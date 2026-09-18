@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>파도레이다 | 경제 파도 조기경보</title>
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --surface:#ffffff;
+      --line:#e6eaf0;
+      --text:#16181d;
+      --muted:#6f7682;
+      --primary:#2563eb;
+      --primary-soft:#eaf2ff;
+      --green:#16a34a;
+      --green-soft:#ecfdf3;
+      --yellow:#f59e0b;
+      --yellow-soft:#fff7df;
+      --red:#ef4444;
+      --red-soft:#fff0f0;
+      --shadow:0 10px 28px rgba(15,23,42,.06);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    button,input{font:inherit}
+    button{cursor:pointer}
+
+    .app{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+      padding-bottom:96px;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(246,248,251,.92);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(230,234,240,.85);
+    }
+
+    .topbar-inner{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{
+      width:42px;height:42px;border-radius:14px;
+      background:linear-gradient(135deg,#2563eb,#76b6ff);
+      display:grid;place-items:center;color:white;font-size:22px;
+      box-shadow:0 8px 18px rgba(37,99,235,.22);
+    }
+    .brand-title{font-weight:800;font-size:20px;letter-spacing:-.02em}
+    .brand-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .top-meta{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+    .meta-pill{background:white;border:1px solid var(--line);padding:10px 12px;border-radius:12px;display:flex;align-items:center;gap:8px}
+    .refresh-btn{border:1px solid var(--line);background:white;border-radius:12px;padding:10px 12px;color:#334155}
+    .refresh-btn:hover{border-color:#cfd7e3;background:#fbfcfe}
+
+    main{padding-top:24px;display:grid;gap:20px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+    .headline-card{
+      padding:26px 28px;
+      background:linear-gradient(100deg,#fffaf0 0%,#fff 55%,#eef7ff 100%);
+      display:grid;grid-template-columns:1fr 230px;gap:20px;align-items:center;
+    }
+    .eyebrow{display:flex;align-items:center;gap:10px;font-weight:700}
+    .status-badge{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+    .status-badge.green{color:#15803d;background:var(--green-soft)}
+    .status-badge.yellow{color:#b45309;background:var(--yellow-soft)}
+    .status-badge.red{color:#b91c1c;background:var(--red-soft)}
+    .headline-card h1{font-size:30px;line-height:1.45;margin:14px 0 0;letter-spacing:-.04em}
+    .headline-visual{height:130px;position:relative;overflow:hidden}
+    .wave{position:absolute;border-radius:50%;background:#6fb6e8;opacity:.9}
+    .wave.one{width:220px;height:80px;right:10px;bottom:0;transform:rotate(-8deg)}
+    .wave.two{width:160px;height:58px;right:92px;bottom:18px;background:#9bd6f1;transform:rotate(6deg)}
+    .lighthouse{position:absolute;right:30px;bottom:20px;width:28px;height:74px;background:#fff;border:2px solid #d9dee7;border-radius:8px 8px 4px 4px;z-index:3}
+    .lighthouse:before{content:"";position:absolute;left:-6px;top:-14px;width:36px;height:16px;background:#ef4444;border-radius:6px 6px 2px 2px}
+    .lighthouse:after{content:"";position:absolute;left:7px;top:18px;width:10px;height:10px;background:#f59e0b;border-radius:2px}
+
+    .section{padding:22px}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+    .section-title{font-size:20px;font-weight:800;letter-spacing:-.03em}
+    .section-sub{font-size:13px;color:var(--muted)}
+
+    .issues-wrap{position:relative}
+    .issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .issue-card{border:1px solid var(--line);border-radius:18px;padding:18px;min-height:220px;display:flex;flex-direction:column;transition:.2s ease;background:#fff}
+    .issue-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,23,42,.08);border-color:#d9e0ea}
+    .issue-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .issue-time{font-size:12px;color:var(--muted)}
+    .issue-title{font-weight:800;font-size:19px;line-height:1.45;margin:15px 0 8px;letter-spacing:-.03em}
+    .issue-subtitle{font-size:14px;color:#596170;line-height:1.6}
+    .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:18px}
+    .tag{font-size:11px;color:#5d6674;border:1px solid var(--line);background:#fafbfc;padding:5px 8px;border-radius:8px}
+    .issue-link{margin-top:14px;border:0;background:transparent;color:var(--primary);padding:0;font-weight:700;font-size:13px;text-align:left}
+
+    .carousel-controls{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px}
+    .dot{width:8px;height:8px;border-radius:50%;background:#d8dde5;border:0;padding:0}
+    .dot.active{background:var(--primary);width:22px;border-radius:999px}
+    .pause-btn{margin-left:12px;border:0;background:transparent;color:var(--muted);font-size:12px}
+
+    .reaction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .reaction-item{border:1px solid var(--line);border-radius:16px;padding:15px;display:flex;align-items:center;gap:12px;background:#fff}
+    .reaction-icon{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:#f7f9fc}
+    .reaction-copy{flex:1}
+    .reaction-name{font-weight:750;font-size:14px}
+    .reaction-desc{font-size:12px;color:var(--muted);margin-top:3px}
+    .reaction-state{font-size:11px;font-weight:800;white-space:nowrap}
+
+    .wave-stage{padding:22px}
+    .stage-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .stage-badge{padding:8px 12px;background:var(--yellow-soft);color:#b45309;border-radius:999px;font-size:13px;font-weight:800}
+    .stage-line{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+    .stage-line:before{content:"";position:absolute;left:8%;right:8%;top:23px;height:2px;background:#e5e7eb}
+    .stage{position:relative;z-index:2;text-align:center;padding:0 8px}
+    .stage-dot{width:46px;height:46px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;border:2px solid #d5d9e0;background:white;font-weight:800;color:#9298a2}
+    .stage.done .stage-dot{border-color:var(--red);color:var(--red);background:#fff5f5}
+    .stage.active .stage-dot{border-color:var(--yellow);color:#b45309;background:var(--yellow-soft)}
+    .stage-title{font-size:13px;font-weight:800}
+    .stage-desc{font-size:11px;color:var(--muted);margin-top:4px}
+    .stage-note{margin-top:22px;padding:16px;border-radius:15px;background:#f8fafc;text-align:center;color:#4b5563;font-size:14px;line-height:1.65}
+
+    .recommend-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .recommend-card{border:1px solid #ffd0d0;border-radius:18px;padding:18px;background:linear-gradient(180deg,#fffafa,#fff)}
+    .recommend-card.secondary{border-color:#f6dfad;background:linear-gradient(180deg,#fffaf0,#fff)}
+    .recommend-label{font-size:12px;font-weight:800;color:#b91c1c}
+    .recommend-card.secondary .recommend-label{color:#b45309}
+    .recommend-title{font-size:19px;font-weight:850;margin:9px 0 6px;letter-spacing:-.03em}
+    .recommend-desc{font-size:13px;color:#596170;line-height:1.6}
+    .reason-btn{margin-top:12px;border:0;background:transparent;color:var(--primary);padding:0;font-weight:700;font-size:13px}
+
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border-top:1px solid var(--line);z-index:30}
+    .bottom-nav-inner{width:min(760px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:70px}
+    .nav-item{border:0;background:transparent;color:#7c8390;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:11px}
+    .nav-item.active{color:var(--primary);font-weight:800}
+    .nav-icon{font-size:19px}
+
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+    .modal-backdrop.open{display:flex}
+    .modal{width:min(680px,100%);max-height:84vh;overflow:auto;background:white;border-radius:22px;padding:24px;box-shadow:0 28px 80px rgba(15,23,42,.22)}
+    .modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .modal h2{font-size:24px;line-height:1.4;margin:10px 0 4px}
+    .close-btn{border:0;background:#f2f4f7;width:36px;height:36px;border-radius:12px;font-size:20px}
+    .modal-section{margin-top:22px}
+    .modal-section h3{font-size:15px;margin:0 0 10px}
+    .modal-section p{font-size:14px;color:#596170;line-height:1.7;margin:0}
+    .flow-box{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .flow-chip{background:#f4f7fb;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700}
+
+    .footer-note{font-size:12px;color:#9097a2;text-align:center;padding:8px 0 18px}
+
+    @media(max-width:900px){
+      .headline-card{grid-template-columns:1fr}.headline-visual{display:none}
+      .issue-grid,.reaction-grid,.recommend-grid{grid-template-columns:1fr}
+      .stage-line{grid-template-columns:1fr;gap:12px}
+      .stage-line:before{display:none}
+      .stage{display:grid;grid-template-columns:46px 1fr;text-align:left;align-items:center;gap:12px;padding:0}
+      .stage-dot{margin:0}.stage-desc{margin-top:2px}
+      .top-meta .meta-pill:first-child{display:none}
+    }
+
+    @media(max-width:640px){
+      .app,.topbar-inner{width:min(100% - 20px,1180px)}
+      .topbar-inner{min-height:66px}
+      .brand-sub{display:none}.brand-title{font-size:18px}.brand-mark{width:38px;height:38px}
+      .headline-card,.section,.wave-stage{padding:18px}
+      .headline-card h1{font-size:23px}
+      .top-meta{gap:6px}.meta-pill{padding:8px 9px;font-size:11px}.refresh-btn{padding:8px 9px}
+      .issue-card{min-height:200px}
+    }
+  
+
+    /* Mobile v0.2 — thumb-friendly review */
+    @media(max-width:640px){
+      body{background:#f5f7fa}
+      .app,.topbar-inner{width:100%}
+      .app{padding:0 12px 92px}
+      .topbar{background:rgba(255,255,255,.96)}
+      .topbar-inner{min-height:58px;padding:0 12px;gap:8px}
+      .brand{gap:8px}.brand-mark{width:34px;height:34px;border-radius:11px;font-size:17px}
+      .brand-title{font-size:16px}.brand-sub{display:none}
+      .top-meta .meta-pill{display:none}
+      .refresh-btn{width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:11px}
+      main{padding-top:12px;gap:12px}
+      .card{border-radius:16px;box-shadow:0 4px 14px rgba(15,23,42,.045)}
+      .headline-card{padding:17px 16px;display:block}
+      .headline-card h1{font-size:20px;line-height:1.48;margin-top:10px;word-break:keep-all}
+      .eyebrow{font-size:13px}.status-badge{padding:5px 8px;font-size:10px}
+      .section,.wave-stage{padding:16px}
+      .section-head{align-items:flex-start;margin-bottom:13px;gap:8px}
+      .section-title{font-size:17px;line-height:1.35}.section-sub{font-size:11px;line-height:1.45}
+      #pageCounter{white-space:nowrap;padding-top:2px}
+
+      /* News: one readable card at a time; swipe/auto-advance remains */
+      .issue-grid{display:block}
+      .issue-card{display:none;min-height:0;padding:16px;border-radius:15px}
+      .issue-card:first-child{display:flex}
+      .issue-title{font-size:18px;line-height:1.4;margin:13px 0 7px}
+      .issue-subtitle{font-size:13px;line-height:1.55}
+      .tags{padding-top:14px;gap:5px}.tag{font-size:10px;padding:4px 7px}
+      .issue-link{font-size:13px;margin-top:14px;min-height:34px;display:flex;align-items:center}
+      .carousel-controls{margin-top:12px;gap:7px}.pause-btn{margin-left:8px;min-height:34px;padding:0 4px}
+      .dot{width:7px;height:7px}.dot.active{width:18px}
+
+      .reaction-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .reaction-item{padding:11px 10px;border-radius:13px;gap:8px;min-width:0}
+      .reaction-icon{width:30px;height:30px;border-radius:9px;font-size:15px;flex:0 0 auto}
+      .reaction-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .reaction-desc{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .reaction-state{font-size:9px}
+
+      /* Wave becomes a compact horizontal progress rail */
+      .stage-head{margin-bottom:15px}.stage-badge{font-size:11px;padding:6px 9px}
+      .stage-line{display:flex;overflow-x:auto;gap:0;padding:2px 0 6px;scrollbar-width:none}
+      .stage-line::-webkit-scrollbar{display:none}
+      .stage-line:before{display:block;left:23px;right:auto;top:20px;width:calc(100% - 46px);height:2px}
+      .stage{display:block;min-width:76px;text-align:center;padding:0 4px}
+      .stage-dot{width:38px;height:38px;margin:0 auto 7px;font-size:12px}
+      .stage-title{font-size:11px}.stage-desc{font-size:9px;margin-top:2px;white-space:nowrap}
+      .stage-note{margin-top:12px;padding:12px;font-size:12px;line-height:1.55;text-align:left}
+      .stage-note br{display:none}
+
+      .recommend-grid{grid-template-columns:1fr;gap:9px}
+      .recommend-card{padding:15px;border-radius:15px}
+      .recommend-title{font-size:17px;margin:7px 0 5px}.recommend-desc{font-size:12px;line-height:1.55}
+      #recalcBtn{font-size:11px;white-space:nowrap}
+      .footer-note{font-size:10px;line-height:1.5;padding:0 8px 8px}
+
+      .bottom-nav-inner{height:64px}.nav-item{font-size:10px;gap:3px}.nav-icon{font-size:17px}
+      .modal-backdrop{align-items:flex-end;padding:0}
+      .modal{width:100%;max-height:88dvh;border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));}
+      .modal h2{font-size:21px}.modal-section{margin-top:18px}.modal-section p{font-size:13px}
+      .close-btn{width:40px;height:40px;flex:0 0 auto}
+    }
+
+    @media(max-width:370px){
+      .app{padding-left:9px;padding-right:9px}
+      .headline-card h1{font-size:18px}
+      .reaction-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">🌊</div>
+        <div>
+          <div class="brand-title">파도레이다</div>
+          <div class="brand-sub">경제 파도 조기경보</div>
+        </div>
+      </div>
+      <div class="top-meta">
+        <div class="meta-pill">📅 <span id="todayLabel"></span></div>
+        <div class="meta-pill">⟳ 최종 업데이트 <b id="updatedAt">09:30</b></div>
+        <button class="refresh-btn" id="refreshBtn" title="새로고침">↻</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app">
+    <main>
+      <section class="card headline-card">
+        <div>
+          <div class="eyebrow">⚡ 오늘의 한 문장 <span class="status-badge yellow">주의</span></div>
+          <h1>미국 금리 기대가 다시 올라가고 있지만,<br>아직 금융시장 전반의 위험 신호는 없습니다.</h1>
+        </div>
+        <div class="headline-visual" aria-hidden="true">
+          <div class="wave one"></div><div class="wave two"></div><div class="lighthouse"></div>
+        </div>
+      </section>
+
+      <section class="card section" id="issuesSection">
+        <div class="section-head">
+          <div>
+            <div class="section-title">오늘의 핵심 이슈 <span class="status-badge red" style="margin-left:8px">LIVE</span></div>
+            <div class="section-sub">3개씩 묶어 10초마다 갱신됩니다. 모바일에서는 대표 이슈 1개를 크게 보여줍니다.</div>
+          </div>
+          <div class="section-sub" id="pageCounter">1 / 3</div>
+        </div>
+        <div class="issues-wrap">
+          <div class="issue-grid" id="issueGrid"></div>
+        </div>
+        <div class="carousel-controls" id="dots"></div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">오늘 시장에서는 이런 일이 있었습니다</div>
+            <div class="section-sub">뉴스가 아니라 실제 시장 데이터 반응을 기준으로 자동 표시합니다.</div>
+          </div>
+          <div class="section-sub">DATA CHECK</div>
+        </div>
+        <div class="reaction-grid" id="reactionGrid"></div>
+      </section>
+
+      <section class="card wave-stage">
+        <div class="stage-head">
+          <div class="section-title">현재 경제 파도</div>
+          <div class="stage-badge">STEP 2 / 5</div>
+        </div>
+        <div class="stage-line">
+          <div class="stage done"><div class="stage-dot">1</div><div><div class="stage-title">사건</div><div class="stage-desc">이벤트 발생</div></div></div>
+          <div class="stage active"><div class="stage-dot">2</div><div><div class="stage-title">채권시장</div><div class="stage-desc">금리 반응</div></div></div>
+          <div class="stage active"><div class="stage-dot">3</div><div><div class="stage-title">자산시장</div><div class="stage-desc">주식·환율 반응</div></div></div>
+          <div class="stage"><div class="stage-dot">4</div><div><div class="stage-title">신용시장</div><div class="stage-desc">신용·유동성</div></div></div>
+          <div class="stage"><div class="stage-dot">5</div><div><div class="stage-title">실물경제</div><div class="stage-desc">경제 활동 영향</div></div></div>
+        </div>
+        <div class="stage-note">미국 금리 상승 기대가 채권과 달러시장까지 전달됐지만,<br>아직 금융불안이나 실물경제 악화 신호는 없습니다.</div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div>
+            <div class="section-title">오늘의 추천</div>
+            <div class="section-sub">현재 시장 상황을 바탕으로 최대 2개 행동만 추천합니다.</div>
+          </div>
+          <button class="issue-link" id="recalcBtn">추천 다시 계산 →</button>
+        </div>
+        <div class="recommend-grid" id="recommendGrid"></div>
+      </section>
+
+      <div class="footer-note">Mock 데이터 기반 v0.1 · 실제 투자 판단 전 원문과 지표 출처 확인이 필요합니다.</div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="nav-item active"><span class="nav-icon">⌂</span><span>홈</span></button>
+      <button class="nav-item" onclick="document.getElementById('issuesSection').scrollIntoView()"><span class="nav-icon">▤</span><span>이슈</span></button>
+      <button class="nav-item"><span class="nav-icon">▥</span><span>지표</span></button>
+      <button class="nav-item"><span class="nav-icon">♢</span><span>알림</span></button>
+      <button class="nav-item"><span class="nav-icon">•••</span><span>더보기</span></button>
+    </div>
+  </nav>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <span class="status-badge yellow" id="modalBadge">주의</span>
+          <h2 id="modalTitle">제목</h2>
+          <div class="section-sub" id="modalMeta"></div>
+        </div>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+      <div class="modal-section">
+        <h3>무슨 일이 있었나</h3>
+        <p id="modalSummary"></p>
+      </div>
+      <div class="modal-section">
+        <h3>왜 중요한가</h3>
+        <p id="modalWhy"></p>
+      </div>
+      <div class="modal-section">
+        <h3>예상되는 파도</h3>
+        <div class="flow-box" id="modalFlow"></div>
+      </div>
+      <div class="modal-section">
+        <button class="issue-link" id="originalNewsBtn">원문 보기 ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const issues = [
+      {
+        level:'red', badge:'주요 변동', time:'방금 전',
+        title:'미국 4월 고용지표 예상 상회',
+        subtitle:'비농업 고용이 예상보다 강하게 나오며 금리 기대가 다시 올라갔습니다.',
+        tags:['#미국고용','#금리','#연준'],
+        source:'BLS · Mock',
+        summary:'미국의 신규 고용이 시장 예상치를 웃돌면서 노동시장이 아직 강하다는 신호가 나타났습니다.',
+        why:'강한 고용은 연준이 금리를 빠르게 내릴 이유를 줄이고, 오히려 고금리를 오래 유지할 수 있다는 기대를 키울 수 있습니다.',
+        flow:['고용 ↑','금리 기대 ↑','2년물 ↑','달러 ↑ 가능','성장주 압박'],
+        url:'https://www.bls.gov/'
+      },
+      {
+        level:'yellow', badge:'주의', time:'5분 전',
+        title:'미국 2년물 국채금리 상승',
+        subtitle:'Fed 정책 기대에 민감한 2년물 금리가 빠르게 반응하고 있습니다.',
+        tags:['#국채금리','#채권','#금리인상'],
+        source:'FRED · Mock',
+        summary:'미국 2년물 국채금리가 주간 기준으로 빠르게 상승했습니다.',
+        why:'2년물 금리는 연준의 정책금리 기대를 비교적 빠르게 반영하는 지표라서 금리 파도의 첫 반응으로 볼 수 있습니다.',
+        flow:['금리 기대 ↑','기존 채권가격 ↓','달러 매력 ↑','성장주 할인율 ↑'],
+        url:'https://fred.stlouisfed.org/series/DGS2'
+      },
+      {
+        level:'yellow', badge:'주의', time:'12분 전',
+        title:'달러 강세 지속',
+        subtitle:'DXY가 상승하며 주요 통화 대비 달러 강세가 이어지고 있습니다.',
+        tags:['#달러','#환율','#DXY'],
+        source:'FRED · Mock',
+        summary:'달러지수가 상승하면서 시장 자금이 달러로 이동하는 흐름이 확인되고 있습니다.',
+        why:'미국 금리 기대가 높아지면 달러 자산의 상대적인 매력이 커질 수 있어 환율 시장으로 파도가 전달될 수 있습니다.',
+        flow:['미국 금리 ↑','달러 수요 ↑','DXY ↑','원달러 ↑ 가능'],
+        url:'https://fred.stlouisfed.org/series/DTWEXBGS'
+      },
+      {
+        level:'green', badge:'안정', time:'22분 전',
+        title:'VIX는 아직 20 아래',
+        subtitle:'시장 불안 심리는 커졌지만 공포 구간으로 진입하지는 않았습니다.',
+        tags:['#VIX','#공포지수','#변동성'],
+        source:'CBOE/FRED · Mock',
+        summary:'VIX가 단기적으로 소폭 상승했지만 20 아래에서 움직이고 있습니다.',
+        why:'채권과 달러가 반응하더라도 VIX가 크게 오르지 않는다면 시장 전반의 공포로 번졌다고 단정하기 어렵습니다.',
+        flow:['금리 우려','변동성 소폭 ↑','광범위 공포는 미확인'],
+        url:'https://fred.stlouisfed.org/series/VIXCLS'
+      },
+      {
+        level:'green', badge:'안정', time:'35분 전',
+        title:'하이일드 신용스프레드 안정',
+        subtitle:'기업 자금조달 위험은 아직 급격히 확대되지 않았습니다.',
+        tags:['#신용시장','#회사채','#스프레드'],
+        source:'FRED · Mock',
+        summary:'미국 하이일드 채권 스프레드가 위험 구간으로 급등하지 않았습니다.',
+        why:'신용스프레드는 금융시장의 스트레스가 기업 자금조달 문제로 번지고 있는지 확인하는 중요한 센서입니다.',
+        flow:['채권 반응','신용시장 전염 없음','실물경제 영향 제한'],
+        url:'https://fred.stlouisfed.org/series/BAMLH0A0HYM2'
+      },
+      {
+        level:'yellow', badge:'주의', time:'44분 전',
+        title:'WTI 주간 변동성 확대',
+        subtitle:'유가가 빠르게 움직이며 향후 물가 기대를 자극할 가능성이 있습니다.',
+        tags:['#WTI','#유가','#물가'],
+        source:'FRED · Mock',
+        summary:'WTI 원유 가격의 주간 변동폭이 평소보다 커졌습니다.',
+        why:'유가는 기업 원가와 소비자 물가에 영향을 줄 수 있기 때문에 금리 정책과 실물경제 사이를 연결하는 중요한 변수입니다.',
+        flow:['유가 변동 ↑','원가 불확실성 ↑','물가 기대 변화','금리 기대 영향'],
+        url:'https://fred.stlouisfed.org/series/DCOILWTICO'
+      },
+      {
+        level:'green', badge:'안정', time:'1시간 전',
+        title:'S&P500 급락 신호는 없음',
+        subtitle:'주식시장은 금리 부담을 반영하고 있지만 급격한 위험회피는 아직 제한적입니다.',
+        tags:['#S&P500','#주식','#RiskOff'],
+        source:'Market · Mock',
+        summary:'S&P500은 약세 압력을 받고 있지만 주간 급락 기준에는 도달하지 않았습니다.',
+        why:'채권과 환율이 움직여도 주식의 광범위한 급락이 없다면 파도가 아직 제한적일 수 있습니다.',
+        flow:['금리 부담','주식 밸류에이션 압박','급격한 리스크오프는 미확인'],
+        url:'https://fred.stlouisfed.org/series/SP500'
+      },
+      {
+        level:'yellow', badge:'주의', time:'1시간 전',
+        title:'원달러 환율 변동성 확대',
+        subtitle:'달러 움직임이 한국 원화에도 전달되는 모습입니다.',
+        tags:['#원달러','#한국','#환율'],
+        source:'FRED · Mock',
+        summary:'원달러 환율이 주간 기준으로 평소보다 큰 폭으로 움직였습니다.',
+        why:'미국 금리와 달러 강세가 한국 금융시장으로 번지는지 확인할 수 있는 직접적인 지표입니다.',
+        flow:['미국 금리 ↑','달러 ↑','원달러 ↑','수입물가 부담 가능'],
+        url:'https://fred.stlouisfed.org/series/DEXKOUS'
+      },
+      {
+        level:'green', badge:'안정', time:'2시간 전',
+        title:'실물경제 악화 신호는 아직 제한적',
+        subtitle:'고용과 소비가 급격히 꺾였다는 신호는 아직 뚜렷하지 않습니다.',
+        tags:['#실물경제','#소비','#고용'],
+        source:'Composite · Mock',
+        summary:'금융시장 일부에서 변동성이 확대됐지만 소비·고용까지 동시에 악화됐다는 신호는 아직 확인되지 않았습니다.',
+        why:'실물경제까지 파도가 도착했는지는 금융시장 지표보다 더 늦게 확인되는 경우가 많습니다.',
+        flow:['시장 반응','신용시장 확인','소비·고용 확인 필요'],
+        url:'https://fred.stlouisfed.org/'
+      }
+    ];
+
+    const reactions = [
+      {icon:'⚡',name:'고용 충격',desc:'고용지표 예상 상회',state:'확인됨',level:'red'},
+      {icon:'↗',name:'국채금리 상승',desc:'2년물 중심 상승',state:'확인됨',level:'yellow'},
+      {icon:'💵',name:'달러 강세',desc:'DXY 상승',state:'확인됨',level:'yellow'},
+      {icon:'📉',name:'주식시장 급락',desc:'S&P500 -2% 이상',state:'변화 없음',level:'green'},
+      {icon:'🏦',name:'신용시장 악화',desc:'스프레드 급등',state:'변화 없음',level:'green'},
+      {icon:'😨',name:'VIX 급등',desc:'30 이상 진입',state:'변화 없음',level:'green'}
+    ];
+
+    const recommendations = [
+      {type:'primary', label:'1 · 필수', title:'큰 투자 결정은 잠시 보류', desc:'미국 금리 기대가 다시 높아지며 단기 변동성이 커질 수 있습니다.'},
+      {type:'secondary', label:'2 · 선택', title:'달러 매수 예정이라면 분할 유지', desc:'달러가 단기간 크게 움직일 가능성이 있으므로 한 번에 매수하기보다 분할 접근을 권장합니다.'}
+    ];
+
+    let page=0;
+    let paused=false;
+    const perPage=3;
+    const totalPages=Math.ceil(issues.length/perPage);
+
+    function cls(level){return level==='red'?'red':level==='yellow'?'yellow':'green'}
+
+    function renderIssues(){
+      const grid=document.getElementById('issueGrid');
+      grid.innerHTML='';
+      const slice=issues.slice(page*perPage,page*perPage+perPage);
+      slice.forEach((item,idx)=>{
+        const card=document.createElement('article');
+        card.className='issue-card';
+        card.innerHTML=`
+          <div class="issue-top">
+            <span class="status-badge ${cls(item.level)}">${item.badge}</span>
+            <span class="issue-time">${item.time}</span>
+          </div>
+          <div class="issue-title">${item.title}</div>
+          <div class="issue-subtitle">${item.subtitle}</div>
+          <div class="tags">${item.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+          <button class="issue-link">상세 보기 →</button>`;
+        card.querySelector('.issue-link').onclick=()=>openModal(item);
+        card.onclick=(e)=>{if(e.target.tagName!=='BUTTON')openModal(item)};
+        grid.appendChild(card);
+      });
+      document.getElementById('pageCounter').textContent=`${page+1} / ${totalPages}`;
+      renderDots();
+    }
+
+    function renderDots(){
+      const wrap=document.getElementById('dots');wrap.innerHTML='';
+      for(let i=0;i<totalPages;i++){
+        const b=document.createElement('button');
+        b.className='dot'+(i===page?' active':'');
+        b.onclick=()=>{page=i;renderIssues()};wrap.appendChild(b);
+      }
+      const pause=document.createElement('button');
+      pause.className='pause-btn';
+      pause.textContent=paused?'▶ 재생':'Ⅱ 일시정지';
+      pause.onclick=()=>{paused=!paused;renderDots()};
+      wrap.appendChild(pause);
+    }
+
+    function renderReactions(){
+      const grid=document.getElementById('reactionGrid');
+      grid.innerHTML=reactions.map(r=>`
+        <div class="reaction-item">
+          <div class="reaction-icon">${r.icon}</div>
+          <div class="reaction-copy"><div class="reaction-name">${r.name}</div><div class="reaction-desc">${r.desc}</div></div>
+          <div class="reaction-state" style="color:${r.level==='red'?'#dc2626':r.level==='yellow'?'#d97706':'#16a34a'}">${r.state}</div>
+        </div>`).join('');
+    }
+
+    function renderRecommendations(){
+      const grid=document.getElementById('recommendGrid');
+      grid.innerHTML=recommendations.map(r=>`
+        <div class="recommend-card ${r.type==='secondary'?'secondary':''}">
+          <div class="recommend-label">${r.label}</div>
+          <div class="recommend-title">${r.title}</div>
+          <div class="recommend-desc">${r.desc}</div>
+          <button class="reason-btn">이유 보기 →</button>
+        </div>`).join('');
+      grid.querySelectorAll('.reason-btn').forEach((btn,i)=>btn.onclick=()=>alert(i===0?'현재 채권과 달러시장이 동시에 반응하고 있어 단기 방향성이 불안정합니다.':'달러 방향성은 맞더라도 진입 시점을 한 번에 맞히기 어렵기 때문에 분할 접근이 변동성 관리에 유리합니다.'));
+    }
+
+    function openModal(item){
+      document.getElementById('modalBadge').className=`status-badge ${cls(item.level)}`;
+      document.getElementById('modalBadge').textContent=item.badge;
+      document.getElementById('modalTitle').textContent=item.title;
+      document.getElementById('modalMeta').textContent=`${item.time} · ${item.source}`;
+      document.getElementById('modalSummary').textContent=item.summary;
+      document.getElementById('modalWhy').textContent=item.why;
+      document.getElementById('modalFlow').innerHTML=item.flow.map((x,i)=>`<span class="flow-chip">${x}</span>${i<item.flow.length-1?'<span>→</span>':''}`).join('');
+      document.getElementById('originalNewsBtn').onclick=()=>window.open(item.url,'_blank','noopener');
+      document.getElementById('modalBackdrop').classList.add('open');
+    }
+
+    function closeModal(){document.getElementById('modalBackdrop').classList.remove('open')}
+
+    function setDate(){
+      const d=new Date();
+      const days=['일','월','화','수','목','금','토'];
+      document.getElementById('todayLabel').textContent=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} (${days[d.getDay()]})`;
+      document.getElementById('updatedAt').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    document.getElementById('closeModal').onclick=closeModal;
+    document.getElementById('modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+    document.getElementById('refreshBtn').onclick=()=>{setDate();const b=document.getElementById('refreshBtn');b.textContent='✓';setTimeout(()=>b.textContent='↻',700)};
+    document.getElementById('recalcBtn').onclick=()=>{renderRecommendations();alert('현재 Mock 상태값을 기준으로 추천을 다시 계산했습니다.')};
+
+    setInterval(()=>{if(!paused){page=(page+1)%totalPages;renderIssues()}},10000);
+
+    setDate();renderIssues();renderReactions();renderRecommendations();
+  </script>
+</body>
+</html>
