@@ -862,6 +862,9 @@ function loadState(){
   if(legacy){try{const migrated=normalizeLegacy(JSON.parse(legacy));sset(STORAGE_KEY,JSON.stringify(migrated));return migrated}catch(e){}}
   const d=defaultState();sset(STORAGE_KEY,JSON.stringify(d));return d;
 }
+// Preserve provenance before loadState creates defaults.
+const syncOriginalCache=sget(STORAGE_KEY)||sget(LEGACY_KEY);
+if(!syncOriginalCache)sset('myWeekSyncDefaultsOnly_v1','true');
 let state=loadState();
 let focusDate=nowDate(),viewMode="week";
 let eventFormSnapshot="",dirtyCloseTarget=null;
@@ -873,6 +876,8 @@ let dragPayload=null;
 // ---------- helpers ----------
 function saveState(msg,undo){
   sset(STORAGE_KEY,JSON.stringify(state));syncStorageWarning();render();
+  sset('myWeekSyncDefaultsOnly_v1','false');
+  window.dispatchEvent(new Event('my-week-local-save'));
   if(msg)toast(msg,undo);
 }
 function toast(msg,undo){
@@ -1543,6 +1548,16 @@ document.getElementById("calendarScroll").addEventListener("touchend",e=>{
   if(!weekNeedsHorizontalScroll && Math.abs(dx)>85&&Math.abs(dx)>Math.abs(dy)*1.4)navigate(dx<0?1:-1);
 },{passive:true});
 
+window.myWeekSyncBridge=Object.freeze({
+  read:()=>clone(state),originalCache:sget('myWeekSyncDefaultsOnly_v1')==='true'?null:syncOriginalCache,
+  busy:()=>!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
+  apply:incoming=>{
+    const next=clone(incoming),previous=state;
+    try{state=next;render()}catch(error){state=previous;render();throw error}
+    if(!sset(STORAGE_KEY,JSON.stringify(state)))throw new Error('로컬 캐시 저장 실패. 서버 데이터는 유지됩니다.');
+    syncStorageWarning();
+  }
+});
 render();
 })();
 </script>
@@ -1554,13 +1569,13 @@ render();
  group.id='scheduleHeaderActions';toggle.setAttribute('aria-controls',group.id);header.insertBefore(toggle,group);
  const buttons=[...group.querySelectorAll('button')];
  function close(focus=false){header.classList.remove('actions-open');toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
- function layout(){const narrow=leading.getBoundingClientRect().width+116+12>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
+ function layout(){const extra=document.getElementById('syncCloudBtn')?96:0;const narrow=leading.getBoundingClientRect().width+116+12+extra>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
  toggle.addEventListener('click',()=>{const open=!header.classList.contains('actions-open');header.classList.toggle('actions-open',open);toggle.setAttribute('aria-expanded',String(open));if(open)buttons[0].focus()});
  group.addEventListener('click',event=>{if(event.target.closest('button'))close()});
  document.addEventListener('click',event=>{if(!header.contains(event.target))close()});
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('actions-open')){event.preventDefault();close(true)}});
  header.addEventListener('focusout',()=>{requestAnimationFrame(()=>{if(!header.contains(document.activeElement))close()})});
- new ResizeObserver(layout).observe(header);new ResizeObserver(layout).observe(leading);layout();
+ new ResizeObserver(layout).observe(header);new ResizeObserver(layout).observe(leading);window.addEventListener('my-week-sync-status',layout);layout();
 })();
-</script></body>
+</script><script type="module" src="./schedule-sync.js"></script></body>
 </html>
