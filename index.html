@@ -1001,6 +1001,15 @@ body{color:var(--ref-text);font-family:Pretendard,-apple-system,BlinkMacSystemFo
 
 
 <style id="v818-category-chip-ui">
+
+/* v8.21 — latest 20 transactions, preserve the final date group, then load older history */
+.txLoadMoreWrap{display:flex;justify-content:center;padding:14px 16px 16px;border-top:1px solid var(--line)}
+.txLoadMoreBtn{min-height:38px;border:1px solid var(--line-strong);border-radius:7px;background:transparent;color:#c8d2df;padding:0 14px;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:650}
+.txLoadMoreBtn:hover{background:var(--card-3);color:var(--text)}
+.txLoadMoreBtn small{font-size:11px;font-weight:500;color:var(--muted)}
+.txLoadMoreBtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){.txLoadMoreWrap{padding:12px 12px calc(14px + env(safe-area-inset-bottom))}.txLoadMoreBtn{width:100%;min-height:44px;justify-content:center;font-size:13px}.txLoadMoreBtn small{font-size:12px}}
+
 /* v8.18 — transaction category chooser: visible chips + existing manager */
 #txModal .searchSelect{display:block!important;min-width:0}
 #txModal #iCat,#txModal #categoryQuickAdd,#txModal .searchSelect>.manageInlineBtn{display:none!important}
@@ -1051,7 +1060,7 @@ body{color:var(--ref-text);font-family:Pretendard,-apple-system,BlinkMacSystemFo
 <section class="card section transactionSection" aria-label="소비 내역">
 <div class="listHeader"><div class="viewTabs" role="tablist" aria-label="소비 보기"><button id="listTab" class="active" role="tab" aria-selected="true" onclick="setView('list')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>목록</span></button><button id="calendarTab" role="tab" aria-selected="false" onclick="setView('calendar')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3.5v4M16 3.5v4M3.5 10h17"/></svg><span>캘린더</span></button></div><div class="listActions"><span id="rowCount" class="tiny muted"></span><button id="mobileSelectToggle" class="mobileOnly miniBtn" type="button" onclick="toggleMobileSelectionMode()">선택</button><div class="searchWrap"><button id="searchToggle" class="iconOnly" aria-label="검색 및 필터" aria-expanded="false" onclick="toggleSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button><div id="searchPanel" class="searchPopover" hidden><label for="txSearch">소비 검색</label><input id="txSearch" class="search" placeholder="항목·목적·결제수단" oninput="applyFilters()"><label for="txCatFilter">카테고리</label><select id="txCatFilter" onchange="applyFilters()"></select><label for="txPayFilter">결제수단</label><select id="txPayFilter" onchange="applyFilters()"></select><div class="filterLinks"><button class="textLink" onclick="clearFilters()">필터 초기화</button><button class="textLink" onclick="openCategoryManage();toggleSearch()">카테고리 관리</button></div></div></div><button class="primaryBtn" onclick="openTransaction()">＋ 추가</button></div></div>
 <div id="filterSummary" class="filterSummary" hidden></div><div id="selectionBar" class="selectionBar" hidden><span id="selectedCount"></span><button class="miniBtn dangerText" onclick="deleteSelected()">선택 삭제</button><button class="textLink" onclick="clearSelection()">선택 해제</button></div><div id="undoBar" class="undoBar" hidden><span id="undoMessage"></span><button class="textLink" onclick="undoDelete()">삭제 취소</button></div>
-<div id="listView"><input id="selectAll" type="checkbox" hidden aria-hidden="true"><div class="tableWrap" aria-label="소비 내역"><table><thead><tr><th>항목</th><th>카테고리</th><th>목적</th><th>결제수단</th><th class="num">금액</th></tr></thead><tbody id="txBody"></tbody></table></div><div id="rowHoverRail" class="rowHoverRail" hidden onmouseenter="cancelRowRailHide()" onmouseleave="scheduleRowRailHide()"><button id="railGrip" class="railIcon railGrip" type="button" draggable="true" aria-label="드래그하여 순서 변경" title="드래그하여 순서 변경" ondragstart="railDragStart(event)" ondragend="railDragEnd(event)"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="5" r="1.2"/><circle cx="13" cy="5" r="1.2"/><circle cx="7" cy="10" r="1.2"/><circle cx="13" cy="10" r="1.2"/><circle cx="7" cy="15" r="1.2"/><circle cx="13" cy="15" r="1.2"/></svg></button><label class="railCheck" title="행 선택"><input id="hoverRowCheck" type="checkbox" aria-label="행 선택" onchange="toggleHoverRailSelection(this.checked)"></label><span class="railDivider" aria-hidden="true"></span><button id="railUp" class="railIcon" type="button" aria-label="위로 이동" title="위로 이동" onclick="moveHoverRail(-1)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 12.5 4.5-4.5 4.5 4.5"/></svg></button><button id="railDown" class="railIcon" type="button" aria-label="아래로 이동" title="아래로 이동" onclick="moveHoverRail(1)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5"/></svg></button></div><p class="interactionHint">더블클릭으로 수정 · 행에 마우스를 올리면 바깥쪽에서 순서 변경·선택할 수 있어요.</p></div>
+<div id="listView"><input id="selectAll" type="checkbox" hidden aria-hidden="true"><div class="tableWrap" aria-label="소비 내역"><table><thead><tr><th>항목</th><th>카테고리</th><th>목적</th><th>결제수단</th><th class="num">금액</th></tr></thead><tbody id="txBody"></tbody></table></div><div id="txLoadMoreWrap" class="txLoadMoreWrap" hidden><button id="txLoadMoreBtn" type="button" class="txLoadMoreBtn" onclick="loadMoreTransactions()"><span>이전 내역 더보기</span><small id="txLoadMoreMeta"></small><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5"/></svg></button></div><div id="rowHoverRail" class="rowHoverRail" hidden onmouseenter="cancelRowRailHide()" onmouseleave="scheduleRowRailHide()"><button id="railGrip" class="railIcon railGrip" type="button" draggable="true" aria-label="드래그하여 순서 변경" title="드래그하여 순서 변경" ondragstart="railDragStart(event)" ondragend="railDragEnd(event)"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="5" r="1.2"/><circle cx="13" cy="5" r="1.2"/><circle cx="7" cy="10" r="1.2"/><circle cx="13" cy="10" r="1.2"/><circle cx="7" cy="15" r="1.2"/><circle cx="13" cy="15" r="1.2"/></svg></button><label class="railCheck" title="행 선택"><input id="hoverRowCheck" type="checkbox" aria-label="행 선택" onchange="toggleHoverRailSelection(this.checked)"></label><span class="railDivider" aria-hidden="true"></span><button id="railUp" class="railIcon" type="button" aria-label="위로 이동" title="위로 이동" onclick="moveHoverRail(-1)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 12.5 4.5-4.5 4.5 4.5"/></svg></button><button id="railDown" class="railIcon" type="button" aria-label="아래로 이동" title="아래로 이동" onclick="moveHoverRail(1)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5"/></svg></button></div><p class="interactionHint">더블클릭으로 수정 · 행에 마우스를 올리면 바깥쪽에서 순서 변경·선택할 수 있어요.</p></div>
 <div id="calendarView" hidden><div class="calendarMonthBar"><span class="syncMonth"></span><div class="monthControls"><button aria-label="캘린더 이전 달" onclick="shiftMonth(-1)">‹</button><button onclick="goToday()">오늘</button><button aria-label="캘린더 다음 달" onclick="shiftMonth(1)">›</button></div></div><div class="calendarWeek" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div id="calendarGrid" class="calendarGrid" role="group" aria-label="월별 소비 캘린더"></div><div id="calendarDay" class="calendarDay" hidden></div><p class="interactionHint">날짜를 선택하면 내역을 확인하거나 기록할 수 있어요. 금액은 결제 총액 기준입니다.</p></div>
 </section>
 </section>
@@ -1514,11 +1523,46 @@ function moveHoverRail(delta){if(!rowRailTxId)return;const id=rowRailTxId;moveTr
 function railDragStart(e){if(!rowRailTxId||filtersActive()){e.preventDefault();return}draggedTxId=rowRailTxId;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(rowRailTxId));document.querySelector(`tr[data-tx="${rowRailTxId}"]`)?.classList.add('dragging');cancelRowRailHide()}
 function railDragEnd(){document.querySelectorAll('.dragging,.dropTarget').forEach(x=>x.classList.remove('dragging','dropTarget'));draggedTxId=null;scheduleRowRailHide()}
 
+const TX_PAGE_SIZE=20;
+let txVisibleLimit=TX_PAGE_SIZE;
+let txListSignature='';
+function txCurrentSignature(){return [ym(),$('txSearch').value.trim().toLowerCase(),$('txCatFilter').value,$('txPayFilter')?.value||''].join('|')}
+function resetTransactionWindow(){txVisibleLimit=TX_PAGE_SIZE;txListSignature=txCurrentSignature()}
+function transactionWindow(rows){
+ // Keep date groups intact WITHOUT exceeding the current page target.
+ // Example: if adding the next whole date group would make 18 -> 23 rows,
+ // stop at 18 and show that date group after “more”.
+ if(rows.length<=txVisibleLimit)return rows;
+ let end=0;
+ while(end<rows.length){
+   const groupDate=rows[end].date;
+   let groupEnd=end+1;
+   while(groupEnd<rows.length&&rows[groupEnd].date===groupDate)groupEnd++;
+   const groupSize=groupEnd-end;
+   if(end>0&&end+groupSize>txVisibleLimit)break;
+   // A single date can exceptionally contain more than 20 records; never split it.
+   end=groupEnd;
+   if(end>=txVisibleLimit)break;
+ }
+ return rows.slice(0,end||Math.min(txVisibleLimit,rows.length));
+}
+function loadMoreTransactions(){
+ const rows=visibleTransactions();
+ const shown=transactionWindow(rows).length;
+ // Expand from what is actually visible, not from the previous abstract limit.
+ txVisibleLimit=shown+TX_PAGE_SIZE;
+ renderTx();
+}
 function renderTx(){
- const rows=visibleTransactions(),ids=new Set(rows.map(t=>t.id));selectedTx=new Set([...selectedTx].filter(id=>ids.has(id)));$('rowCount').textContent=rows.length+'건';let html='',lastDate='',filtering=filtersActive();
- for(const t of rows){if(t.date!==lastDate){html+=`<tr class="dateGroup"><td colspan="5">${esc(txDayLabel(t.date))}${t.date>localDate()?'<span class="futureDot" title="미래 기록"> · 예정</span>':''}</td></tr>`;lastDate=t.date}
+ const rows=visibleTransactions(),sig=txCurrentSignature();if(sig!==txListSignature){txVisibleLimit=TX_PAGE_SIZE;txListSignature=sig}const displayRows=transactionWindow(rows),ids=new Set(rows.map(t=>t.id));selectedTx=new Set([...selectedTx].filter(id=>ids.has(id)));$('rowCount').textContent=displayRows.length<rows.length?`${displayRows.length}/${rows.length}건`:`${rows.length}건`;let html='',lastDate='',filtering=filtersActive();
+ for(const t of displayRows){if(t.date!==lastDate){html+=`<tr class="dateGroup"><td colspan="5">${esc(txDayLabel(t.date))}${t.date>localDate()?'<span class="futureDot" title="미래 기록"> · 예정</span>':''}</td></tr>`;lastDate=t.date}
  html+=`<tr data-tx="${t.id}" data-date="${t.date}" class="${selectedTx.has(t.id)?'isSelected':''}" tabindex="0" aria-label="${esc(t.item)} ${won(t.amount)}, 더블클릭 또는 Enter로 수정" onmouseenter="showRowRail(this,${t.id})" onmouseleave="scheduleRowRailHide()" onfocusin="showRowRail(this,${t.id})" ondblclick="editRow(event,${t.id})" onclick="tapRow(event,${t.id})" onkeydown="rowKey(event,${t.id})" draggable="false" ondragover="rowDragOver(event,${t.id})" ondragleave="rowDragLeave(event)" ondrop="rowDrop(event,${t.id})"><td class="txItem"><button type="button" class="dragHandle" aria-label="순서 이동" ${filtering?'disabled title="필터 적용 중에는 순서를 바꿀 수 없습니다"':''} onpointerdown="reorderPointerDown(event,${t.id})" onpointermove="reorderPointerMove(event)" onpointerup="reorderPointerUp(event)" onpointercancel="reorderPointerUp(event)"></button><span>${esc(t.item)}</span></td><td class="txCategory"><span class="plainTag">${esc(t.cat)}</span></td><td class="txPurpose">${t.purpose?`<span class="purposeTag">${esc(t.purpose)}</span>`:'<span class="noPurpose">—</span>'}</td><td class="txPayment"><span class="paymentTag ${state.prepaid[t.pay]?'prepaid':''}">${esc(t.pay)}</span></td><td class="num txAmount"><span>${won(t.amount)}</span></td></tr>`}
  $('txBody').innerHTML=html||'<tr class="emptyRow"><td colspan="5" class="empty">조건에 맞는 소비가 없습니다.</td></tr>';
+ const moreWrap=$('txLoadMoreWrap'),moreBtn=$('txLoadMoreBtn'),moreMeta=$('txLoadMoreMeta');
+ const remaining=Math.max(0,rows.length-displayRows.length);
+ moreWrap.hidden=remaining===0||expenseView!=='list';
+ if(remaining){const nextCount=Math.min(TX_PAGE_SIZE,remaining);moreMeta.textContent=`남은 ${remaining}건`;moreBtn.setAttribute('aria-label',`이전 내역 더 보기, ${remaining}건 남음`)}
+
  $('listView').hidden=expenseView!=='list';$('calendarView').hidden=expenseView!=='calendar';$('listTab').classList.toggle('active',expenseView==='list');$('calendarTab').classList.toggle('active',expenseView==='calendar');$('listTab').setAttribute('aria-selected',expenseView==='list');$('calendarTab').setAttribute('aria-selected',expenseView==='calendar');
  filtering=filtersActive();$('searchToggle').classList.toggle('filterActive',filtering);$('filterSummary').hidden=!filtering;const bits=[];if($('txCatFilter').value)bits.push($('txCatFilter').value);if($('txPayFilter')?.value)bits.push($('txPayFilter').value);if($('txSearch').value.trim())bits.push($('txSearch').value.trim());$('filterSummary').innerHTML=filtering?`<span>필터 적용 · ${esc(bits.join(' · '))}</span><button class="textLink" onclick="clearFilters()">초기화</button>`:'';
  let n=$('reorderNotice');if(!n){n=document.createElement('div');n.id='reorderNotice';n.className='reorderNotice';$('listView').prepend(n)}n.hidden=!filtering;n.textContent=filtering?'검색·필터 적용 중에는 순서 변경을 사용할 수 없어요.':'';renderSelection();renderCalendar(rows);const rail=$('rowHoverRail');if(rail)rail.hidden=true;rowRailTxId=null;
@@ -2017,6 +2061,88 @@ function openTxNativeDatePicker(){
   const el=$('iDate');if(!el)return;
   try{if(typeof el.showPicker==='function')el.showPicker();else el.click()}catch(e){try{el.click()}catch(_){}}
 }
+</script>
+
+
+<script id="v823-pagination-final-fix">
+/* v8.23 — FINAL renderTx override.
+   v8.22 pagination was being overwritten later by v8.13's renderTx().
+   This final definition intentionally comes last and combines:
+   - 20-item/date-group pagination
+   - day totals
+   - mobile meta layout
+   - selection / drag / filter behavior
+*/
+function renderTx(){
+  const rows=visibleTransactions();
+  const sig=txCurrentSignature();
+  if(sig!==txListSignature){
+    txVisibleLimit=TX_PAGE_SIZE;
+    txListSignature=sig;
+  }
+  const displayRows=transactionWindow(rows);
+  const ids=new Set(rows.map(t=>t.id));
+  selectedTx=new Set([...selectedTx].filter(id=>ids.has(id)));
+
+  $('rowCount').textContent=displayRows.length<rows.length
+    ? `${displayRows.length}/${rows.length}건`
+    : `${rows.length}건`;
+
+  // Full-day totals are based on the complete filtered result, not only currently loaded rows.
+  const dayTotals=new Map();
+  for(const t of rows) dayTotals.set(t.date,(dayTotals.get(t.date)||0)+Number(t.amount||0));
+
+  let html='',lastDate='',filtering=filtersActive();
+  for(const t of displayRows){
+    if(t.date!==lastDate){
+      html+=`<tr class="dateGroup"><td colspan="5"><div class="dateGroupInner"><span>${esc(txDayLabel(t.date))}${t.date>localDate()?'<span class="futureDot" title="미래 기록"> · 예정</span>':''}</span><strong class="dateGroupTotal">${won(dayTotals.get(t.date)||0)}</strong></div></td></tr>`;
+      lastDate=t.date;
+    }
+    const mobileMeta=`<span class="mobileTxMeta"><span class="plainTag">${esc(t.cat)}</span>${t.purpose?`<span class="purposeTag">${esc(t.purpose)}</span>`:''}</span>`;
+    html+=`<tr data-tx="${t.id}" data-date="${t.date}" class="${selectedTx.has(t.id)?'isSelected':''}" tabindex="0" aria-label="${esc(t.item)} ${won(t.amount)}, 더블클릭 또는 Enter로 수정" onmouseenter="showRowRail(this,${t.id})" onmouseleave="scheduleRowRailHide()" onfocusin="showRowRail(this,${t.id})" ondblclick="editRow(event,${t.id})" onclick="tapRow(event,${t.id})" onkeydown="rowKey(event,${t.id})" draggable="false" ondragover="rowDragOver(event,${t.id})" ondragleave="rowDragLeave(event)" ondrop="rowDrop(event,${t.id})"><td class="txItem"><button type="button" class="dragHandle" aria-label="순서 이동" ${filtering?'disabled title="필터 적용 중에는 순서를 바꿀 수 없습니다"':''} onpointerdown="reorderPointerDown(event,${t.id})" onpointermove="reorderPointerMove(event)" onpointerup="reorderPointerUp(event)" onpointercancel="reorderPointerUp(event)"></button><span>${esc(t.item)}</span>${mobileMeta}</td><td class="txCategory"><span class="plainTag">${esc(t.cat)}</span></td><td class="txPurpose">${t.purpose?`<span class="purposeTag">${esc(t.purpose)}</span>`:'<span class="noPurpose">—</span>'}</td><td class="txPayment"><span class="paymentTag ${state.prepaid[t.pay]?'prepaid':''}">${esc(t.pay)}</span></td><td class="num txAmount"><span>${won(t.amount)}</span></td></tr>`;
+  }
+  $('txBody').innerHTML=html||'<tr class="emptyRow"><td colspan="5" class="empty">조건에 맞는 소비가 없습니다.</td></tr>';
+
+  const moreWrap=$('txLoadMoreWrap'),moreBtn=$('txLoadMoreBtn'),moreMeta=$('txLoadMoreMeta');
+  const remaining=Math.max(0,rows.length-displayRows.length);
+  if(moreWrap){
+    moreWrap.hidden=remaining===0||expenseView!=='list';
+    if(remaining&&moreMeta){
+      moreMeta.textContent=`남은 ${remaining}건`;
+      moreBtn?.setAttribute('aria-label',`이전 내역 더 보기, ${remaining}건 남음`);
+    }
+  }
+
+  $('listView').hidden=expenseView!=='list';
+  $('calendarView').hidden=expenseView!=='calendar';
+  $('listTab').classList.toggle('active',expenseView==='list');
+  $('calendarTab').classList.toggle('active',expenseView==='calendar');
+  $('listTab').setAttribute('aria-selected',expenseView==='list');
+  $('calendarTab').setAttribute('aria-selected',expenseView==='calendar');
+
+  filtering=filtersActive();
+  $('searchToggle').classList.toggle('filterActive',filtering);
+  $('filterSummary').hidden=!filtering;
+  const bits=[];
+  if($('txCatFilter').value)bits.push($('txCatFilter').value);
+  if($('txPayFilter')?.value)bits.push($('txPayFilter').value);
+  if($('txSearch').value.trim())bits.push($('txSearch').value.trim());
+  $('filterSummary').innerHTML=filtering?`<span>필터 적용 · ${esc(bits.join(' · '))}</span><button class="textLink" onclick="clearFilters()">초기화</button>`:'';
+
+  let n=$('reorderNotice');
+  if(!n){n=document.createElement('div');n.id='reorderNotice';n.className='reorderNotice';$('listView').prepend(n)}
+  n.hidden=!filtering;
+  n.textContent=filtering?'검색·필터 적용 중에는 순서 변경을 사용할 수 없어요.':'';
+
+  renderSelection();
+  // Calendar always receives the complete filtered month, never the 20-row window.
+  renderCalendar(rows);
+  const rail=$('rowHoverRail');if(rail)rail.hidden=true;rowRailTxId=null;
+}
+
+// Re-render once after the last override is installed.
+resetTransactionWindow();
+renderTx();
 </script>
 
 </body></html>
