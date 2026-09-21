@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>MY WEEK v5</title>
+<title>MY WEEK v5.8</title>
 <style>
 :root{
   color-scheme:dark;
@@ -40,30 +40,26 @@ button:disabled{cursor:not-allowed;opacity:.45}
 :focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 [hidden]{display:none!important}
 .app{min-height:100vh;padding:44px 4.7vw 56px}
-.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:28px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
 .brand-title{margin:0;color:#9b9ea6;font-size:20px;font-weight:600;letter-spacing:-.02em}
-.selection-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
-.selected-date-label{font-size:24px;font-weight:650;letter-spacing:-.035em}
+.selection-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.selected-date-label{font-size:24px;font-weight:650;letter-spacing:-.035em;cursor:pointer;display:inline-flex;align-items:center;border-radius:8px;padding:1px 0;transition:opacity .15s,color .15s}
 .view-select{
   height:34px;padding:0 34px 0 12px;border:1px solid var(--line);border-radius:7px;
   color:#d9dbe0;background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%238f939d' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
   appearance:none;font-size:12px;
 }
-.today-btn{
-  min-height:40px;border:1px solid #596170;border-radius:var(--pill);padding:9px 22px;
-  background:transparent;color:#f3f4f6;font-weight:600;display:flex;align-items:center;justify-content:center;
-  transition:background .15s,border-color .15s,color .15s;
-}
-.today-btn:hover{background:#23272e;border-color:#737b8e;color:#fff}
-.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:12px}
+.header-actions{display:flex;gap:14px;align-items:center;flex-wrap:nowrap;padding-top:10px;flex:0 0 auto}
+.selected-date-label:hover{opacity:.86;color:#ffffff}
+.header-actions{display:flex;gap:14px;align-items:center;flex-wrap:nowrap;padding-top:10px;flex:0 0 auto}
 .action-btn{
-  min-height:40px;border:1px solid transparent;border-radius:var(--pill);padding:9px 17px;
-  background:#23272e;color:#f3f4f6;font-weight:600;display:flex;gap:7px;align-items:center;
+  width:24px;height:24px;min-height:24px;border:0;border-radius:0;padding:0;
+  background:transparent;color:#f3f4f6;display:grid;place-items:center;opacity:.86;
 }
-.action-btn:hover{background:#2a2f38}
-.action-btn.primary{background:#23272e}
-.action-btn .dim{color:#777d88;font-size:18px;line-height:1}
-.action-btn .icon-img{width:18px;height:18px;display:block;opacity:.92;object-fit:contain}
+.action-btn:hover{background:transparent;opacity:1}
+.action-btn.primary{background:transparent}
+.action-btn .dim{display:none}
+.action-btn .icon-img{width:24px;height:24px;display:block;opacity:1;object-fit:contain}
 .storage-warning{
   display:none;margin:-12px 0 18px;padding:10px 13px;border:1px solid #7e5b2a;border-radius:9px;
   background:#2a231a;color:#f1c985;font-size:12px;
@@ -331,7 +327,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
 @media(max-width:900px){
   .app{padding:24px 18px 42px}
   .header{display:block}
-  .header-actions{padding-top:18px}
+  .header-actions{padding-top:10px}
   .side-nav{width:44px;height:54px;font-size:34px;background:rgba(23,26,32,.85);backdrop-filter:blur(6px)}
   .side-nav.prev{left:-10px}.side-nav.next{right:-10px}
   .calendar-card{margin-inline:8px}
@@ -344,14 +340,13 @@ button:disabled{cursor:not-allowed;opacity:.45}
   .calendar-shell{display:none}
   .mobile-shell{display:block}
   .header{display:block;margin-bottom:14px}
-  .header-actions{padding-top:12px}
+  .header-actions{padding-top:10px;display:flex;gap:12px;overflow-x:visible;flex-wrap:nowrap;padding-bottom:0;scrollbar-width:none}
   .brand-title{font-size:17px}
   .selected-date-label{font-size:21px}
   .selection-line{gap:8px}
-  .header-actions{display:flex;gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none}
   .header-actions::-webkit-scrollbar{display:none}
-  .today-btn,.action-btn{min-height:42px;padding:8px 13px;justify-content:center;font-size:11px;white-space:nowrap;flex:0 0 auto}
-  .action-btn .label-extra{display:none}
+  .action-btn{width:22px;height:22px;min-height:22px;padding:0;justify-content:center;white-space:nowrap;flex:0 0 auto}
+  .action-btn .icon-img{width:22px;height:22px}
   .calendar-card{margin-inline:3px}
   .side-nav{top:48%;width:42px}
   .side-nav.prev{left:-8px}.side-nav.next{right:-8px}
@@ -402,10 +397,9 @@ button:disabled{cursor:not-allowed;opacity:.45}
       </div>
     </div>
     <div class="header-actions">
-      <button class="today-btn" id="todayBtn">오늘</button>
-      <button class="action-btn primary" id="quickAddBtn">일정 추가 <span class="dim">＋</span></button>
-      <button class="action-btn" id="workStatusBtn">근무상태 <img class="icon-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAACzElEQVR4AbSWgVnqMBSFSyfgTfBgA5zAskGd4KUb4ATiBOACNEwATiBOIE5A3wR2AvA/+ZJQ1PqhQL9c7s3NvefkJqFpmvzwMcYMiqJ4QzYG+4fpybeEAGaSD6CTTqfzgO+x0+mM0QeN+N6B40OnlZBEAS8ALbFNI+95t9v9o3+NVEhsxCln46v/kriVEKIbgAvkEUSBo5LEWjvGd4/My7IcOef+p+/NHvkvxpjc96NqJQRwSpIqVDVawpgEqdo0OvaGJjD33a7yqVb53pW07yGIU0j/IH3sdcz4xiCuomoD0X0jbGqMicsbK8Q5QbQMdyEYgFoS+sfq2Ww2bpCq0jLkOkKIcgJynLfosTGmi31S86RLD5KBaWQ7QowaEUmOlo06vW232wIUh0chbuUcobV2xV6pui56SL8m8ORmra3BCweuZ4zJHKGQGbTacPRRB0Q5R8qqEZdHwobzrCYFiLAWKMt6nVLmAFkgk+RCD8v67KG7Kaz6c/9H6ySN/MC5lasQ0J6WVAdFji4OadTlWkq5Q1WHzC3Phaj+etw6hWPN6cz0R/XOsyuKGXjQVy2pty+jOIwi03YlrOb64oSU0TyIy0jITEaILls3GwJPbuDpXgzXU8X2rRyhH9BtbdI0LU9m2gPETxCW011ZjhDmihj3SmMgZwLuRYvv100YHJZmdVZgjlAGRDfoGkkIHCtB9m9EucLwuXqBD729v/GttRWkt2FACSRqT+NtHcbaNPFdRG+u5lIWwg45sUI5GLCQNivV54K+P0Ws462wTwJJhtwxyQ2S+4AaW2RL33fqgFAeSJeQXmFrX1GJlljEL3wQvRljnhBNQLKQD+AnRFWFE74WBi8Tt29J4/lEqDFIK94+fZIK+pEYW98nGeCagCSXDwlN21KQeyWM4GzqLwlDAEm6lEWsTdfNrWumDuNo2a/oByY3hKhveei3tncAAAD//9/UhzEAAAAGSURBVAMA9hJNrJB6i4AAAAAASUVORK5CYII="></button>
-      <button class="action-btn" id="settingsBtn">설정 <img class="icon-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEgUlEQVR4AcSW7V0jNxCHl1TgdGAqyFFBTAXnqwC5AkwFcBUADeBJBXAV4KsAd3CkgmwFkOeRpWXXXu5MvmR/+ntG86bRjFbr35r/+flwAimlSUrpU0pplob41PyH50MJLBaLs6Ojox/gCTzu4An9D5KafySPgxNIKU0JHGAC3htTklph+zObge/BCeA1A3m8vr5+Aac7WGRl07j4vDnwGU0gbfu8hF6BWYlV6SYiHiJiHUNYnb+LbT4P+gJjQHIFi/qN7CWApWW0z9eU8xI82lvo5+JWFynTN0JFNs6wPcfnH6jnxBgreWOr72MvAQ0xsIyQpm22j/3PMhZ52IpGf/u6bI9VF4PYK+aDMUiADBNaF2swvlitVr+z4Cmyv8A3+OPggR8dqEIblN/ALfxpiXHB3DFjjaVMRZcACkt/WRTPd3d3N/IEXRMkgTn8c1Me7CdgCnK/i7jRRluwhF8rhxor82zsMnHGlIsuASZXYAoaM5eOAWcXtbeeE+H7/4rc1y/7j/kR82uRT6B1o01OAOcJmZ2hsPQkHN1OlVVgN8fOS8g3wkBVpV9Sp00n7DEEtQK3irBbYpf9cwII8wTavLy82D/ZAXCwRR4ibVuCfGVX+T7A0MAt1I28Wwns+4c0ty4nEJF33BLAnRhgLr8DW5QXJ9ApZ+Qqyn1gv5Vh34KcBHQwUkpW774InyNiLZ8TkNkJcI/D4LSy436LNvr0QcANMayE4k/4m2zjA297XFxZi119K7ZnQKMS4AS+BY4//BEEyOWSf69F6kBNzIUEojxm+bdpnln8NKhcmb8lUATusjr2b7y26CVVL7+LX9np27d5S4Bd2iP7bFB7VHnnOgn5rhpOdvC5ziOiVkNR5T0fT6zVxejOAD2+1hLkMkG7QbCWSQ6C3Xk/API8lKFLTqAhrYiIG0rv17JFZhKeB9hmWwGc7VG+RDC8iIi9ewB5P8AjPtdgBubAD84jEXOJOSf10kG0HcT0mjaGgik+eb1agY3Sgj8LHRACWBkDtCjcxZKdeiPeQ23XBLknfBGxvwF0jrk/Ba00JxARLZP8ChFsmVKaMd8bwemlEico/DhButHCfVcX2MDvDWJ6kZ2pYA3M8prbFijE2V208hhcSscQ7I6Lx4/TET4n4Fggm6kb8ymy2vfnfotyBTTA2fLV3tnbpXIyn4Eb4OWU+6Zc4LMBvjGtc4HdFGi7gs6LzIson3w2dxtsQrnoEnCCov/ZvO79qznH0dfUf71J2zEkHuz8WGnrovclxqrYd5/5Mn9rQRVQTg9afQsmRd4WKhk9pCqAZ0cf7fdiEPsLNoMxqICaoDwYnoIF8ItX/9XUQ+oimu6B3dfr+ztnwrNhHGNcEOuY2Jtdp70ENMDQvkLiKiLWysAGOKZUeg48G33MUeY+s1j20RdcgRvQot8bownsWW0FD5AchJ367j9C+7hHX4e2lf8pPTiB4K5gZ/3zMRbYPyoLbGv/x2wGsoMT0IvAD6W3vv/2tw9lx/xRCW0PxYcSqEFJxPd/De1DWVttKv0V/RcAAP//7D9VjAAAAAZJREFUAwCGKIJfum8jfQAAAABJRU5ErkJggg=="></button>
+      <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><img class="icon-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAA2ElEQVR4AeyU4Q3CIBCFGyepm9RJnINf6i/mcBK7iR3F7xHaYEIEilYTae6VA97dg0t7u27j5/cFrbU9uHv0pQVac8MjIhIS5DPNtzWC+dkjzCYYKUrdUitpXf0i0d8rKZ1DHeTE+BIcegCzDSm+31eTcDHhDW+snDPwJJjBV07lhtp1oaBb+PQrFDwgptOkMMKbTX6Kr33ldjGLoDFmApcUiJIIg7Mxxff7k2PzWgTxN7Em+PYyt5L+Z0mvXFs/siCfab4VfzR0DnWkPaMg0Xw1mMWCxFTZAwAA//9Recy/AAAABklEQVQDAIgSfDldojxWAAAAAElFTkSuQmCC"></button>
+      <button class="action-btn" id="workStatusBtn" aria-label="근무상태" title="근무상태"><img class="icon-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADB0lEQVR4AexW243aQBTlJcFfnAoCHbAVhC0hHZAKAj+Il7RG4v0DqWCTDtIB2wGkgnUqWOcPJB45x/JYM+MZY4yi/AT5aGbu88z1nTGF3D/+/SdwVwUmk0mduOctZiYwm83cQqGwJabTaSsricwE8vn8F5FUngtZ2vEqAZYYu63qAS+Xi6PL5LXrug78GrLMNE8kgNIGJUayLYmYAphkSNysVCqv0G0w32C0PlYCcGygtHV6YnSAjUwCa586Qp7DrwnZM0iLCjXG4/EHyIyPlQB2sJMDYx6QYGkZ6Xw+jzhC7os5kvNVPVMuwRsOh7+ktTK1Emi32z46/JEJhAfmDoh95Lrf7697vV5+v9/XMP9BGaC8c9j7xWLxE+TWx0qAHp1OZ6eR8FDan9QJoCLRq4DshUkx5jjSlzG4tiGRAJ0YAEkfgObhcHjArj3KTaAOdoEtK0Nfk50su0qAxgyMMn/XdktVDLfY0jlGYLFYtObz+Rsa6hLiFcexReNboMcJY7p6DIUAEjbQ0SuUURwh2rOzn7B7WUa5FavVytHjhDGf9COpEICTb4qKhnJAwKgz2SfJjsfjb1mvEBgMBjsoXSTkyGYLAPa8XKBK9/AIw/KzHgfrlr4RhQCccmiiUbfbZbfXMA/ABqTuFsD3mx4H6696jBgB3YBr9gbQBNgPFFmxXC7rsEtlyyBXCTAYDPlB4f2+RQmtzQjbKvoospW/HYhhfBIJICDffXS34x1GVzGjkQzBeYgG+iUgSFtA+YCFNspgJYDkLHeUnF4I6CNBcBVD75bL5TdCuieiqzi0Vz5glOmwEkApg50IBybn3Y7m4sngXR/7R0QdbWgr+TmlUumdWOujlUB4JF9CB4+B5bsdlVAIhnY52tAW64Ao7NaZPscIwCP5eDqdqvwIMTBlaUBb+tAXR7id5GOtgHAie9d1Y7egVuaYnj70FXFs41UCNkf0yEjoUGbxh0SIUo+ZCaC0a2SpodTv0XwRGchuejITYBYk9lhqzrPiLgJZk8p+f52AnMw0/wMAAP//M0ImuwAAAAZJREFUAwDzD31Q2BfDVQAAAABJRU5ErkJggg=="></button>
+      <button class="action-btn" id="settingsBtn" aria-label="설정" title="설정"><img class="icon-img" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEh0lEQVR4AdSWS1IbSRCGG7GApeYEI24gTjDyCcacwMMJLDYEj8U0Ebw3yCcwPgH2CdScQLoBuoHZEgTI35d0t7ullhErhxWVqqp81Z+Z9ehW8pt/fxaAs7OzDjSEpk10enp6A7/zlqS+NQNDnPegxraysvIewWdo6bY0gJOTky5ejW7y8PDw1/7+/kqVkG0A4J6+d3x8/Df9Um0hABckpe+LlK6urv6jx+l0Ok7T1IWclgSYyfPzcyaj1WpFltI0bWPfk+Q3UWuWmRsNcTIiohvkdzgYsnCfcQI/s2+iQoZdqs3a2tp39IYSwYxSADGutTkAGKVo9HBilBljmxFF+gHyTUYTAeAW/gRSV5sEP2PmE/ru+vr6/4xrrQYA1Bp+VIOFNknrO8Yb0DYO+sw3IBeANd92d3fHyN0LffXdK3t7e5tobkMJPvuW1nFBNQAwTZeKAxzFQvbQNY4+IV+qqSul+V7BPgPQQGOydGVfUAmA6P+DaQZM18LFcOrGihpjE/eB9YU+YL+wUdojQFjWHrqxn1QuATCJ+pCmFMQRPbxaY8EOjkYw1Y0aM7bOXZxfI3fDGoTsGu3s7Nzje0cmulFmx1UAYYjQjaSsiSyRehOc9awxYDGJC0jQyoZmqckYXgbZ1LNPqgAKoVdtqRBa/BFdWSIW3jw4OLhN8xpT72/scDdbgCBLZYSYRsNenwbgPPNPqgJwp4YDBHMgCDOc0vfTfGH0ymaKmeiDLinLk/C7vLzs0rm4IFyj0PuZAVI5qUaBQW1TkXKdJEaLrLFh75lXVgPw9PT0L8wOPsZmz7WYR6tmIHl8fBSh5FEUaShV/4i+XZ1Xx3kWqqxXxyUAawRSr16NUmr8xUGFMsfUNzLheJY4Xr6GnooiE4WKvjzeXexHrlUISgAwfEYjTaToiPlsCwAwP6cNd7o89kdcMjxKcemgGw1/ZtNb1d4Mu1bIqgCibjjZCsnMH/X1cgoHRlFE68JE1JOHic4nDdlLKiAsb5nFKgCdK4xnF2e1lte3jAKgfv1MWbh48WJxjNSha2xFkN6IoVACYIcaocyBUTmYJaOAisdpXJFnjNPZHQ6vbOlL2bxBDdIXN2QlANJm3Xw02qQ7FEOj4Q8QPk6+lsVX0Tt4RyxSRjZrRqa8/yNLrOWmDJUSgDO+euKuJhvls4nT9vn5+UdqrgPVXqWLi4s++h/YGy6Y5H0RVK1ENQC+59TWTPjlc4OTEci/A2gA/wpHd7PveRUNcr+a7zgFV+hfI/NxGjL2AWOaXJOp2GtOpBoAGSzos2l9OxgWuzVDpmGHLDVuUuQ2N5lRe+a/yoB6BNCG9Dl3vOcAuNu5bjcx0LDHxvIL2LSFMdG5CH4bW4AD+AAfW9rqBxsfL/eMQdQM5wAUUjbKrZT+fHiyXOZXrlHm05cufdnlAY4FjTaBd6+Pw8PDmL9o1v8XAqirJUleuzglyKxtfA1R9+gpnfeBwLyIbtFZqi0NIPe2TUqL2uasWpcxs1x0y7U3ATALpHSLvjj/s733wVydfwXlTQB+5WiR7DX+DwAAAP//Jw/KCQAAAAZJREFUAwCJmiFfofz2fwAAAABJRU5ErkJggg=="></button>
     </div>
   </header>
 
@@ -1457,7 +1451,7 @@ function requestClose(id){
 // ---------- listeners ----------
 fillTimeSelects();
 document.getElementById("viewSelect").onchange=e=>{viewMode=e.target.value;render()};
-document.getElementById("todayBtn").onclick=()=>{focusDate=nowDate();render()};
+document.getElementById("selectedDateLabel").onclick=()=>{focusDate=nowDate();render()};
 document.getElementById("prevBtn").onclick=()=>navigate(-1);
 document.getElementById("nextBtn").onclick=()=>navigate(1);
 document.getElementById("quickAddBtn").onclick=()=>openEventForm({date:fmtDate(focusDate),slot:"morning"});
