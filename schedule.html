@@ -386,6 +386,20 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header-actions .action-btn:hover{color:#b0b0b0;opacity:1;background:transparent}
 .header-actions .header-action-svg{display:block;width:16px;height:16px;min-width:16px;min-height:16px;padding:0;margin:0;flex:none}
 @media(max-width:640px){.header-actions .action-btn{width:44px;height:44px;min-width:44px;min-height:44px}}
+
+/* Keep actions on the date row; collapse only when the row cannot fit. */
+.header{display:flex;align-items:flex-end;gap:12px;position:relative}
+.header>div:first-child{flex:0 0 auto;min-width:0}
+.header .selection-line{flex-wrap:nowrap}
+.header .header-actions{gap:4px;padding-top:0;margin-left:auto;overflow:visible;flex-wrap:nowrap;align-items:center}
+.header .header-actions .action-btn{width:36px;height:36px;min-width:36px;min-height:36px}
+.header-action-toggle{display:none;width:36px;height:36px;flex:0 0 36px;padding:0;border:0;background:transparent;color:#878787;font-size:24px;line-height:1;margin-left:auto}
+.header-action-toggle:hover{color:#b0b0b0;background:transparent}
+.header.actions-collapsed .header-action-toggle{display:grid;place-items:center}
+.header.actions-collapsed .header-actions{display:none}
+.header.actions-collapsed.actions-open .header-actions{display:flex;flex-direction:column;position:absolute;right:0;top:calc(100% + 8px);z-index:1000;width:148px;padding:6px;margin:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #0005;gap:4px}
+.header.actions-collapsed .header-actions .action-btn{width:100%;height:44px;display:flex;justify-content:flex-start;gap:10px;padding:0 10px}
+.header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1532,5 +1546,21 @@ document.getElementById("calendarScroll").addEventListener("touchend",e=>{
 render();
 })();
 </script>
-</body>
+<script>
+// Responsive header action disclosure; existing action buttons and handlers are retained.
+(()=>{
+ const header=document.querySelector('.header'),group=header.querySelector('.header-actions'),leading=header.firstElementChild;
+ const toggle=document.createElement('button');toggle.id='scheduleActionToggle';toggle.className='header-action-toggle';toggle.type='button';toggle.textContent='⋮';toggle.setAttribute('aria-label','스케줄 메뉴');toggle.setAttribute('aria-expanded','false');
+ group.id='scheduleHeaderActions';toggle.setAttribute('aria-controls',group.id);header.insertBefore(toggle,group);
+ const buttons=[...group.querySelectorAll('button')];
+ function close(focus=false){header.classList.remove('actions-open');toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
+ function layout(){const narrow=leading.getBoundingClientRect().width+116+12>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
+ toggle.addEventListener('click',()=>{const open=!header.classList.contains('actions-open');header.classList.toggle('actions-open',open);toggle.setAttribute('aria-expanded',String(open));if(open)buttons[0].focus()});
+ group.addEventListener('click',event=>{if(event.target.closest('button'))close()});
+ document.addEventListener('click',event=>{if(!header.contains(event.target))close()});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('actions-open')){event.preventDefault();close(true)}});
+ header.addEventListener('focusout',()=>{requestAnimationFrame(()=>{if(!header.contains(document.activeElement))close()})});
+ new ResizeObserver(layout).observe(header);new ResizeObserver(layout).observe(leading);layout();
+})();
+</script></body>
 </html>
