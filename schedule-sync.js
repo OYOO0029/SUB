@@ -1,6 +1,7 @@
 import {SyncEngine, notionContext, validateState} from './schedule-sync-core.mjs';
 
 const CONFIG='myWeekSyncConfig_v1',OWNER='myWeekSyncCacheOwner_v1';
+const DEFAULT_CONFIG={url:'https://cmsakakecnlsqdbhvzuu.supabase.co',key:'sb_publishable_C3zzu4l0uJJAlqVK_RFgKA_APLn6oXP'};
 const SDK='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/+esm';
 const $=id=>document.getElementById(id);
 const bridge=window.myWeekSyncBridge;
@@ -8,7 +9,7 @@ let client=null,engine=null,user=null,channel=null,authSubscription=null,epoch=0
 let storage;
 try{storage=window.localStorage}catch{storage={getItem:()=>null,setItem:()=>{throw Error('저장 공간이 차단되어 동기화를 시작할 수 없습니다.')},removeItem:()=>{}}}
 const notion=notionContext(window.self!==window.top,document.referrer,Array.from(location.ancestorOrigins||[]));
-function config(){try{return JSON.parse(storage.getItem(CONFIG)||'{}')}catch{return {}}}
+function config(){try{return JSON.parse(storage.getItem(CONFIG)||'null')||DEFAULT_CONFIG}catch{return DEFAULT_CONFIG}}
 function status(kind,label,detail){$('syncCloudBtn').dataset.state=kind;$('syncCloudLabel').textContent=label;$('syncCloudStatus').textContent=detail;window.dispatchEvent(new Event('my-week-sync-status'))}
 function authUI(){for(const id of ['syncCloudPull','syncCloudPush','syncCloudLogout'])$(id).disabled=!user;$('syncCloudEmail').disabled=!!user;$('syncCloudPw').disabled=!!user;$('syncCloudLogin').disabled=!!user;$('syncCloudSignup').disabled=!!user;$('syncAccount').textContent=user?'로그인: '+user.email:'로그인하지 않음';}
 function publicConfig(url,key){
