@@ -1,8 +1,9 @@
 import {SyncEngine, notionContext, validateState} from './schedule-sync-core.mjs';
+import {SYNC_CONFIG, SUPABASE_SDK} from './sync-config.mjs';
 
 const CONFIG='myWeekSyncConfig_v1',OWNER='myWeekSyncCacheOwner_v1';
-const DEFAULT_CONFIG={url:'https://cmsakakecnlsqdbhvzuu.supabase.co',key:'sb_publishable_C3zzu4l0uJJAlqVK_RFgKA_APLn6oXP'};
-const SDK='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/+esm';
+const DEFAULT_CONFIG=SYNC_CONFIG;
+const SDK=SUPABASE_SDK;
 const $=id=>document.getElementById(id);
 const bridge=window.myWeekSyncBridge;
 let client=null,engine=null,user=null,channel=null,authSubscription=null,epoch=0,authBusy=false;

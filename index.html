@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>소비 대시보드 · v8.3</title><style>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>소비 대시보드 · v8.24</title><style>
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 :root{--bg:#f6f7fb;--card:#fff;--text:#182033;--muted:#7b8494;--line:#e6e9ef;--accent:#2f6fed;--accentSoft:#eef4ff;--danger:#d94b4b;--warn:#d98b2b;--ok:#2d8b62;--shadow:0 8px 24px rgba(15,23,42,.05);--r:16px}
 *{box-sizing:border-box} body{margin:0;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)} button,input,select{font:inherit} button{cursor:pointer} h1,h2,h3,p{margin:0}.wrap{max-width:1120px;margin:auto;padding:26px 20px 94px}.muted{color:var(--muted)}.tiny{font-size:11px}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:12px}.header h1{font-size:24px;letter-spacing:-.5px}.header p{font-size:12px;color:var(--muted);margin-top:5px}.ghost-btn,.pill{border:1px solid var(--line);background:#fff;border-radius:9px;height:34px;padding:0 11px}.pill{border-radius:999px;font-size:12px;font-weight:700}.pill.blue{color:var(--accent);background:var(--accentSoft);border-color:#cfdeff}.month-nav{display:flex;justify-content:center;align-items:center;gap:10px;margin:8px 0 14px}.month-nav button{border:1px solid var(--line);background:#fff;border-radius:9px;width:34px;height:34px;font-size:18px}.month-label{min-width:145px;text-align:center;font-weight:800;font-size:19px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}.section{padding:16px}.page{display:none}.page.active{display:block}.summary{display:grid;grid-template-columns:220px 1fr;gap:28px;padding:20px 24px;margin-bottom:12px}.donutWrap{display:flex;flex-direction:column;align-items:center;justify-content:center}.donut{width:138px;height:138px;border-radius:50%;position:relative;background:#eef1f5}.donut:after{content:"";position:absolute;inset:23px;background:#fff;border-radius:50%}.donutCenter{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.donutCenter strong{font-size:17px}.donutCenter span{font-size:10px;color:var(--muted)}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;align-content:center}.kpi.primary{grid-column:1/-1;border-bottom:1px solid var(--line);padding-bottom:14px}.kpi label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.kpi strong{font-size:20px}.kpi.primary strong{font-size:29px}.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.settleStrip{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;margin-bottom:12px;font-size:12px}.settleStrip strong{font-size:13px}.panelHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.panelHead h2{font-size:15px}.tableTools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.search{height:34px;width:170px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:#fff}.selectCompact{height:34px;border:1px solid var(--line);border-radius:9px;padding:0 8px;background:#fff}.addBtn{width:34px;height:34px;border:0;border-radius:9px;background:var(--accent);color:#fff;font-size:20px;line-height:1}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);font-size:12px;text-align:left}th{background:#fafbfc;color:#5b6575;font-weight:700;white-space:nowrap}.num{text-align:right;font-variant-numeric:tabular-nums}.tag{display:inline-flex;align-items:center;height:23px;padding:0 8px;border-radius:999px;font-size:10px;font-weight:700;background:#f2f4f7;color:#556071}.tag.prepaid{background:#f0f5ff;color:#386bd8}.tag.warn{background:#fff6e8;color:#b86d13}.tag.danger{background:#fff0f0;color:#c63d3d}.tag.ok{background:#eef8f3;color:#2d8b62}.inlineRow input,.inlineRow select{height:32px;border:1px solid var(--line);border-radius:7px;padding:0 8px;width:100%;background:#fff}.inlineActions{display:flex;gap:5px;justify-content:flex-end}.miniBtn{height:30px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:0 9px;font-size:11px}.miniBtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.autoTag{display:inline-flex;margin-top:4px;color:var(--ok);font-size:10px;font-weight:700}.progress{height:9px;background:#eef1f5;border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent);border-radius:999px}.budgetTotal,.yearTop{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.metric{padding:15px}.metric label{font-size:11px;color:var(--muted);display:block;margin-bottom:6px}.metric strong{font-size:21px}.budgetRows{display:flex;flex-direction:column;gap:10px}.budgetRow{display:grid;grid-template-columns:140px 1fr 125px 120px;gap:12px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:12px}.budgetRow .name{font-weight:800;font-size:13px}.budgetRow .sub{font-size:10px;color:var(--muted);margin-top:3px}.budgetRow .amount{text-align:right;font-size:12px}.budgetRow .result{text-align:right;font-size:12px;font-weight:800}.subBudget{margin-top:12px;padding:14px;border:1px dashed #d9dfe8;border-radius:12px;background:#fbfcfe}.subBudgetHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.subBudgetHead h3{font-size:13px}.settleSummary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.settleBox{padding:16px}.settleBox label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.settleBox strong{font-size:22px}.moneyList{display:flex;flex-direction:column;gap:10px}.moneyItem{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}.moneyTitle{font-size:13px;font-weight:800}.moneyMeta{font-size:10px;color:var(--muted);margin-top:3px}.moneyAmount{font-size:14px;font-weight:800}.receive{color:var(--ok)}.pay{color:var(--danger)}.actionDone{height:31px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:0 10px;font-size:11px;font-weight:800}.moneyItem.done{opacity:.58}.moneyItem.done .moneyTitle{text-decoration:line-through}.annualChart{height:230px;display:flex;align-items:flex-end;gap:8px;padding:8px 6px 26px;border-bottom:1px solid var(--line)}.barCol{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;gap:5px}.bar{width:min(34px,68%);background:#91aff5;border-radius:7px 7px 2px 2px;min-height:0}.bar.current{background:var(--accent)}.barLabel{position:absolute;bottom:-20px;font-size:10px;color:var(--muted)}.barValue{font-size:9px;color:var(--muted);white-space:nowrap}.annualCats{display:flex;flex-direction:column;gap:12px}.annualRow{display:grid;grid-template-columns:100px 1fr 100px 52px;gap:10px;align-items:center;font-size:12px}.bottomNav{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(720px,calc(100% - 28px));height:58px;background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:0 14px 36px rgba(15,23,42,.13);border-radius:17px;display:grid;grid-template-columns:repeat(4,1fr);z-index:50;overflow:hidden;backdrop-filter:blur(12px)}.navBtn{border:0;background:transparent;color:#747e8e;font-size:12px;font-weight:800}.navBtn.active{color:var(--accent);background:var(--accentSoft)}.modalBack{position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:18px;z-index:80}.modalBack.show{display:flex}.modal{width:min(620px,100%);max-height:82vh;overflow:auto;background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 24px 70px rgba(15,23,42,.2)}.modalHead{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;z-index:1}.modalHead h2{font-size:16px}.close{border:1px solid var(--line);background:#fff;width:32px;height:32px;border-radius:9px}.modalBody{padding:16px 18px}.categoryList,.prepaidList{display:flex;flex-direction:column;gap:10px}.categoryItem,.prepaidItem{padding:12px 0;border-bottom:1px solid var(--line)}.categoryItem:last-child,.prepaidItem:last-child{border-bottom:0}.catTop,.prepaidTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:7px}.catTop strong,.prepaidTop strong{font-size:13px}.catTop b,.prepaidTop b{font-size:14px}.catMeta{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:5px}.ledger{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}.ledgerRow{display:grid;grid-template-columns:58px 1fr 90px;gap:8px;padding:6px 0;font-size:11px}.ledgerRow .plus{color:var(--ok)}.ledgerRow .minus{color:var(--danger)}.formRow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin-bottom:10px}.formRow label{font-size:12px;color:#5d6777}.formRow input,.formRow select{height:36px;border:1px solid var(--line);border-radius:9px;padding:0 10px;width:100%}.primaryBtn{height:36px;border:0;border-radius:9px;background:var(--accent);color:#fff;padding:0 14px;font-size:12px;font-weight:800}.empty{padding:30px;text-align:center;color:var(--muted);font-size:12px}.infoLine{padding:10px 12px;background:#fafbfc;border:1px solid var(--line);border-radius:10px;font-size:11px;color:var(--muted)}
@@ -1048,14 +1048,14 @@ body{color:var(--ref-text);font-family:Pretendard,-apple-system,BlinkMacSystemFo
 }
 </style>
 </head><body><div class="wrap">
-<header class="header"><div><div class="eyebrow">MY SPENDING</div><h1>소비 대시보드</h1><p>쓴 돈을 기록하고, 남은 예산과 주고받을 돈을 함께 관리하세요.</p></div><div class="headerUtilities"><div class="utilityWrap"><button id="notificationBtn" class="utilityIcon notificationBell" aria-label="알림" aria-expanded="false" title="알림" onclick="toggleUtilityMenu('notificationMenu',event)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3.36647 15.445H16.6336C17.429 15.445 17.8979 15.035 17.8979 14.4321C17.8979 13.595 17.0522 12.8418 16.324 12.0968C15.7715 11.5193 15.6208 10.3307 15.5622 9.36822C15.4954 6.15393 14.65 3.93572 12.415 3.13215C12.1054 2.04393 11.2347 1.17322 10.0043 1.17322C8.76504 1.17322 7.90325 2.04393 7.58504 3.13215C5.35861 3.93572 4.50468 6.15357 4.44611 9.36786C4.37932 10.3307 4.23682 11.5193 3.67611 12.0968C2.95611 12.8418 2.10254 13.595 2.10254 14.4325C2.10254 15.035 2.57968 15.445 3.36647 15.445ZM7.45111 16.5836C7.55183 17.8057 8.58111 18.8264 10.0043 18.8264C11.4186 18.8264 12.4483 17.8057 12.5572 16.5836H7.45111Z" fill="currentColor"/></svg><span id="notificationBadge" class="utilityBadge" hidden></span></button><div id="notificationMenu" class="utilityMenu notificationMenu" hidden><div class="utilityMenuTitle">알림</div><div id="notificationList"></div></div></div><div class="utilityWrap"><button id="optionsBtn" class="utilityIcon" aria-label="옵션" aria-expanded="false" title="옵션" onclick="toggleUtilityMenu('optionsMenu',event)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div id="optionsMenu" class="utilityMenu" hidden><button onclick="closeUtilityMenus();openCategoryManage()">카테고리 관리</button><button onclick="closeUtilityMenus();openPaymentManager('general')">결제수단 관리</button><button onclick="closeUtilityMenus();openPrepaidModal()">선불 잔액</button><div class="utilityDivider"></div><button onclick="closeUtilityMenus();openData()">백업 · 데이터</button></div></div></div></header>
+<header class="header"><div><div class="eyebrow">MY SPENDING</div><h1>소비 대시보드</h1><p>쓴 돈을 기록하고, 남은 예산과 주고받을 돈을 함께 관리하세요.</p></div><div class="headerUtilities"><span id="syncStatus" class="syncStatus" title="데이터 저장 상태">로컬 저장</span><div class="utilityWrap"><button id="notificationBtn" class="utilityIcon notificationBell" aria-label="알림" aria-expanded="false" title="알림" onclick="toggleUtilityMenu('notificationMenu',event)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3.36647 15.445H16.6336C17.429 15.445 17.8979 15.035 17.8979 14.4321C17.8979 13.595 17.0522 12.8418 16.324 12.0968C15.7715 11.5193 15.6208 10.3307 15.5622 9.36822C15.4954 6.15393 14.65 3.93572 12.415 3.13215C12.1054 2.04393 11.2347 1.17322 10.0043 1.17322C8.76504 1.17322 7.90325 2.04393 7.58504 3.13215C5.35861 3.93572 4.50468 6.15357 4.44611 9.36786C4.37932 10.3307 4.23682 11.5193 3.67611 12.0968C2.95611 12.8418 2.10254 13.595 2.10254 14.4325C2.10254 15.035 2.57968 15.445 3.36647 15.445ZM7.45111 16.5836C7.55183 17.8057 8.58111 18.8264 10.0043 18.8264C11.4186 18.8264 12.4483 17.8057 12.5572 16.5836H7.45111Z" fill="currentColor"/></svg><span id="notificationBadge" class="utilityBadge" hidden></span></button><div id="notificationMenu" class="utilityMenu notificationMenu" hidden><div class="utilityMenuTitle">알림</div><div id="notificationList"></div></div></div><div class="utilityWrap"><button id="optionsBtn" class="utilityIcon" aria-label="옵션" aria-expanded="false" title="옵션" onclick="toggleUtilityMenu('optionsMenu',event)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div id="optionsMenu" class="utilityMenu" hidden><button onclick="closeUtilityMenus();openCategoryManage()">카테고리 관리</button><button onclick="closeUtilityMenus();openPaymentManager('general')">결제수단 관리</button><button onclick="closeUtilityMenus();openPrepaidModal()">선불 잔액</button><div class="utilityDivider"></div><button onclick="closeUtilityMenus();openData()">백업 · 데이터</button></div></div></div></header>
 <noscript><div class="jsPreviewNotice">iPhone 파일 미리보기에서는 계산·목록 기능이 실행되지 않을 수 있어요. 실제 사용은 Safari에서 배포된 웹 주소로 열어 주세요.</div></noscript><div id="storageNotice" class="storageNotice" role="status"></div>
 <nav class="bottomNav" aria-label="주요 화면"><button class="navBtn active" data-page="spend" onclick="goPage('spend')">소비</button><button class="navBtn" data-page="budget" onclick="goPage('budget')">예산</button><button class="navBtn" data-page="settle" onclick="goPage('settle')">정산</button><button class="navBtn" data-page="year" onclick="goPage('year')">연간</button></nav>
 <main>
 <section id="page-spend" class="page active" aria-label="소비 현황">
 <div class="monthBar"><span id="monthLabel" class="month-label"></span><div class="monthControls"><button aria-label="이전 달" onclick="shiftMonth(-1)">‹</button><button onclick="goToday()">오늘</button><button aria-label="다음 달" onclick="shiftMonth(1)">›</button></div></div>
-<div class="budgetHero card"><div class="heroMain"><div class="heroTitleRow"><div class="eyebrow" id="heroLabel">이번 달 남은 예산</div><button class="heroDetail" onclick="goPage('budget')"><span>상세</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></div><strong id="heroAmount">—</strong><p id="heroDaily"></p></div><div class="heroSide"><div class="heroRow"><span>예산 반영 소비</span><b id="monthTotal"></b></div><div class="progress"><i id="heroProgress"></i></div><div class="heroRow muted"><span>설정한 예산</span><span id="heroBudget"></span></div><div id="forecast" class="forecast"></div></div></div>
-<div class="metricGrid"><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricBlue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="1.8"/><path d="M3.5 10h17"/></svg></span><label>총 결제액</label><button class="infoTip" type="button" aria-label="총 결제액 계산 기준" data-tip="실제로 결제한 전체 금액이에요. 다른 사람 부담액은 예산 반영 소비에서 제외돼요.">i</button></div><strong id="grossTotal"></strong></div><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricBlue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M8 3.5v4M16 3.5v4M4 9.5h16"/></svg></span><label>하루 평균</label><button class="infoTip" type="button" aria-label="하루 평균 계산 기준" data-tip="선택한 달의 현재까지 소비를 지난 일수로 나눠 계산해요.">i</button></div><strong id="dailyAvg"></strong></div><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricGreen" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 18V11M12 18V6M18 18V9"/></svg></span><label>지난달과 비교</label><button class="infoTip" type="button" aria-label="지난달 비교 기준" data-tip="지난달 같은 기간의 소비 기록과 비교해요.">i</button></div><strong id="prevCompare"></strong></div><div class="card metric metricCompact categoryMetric"><div class="metricHead"><span class="metricIcon metricOrange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.5 10.5V20M7.5 10.5 10 5.5c.4-.8 1.6-.5 1.6.4v4.6h4.9c1.4 0 2.4 1.3 2 2.6l-1.5 5.1c-.3 1-1.2 1.8-2.3 1.8H7.5M4 10.5h3.5V20H4z"/></svg></span><label>가장 많이 쓴 카테고리</label><button class="detailArrow" type="button" aria-label="카테고리 상세 보기" title="카테고리 상세 보기" onclick="openCategoryModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></div><strong id="topCatKpi"></strong></div></div>
+<div class="budgetHero card"><div class="heroMain"><div class="heroTitleRow"><div class="eyebrow" id="heroLabel">이만큼 아꼈어요!</div><button class="heroDetail" onclick="goPage('budget')"><span>상세</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></div><strong id="heroAmount">—</strong><p id="heroDaily"></p></div><div class="heroSide"><div class="heroRow"><span>이번 달 사용금액</span><b id="monthTotal"></b></div><div class="progress"><i id="heroProgress"></i></div><div class="heroRow muted"><span>설정한 예산</span><span id="heroBudget"></span></div><div id="forecast" class="forecast"></div></div></div>
+<div class="metricGrid"><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricBlue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="1.8"/><path d="M3.5 10h17"/></svg></span><label>이번 달 사용금액</label><button class="infoTip" type="button" aria-label="이번 달 사용금액 계산 기준" data-tip="비선불 실제 부담액과 환불 불가 선불 충전액을 합산해요. 선불카드 결제는 충전과 중복되므로 다시 더하지 않아요.">i</button></div><strong id="grossTotal"></strong></div><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricBlue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M8 3.5v4M16 3.5v4M4 9.5h16"/></svg></span><label>하루 평균</label><button class="infoTip" type="button" aria-label="하루 평균 계산 기준" data-tip="선택한 달의 현재까지 소비를 지난 일수로 나눠 계산해요.">i</button></div><strong id="dailyAvg"></strong></div><div class="card metric metricCompact"><div class="metricHead"><span class="metricIcon metricGreen" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 18V11M12 18V6M18 18V9"/></svg></span><label>지난달과 비교</label><button class="infoTip" type="button" aria-label="지난달 비교 기준" data-tip="지난달 같은 기간의 소비 기록과 비교해요.">i</button></div><strong id="prevCompare"></strong></div><div class="card metric metricCompact categoryMetric"><div class="metricHead"><span class="metricIcon metricOrange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.5 10.5V20M7.5 10.5 10 5.5c.4-.8 1.6-.5 1.6.4v4.6h4.9c1.4 0 2.4 1.3 2 2.6l-1.5 5.1c-.3 1-1.2 1.8-2.3 1.8H7.5M4 10.5h3.5V20H4z"/></svg></span><label>가장 많이 쓴 카테고리</label><button class="detailArrow" type="button" aria-label="카테고리 상세 보기" title="카테고리 상세 보기" onclick="openCategoryModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></div><strong id="topCatKpi"></strong></div></div>
 <div id="monthCompare" class="card section" hidden></div>
 <section class="card section transactionSection" aria-label="소비 내역">
 <div class="listHeader"><div class="viewTabs" role="tablist" aria-label="소비 보기"><button id="listTab" class="active" role="tab" aria-selected="true" onclick="setView('list')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>목록</span></button><button id="calendarTab" role="tab" aria-selected="false" onclick="setView('calendar')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M8 3.5v4M16 3.5v4M3.5 10h17"/></svg><span>캘린더</span></button></div><div class="listActions"><span id="rowCount" class="tiny muted"></span><button id="mobileSelectToggle" class="mobileOnly miniBtn" type="button" onclick="toggleMobileSelectionMode()">선택</button><div class="searchWrap"><button id="searchToggle" class="iconOnly" aria-label="검색 및 필터" aria-expanded="false" onclick="toggleSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button><div id="searchPanel" class="searchPopover" hidden><label for="txSearch">소비 검색</label><input id="txSearch" class="search" placeholder="항목·목적·결제수단" oninput="applyFilters()"><label for="txCatFilter">카테고리</label><select id="txCatFilter" onchange="applyFilters()"></select><label for="txPayFilter">결제수단</label><select id="txPayFilter" onchange="applyFilters()"></select><div class="filterLinks"><button class="textLink" onclick="clearFilters()">필터 초기화</button><button class="textLink" onclick="openCategoryManage();toggleSearch()">카테고리 관리</button></div></div></div><button class="primaryBtn" onclick="openTransaction()">＋ 추가</button></div></div>
@@ -1064,10 +1064,10 @@ body{color:var(--ref-text);font-family:Pretendard,-apple-system,BlinkMacSystemFo
 <div id="calendarView" hidden><div class="calendarMonthBar"><span class="syncMonth"></span><div class="monthControls"><button aria-label="캘린더 이전 달" onclick="shiftMonth(-1)">‹</button><button onclick="goToday()">오늘</button><button aria-label="캘린더 다음 달" onclick="shiftMonth(1)">›</button></div></div><div class="calendarWeek" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div id="calendarGrid" class="calendarGrid" role="group" aria-label="월별 소비 캘린더"></div><div id="calendarDay" class="calendarDay" hidden></div><p class="interactionHint">날짜를 선택하면 내역을 확인하거나 기록할 수 있어요. 금액은 결제 총액 기준입니다.</p></div>
 </section>
 </section>
-<section id="page-budget" class="page" aria-label="예산 관리"><div class="monthBar"><span class="month-label syncMonth"></span><div class="monthControls"><button aria-label="이전 달" onclick="shiftMonth(-1)">‹</button><button onclick="goToday()">오늘</button><button aria-label="다음 달" onclick="shiftMonth(1)">›</button></div></div><div class="budgetTotal"><div class="card metric"><label>총예산</label><strong id="budgetTotal"></strong></div><div class="card metric"><label>내 부담 소비</label><strong id="budgetSpent"></strong></div><div class="card metric"><label>남은 예산</label><strong id="budgetRemain"></strong></div><div class="card metric"><label>사용률</label><strong id="budgetRate"></strong></div></div><div class="card section"><div class="panelHead"><div><h2>카테고리별 예산</h2><p class="tiny muted">예산은 내 부담액 기준 · 공동 지출은 상대 부담을 제외</p></div><button class="ghost-btn" onclick="openBudgetEdit()">예산 편집</button></div><div id="budgetRows" class="budgetRows"></div></div><div class="card section spaceTop"><div class="panelHead"><div><h2>목적 예산</h2><p class="tiny muted">카테고리·결제수단과 관계없이 목적별 사용액을 관리합니다.</p></div><button class="miniBtn" onclick="openBudgetEdit()">편집</button></div><div id="purposeBudgets"></div></div></section>
+<section id="page-budget" class="page" aria-label="예산 관리"><div class="monthBar"><span class="month-label syncMonth"></span><div class="monthControls"><button aria-label="이전 달" onclick="shiftMonth(-1)">‹</button><button onclick="goToday()">오늘</button><button aria-label="다음 달" onclick="shiftMonth(1)">›</button></div></div><div class="budgetTotal"><div class="card metric"><label>총예산</label><strong id="budgetTotal"></strong></div><div class="card metric"><label>사용금액</label><strong id="budgetSpent"></strong></div><div class="card metric"><label>남은 예산</label><strong id="budgetRemain"></strong></div><div class="card metric"><label>사용률</label><strong id="budgetRate"></strong></div></div><div class="card section"><div class="panelHead"><div><h2>카테고리별 예산</h2><p class="tiny muted">전체 예산은 사용금액 기준 · 카테고리는 실제 구매내역 기준</p></div><button class="ghost-btn" onclick="openBudgetEdit()">예산 편집</button></div><div id="budgetRows" class="budgetRows"></div></div><div class="card section spaceTop"><div class="panelHead"><div><h2>목적 예산</h2><p class="tiny muted">카테고리·결제수단과 관계없이 목적별 사용액을 관리합니다.</p></div><button class="miniBtn" onclick="openBudgetEdit()">편집</button></div><div id="purposeBudgets"></div></div></section>
 <section id="page-settle" class="page" aria-label="정산 관리"><div class="sectionTitle"><h2>주고받을 돈</h2><p class="muted">모든 기간의 정산 · 완료해도 소비를 다시 더하거나 빼지 않습니다.</p></div><div class="settleSummary"><div class="card settleBox"><label>아직 받을 돈</label><strong id="receiveTotal" class="receive"></strong></div><div class="card settleBox"><label>아직 보낼 돈</label><strong id="payTotal" class="pay"></strong></div></div><div class="card section"><div class="panelHead"><h2>미완료 정산</h2><button class="primaryBtn" onclick="openSettlement()">＋ 정산 추가</button></div><div id="moneyList" class="moneyList"></div></div><div class="card section spaceTop"><div class="panelHead"><h2>완료된 정산</h2><button class="miniBtn" onclick="toggleDoneList()" id="doneToggle">접기</button></div><div id="doneList" class="moneyList"></div></div></section>
-<section id="page-year" class="page" aria-label="연간 소비"><div class="month-nav"><button aria-label="이전 해" onclick="shiftYear(-1)">‹</button><div id="yearLabel" class="month-label"></div><button aria-label="다음 해" onclick="shiftYear(1)">›</button></div><div class="yearTop"><div class="card metric"><label>올해 내 부담 소비</label><strong id="yearTotal"></strong></div><div class="card metric"><label>기록된 월 평균</label><strong id="yearAvg"></strong></div><div class="card metric"><label>가장 많이 쓴 달</label><strong id="yearPeak"></strong></div><div class="card metric"><label>가장 큰 카테고리</label><strong id="yearTopCat"></strong></div></div><div class="card section"><div class="panelHead"><div><h2>월별 내 부담 소비</h2><p id="yearNote" class="tiny muted"></p></div></div><div id="annualChart" class="annualChart"></div></div><div class="card section spaceTop"><h2>카테고리별 소비</h2><div id="annualCats" class="annualCats spaceTop"></div></div></section>
-</main><footer class="appFooter">데이터는 현재 브라우저에 저장됩니다. 노션·다른 기기와 자동 동기화되지 않습니다. <button class="textLink" onclick="openData()">백업하기</button></footer>
+<section id="page-year" class="page" aria-label="연간 소비"><div class="month-nav"><button aria-label="이전 해" onclick="shiftYear(-1)">‹</button><div id="yearLabel" class="month-label"></div><button aria-label="다음 해" onclick="shiftYear(1)">›</button></div><div class="yearTop"><div class="card metric"><label>올해 사용금액</label><strong id="yearTotal"></strong></div><div class="card metric"><label>기록된 월 평균</label><strong id="yearAvg"></strong></div><div class="card metric"><label>가장 많이 쓴 달</label><strong id="yearPeak"></strong></div><div class="card metric"><label>가장 큰 카테고리</label><strong id="yearTopCat"></strong></div></div><div class="card section"><div class="panelHead"><div><h2>월별 사용금액</h2><p id="yearNote" class="tiny muted"></p></div></div><div id="annualChart" class="annualChart"></div></div><div class="card section spaceTop"><h2>카테고리별 소비</h2><div id="annualCats" class="annualCats spaceTop"></div></div></section>
+</main><footer class="appFooter">기본 데이터는 이 브라우저에 저장됩니다. 동기화 어댑터를 연결하면 다른 기기와 같은 데이터를 사용할 수 있습니다. <button class="textLink" onclick="openData()">백업 · 데이터</button></footer>
 </div>
 <div id="txModal" class="modalBack" onclick="backdropClose(event,'txModal')"><section class="modal compactTransaction" role="dialog" aria-modal="true" aria-labelledby="txTitle"><div class="modalHead txModalHead"><div class="txTitleBlock"><h2 id="txTitle">소비 기록</h2><p id="txDateSubtitle" class="txDateSubtitle"></p></div><button class="close" aria-label="닫기" onclick="closeModal('txModal')">×</button></div><form id="txForm" class="modalBody" onsubmit="saveTransaction(event)">
 <div class="txDateQuickArea"><div id="txDateQuickChips" class="txDateQuickChips"></div><input id="iDate" class="txNativeDate" type="date" required aria-label="소비 날짜" onchange="updateEntryDate();saveTxDraft()"></div>
@@ -1086,65 +1086,12 @@ body{color:var(--ref-text);font-family:Pretendard,-apple-system,BlinkMacSystemFo
 <div id="settleModal" class="modalBack" onclick="backdropClose(event,'settleModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="settleTitle"><div class="modalHead"><h2 id="settleTitle">정산 추가</h2><button class="close" aria-label="닫기" onclick="closeModal('settleModal')">×</button></div><form class="modalBody" onsubmit="saveSettlement(event)"><div class="formRow"><label for="sType">구분</label><select id="sType" onchange="updateSettlementMode()"><option value="receive">받을 돈</option><option value="pay">보낼 돈</option></select></div><div class="formRow"><label for="sTitle">내용</label><input id="sTitle" required maxlength="120"></div><div class="formRow"><label for="sPerson">상대방</label><input id="sPerson" maxlength="80"></div><div class="formRow"><label for="sAmount">금액</label><input id="sAmount" type="number" required min="1" step="1"></div><div class="formRow"><label for="sDate">발생일</label><input id="sDate" type="date" required></div><div class="formRow"><label for="sTx">관련 소비</label><select id="sTx"></select></div><label class="checkLabel"><input id="sAffects" type="checkbox" onchange="updateSettlementMode()"><span id="sAffectsLabel"></span></label><p id="sHelp" class="infoLine"></p><div id="sCategoryRow" class="formRow spaceTop" hidden><label for="sCat">소비 카테고리</label><select id="sCat"></select></div><p id="settleError" class="formError" role="alert"></p><div class="formActions"><button class="primaryBtn">저장</button></div></form></section></div>
 <div id="prepaidModal" class="modalBack" onclick="backdropClose(event,'prepaidModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="prepaidTitle"><div class="modalHead"><h2 id="prepaidTitle">선불 잔액</h2><button class="close" aria-label="닫기" onclick="closeModal('prepaidModal')">×</button></div><div class="modalBody"><p class="infoLine">충전·인센티브는 소비에 포함하지 않고 선불 잔액만 증가합니다. 실제 결제 금액은 사용 이력에서 차감됩니다.</p><div id="prepaidList"></div><section id="chargeEditor" class="balanceEntryCard"><div class="balanceEntryHead"><div><h3 id="chargeFormTitle">잔액 추가</h3><p class="tiny muted">충전 또는 인센티브를 기록할 수 있어요.</p></div><button id="chargeEditCancel" type="button" class="textLink" hidden onclick="cancelChargeEdit()">수정 취소</button></div><form id="chargeForm" onsubmit="saveCharge(event)"><div class="formRow"><label for="chargeType">구분</label><select id="chargeType"><option value="charge">충전</option><option value="incentive">인센티브 · 적립</option></select></div><div class="formRow"><label for="chargeMethod">결제수단</label><select id="chargeMethod"></select></div><div class="formRow"><label for="chargeDate">일자</label><input id="chargeDate" type="date" required></div><div class="formRow"><label for="chargeAmount">금액</label><div class="moneyEntryField"><input id="chargeAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="0" required oninput="formatChargeAmount(this)" aria-describedby="chargeAmountHelp"><span aria-hidden="true">원</span></div></div><p id="chargeAmountHelp" class="chargeHelp">숫자만 입력하면 천 단위 쉼표가 자동으로 표시됩니다.</p><p id="chargeError" class="formError" role="alert"></p><div class="formActions"><button id="chargeSubmitBtn" class="primaryBtn">기록 저장</button></div></form></section></div></section></div>
 <div id="categoryManageModal" class="modalBack" onclick="backdropClose(event,'categoryManageModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="manageTitle"><div class="modalHead"><h2 id="manageTitle">카테고리 관리</h2><button class="close" aria-label="닫기" onclick="closeModal('categoryManageModal')">×</button></div><div class="modalBody"><p class="managerHelp">새 카테고리를 입력해 추가하세요. 소비 추가 창에서 직접 새 이름을 입력해 추가할 수도 있어요.</p><form class="categoryAdd" onsubmit="addCategory(event)"><input id="newCategoryName" aria-label="새 카테고리" placeholder="예: 식비, 교통, 쇼핑" maxlength="40" required><button class="primaryBtn">＋ 추가</button></form><p id="categoryError" class="formError" role="alert"></p><div id="categoryManageList"></div></div></section></div>
-<div id="dataModal" class="modalBack" onclick="backdropClose(event,'dataModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="dataTitle"><div class="modalHead"><h2 id="dataTitle">백업 · 데이터</h2><button class="close" aria-label="닫기" onclick="closeModal('dataModal')">×</button></div><div class="modalBody"><p class="infoLine">현재 주소의 이 브라우저에 저장됩니다. 노션 페이지나 GitHub에 기록이 전송되지 않으며, 다른 기기로 옮길 때는 백업 파일을 복원해야 합니다.</p><div id="dataSummary" class="spaceTop"></div><div class="dataActions"><button class="primaryBtn" onclick="exportBackup()">전체 데이터 백업 (.json)</button><button class="ghost-btn" onclick="exportCSV()">소비 내역 CSV</button></div><hr><h3>백업 복원</h3><p class="tiny muted">v7 또는 v8 JSON 백업을 불러올 수 있습니다. 복원 전 현재 데이터를 백업해 두세요.</p><input id="restoreFile" type="file" accept=".json,application/json" onchange="previewImport(event)"><div id="importPreview" class="infoLine spaceTop" hidden></div><button id="restoreConfirm" class="primaryBtn spaceTop" hidden onclick="commitImport()">이 백업으로 교체</button><button id="undoRestore" class="miniBtn spaceTop" hidden onclick="undoImport()">직전 복원 취소</button><p id="dataError" class="formError" role="alert"></p><hr><p id="storageDetail" class="tiny muted"></p><p class="tiny muted">기존 정산은 ‘참고 연결’로 보존합니다. 정산의 편집 버튼에서 소비 반영 여부를 확인할 수 있습니다.</p></div></section></div>
+<div id="dataModal" class="modalBack" onclick="backdropClose(event,'dataModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="dataTitle"><div class="modalHead"><h2 id="dataTitle">백업 · 데이터</h2><button class="close" aria-label="닫기" onclick="closeModal('dataModal')">×</button></div><div class="modalBody"><p class="infoLine">기본은 이 브라우저에 안전하게 저장됩니다. v8.24부터 외부 동기화 어댑터를 연결할 수 있으며, 연결 전에는 기존처럼 로컬 데이터와 백업 기능만 사용합니다.</p><div id="dataSummary" class="spaceTop"></div><div class="dataActions"><button class="primaryBtn" onclick="exportBackup()">전체 데이터 백업 (.json)</button><button class="ghost-btn" onclick="exportCSV()">소비 내역 CSV</button></div><hr><h3>백업 복원</h3><p class="tiny muted">v7 또는 v8 JSON 백업을 불러올 수 있습니다. 복원 전 현재 데이터를 백업해 두세요.</p><input id="restoreFile" type="file" accept=".json,application/json" onchange="previewImport(event)"><div id="importPreview" class="infoLine spaceTop" hidden></div><button id="restoreConfirm" class="primaryBtn spaceTop" hidden onclick="commitImport()">이 백업으로 교체</button><button id="undoRestore" class="miniBtn spaceTop" hidden onclick="undoImport()">직전 복원 취소</button><p id="dataError" class="formError" role="alert"></p><hr><p id="storageDetail" class="tiny muted"></p><p class="tiny muted">기존 정산은 ‘참고 연결’로 보존합니다. 정산의 편집 버튼에서 소비 반영 여부를 확인할 수 있습니다.</p></div></section></div>
 <button id="mobileSpendCta" class="mobileSpendCta" type="button" onclick="openTransaction()">＋ 소비 기록</button><div id="toast" class="toast" role="status" hidden></div>
 <div id="paymentModal" class="modalBack" onclick="backdropClose(event,'paymentModal')"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle"><div class="modalHead"><h2 id="paymentTitle">결제수단 관리</h2><button class="close" aria-label="닫기" onclick="closeModal('paymentModal')">×</button></div><div class="modalBody"><p class="managerHelp">일반·선불 결제수단을 추가하고 이름을 수정하거나 삭제할 수 있어요.</p><div class="viewTabs"><button id="generalMethodsTab" onclick="setPaymentView('general')">일반</button><button id="prepaidMethodsTab" onclick="setPaymentView('prepaid')">선불</button></div><p id="paymentHelp" class="tiny muted spaceTop"></p><div id="paymentList" class="spaceTop"></div><form id="paymentForm" class="methodCreate" onsubmit="savePaymentMethod(event)"><h3 id="paymentFormTitle">결제수단 추가</h3><input id="methodName" placeholder="이름 · 예: 지역화폐, 식권카드" aria-label="결제수단 이름" required maxlength="60"><div id="methodOpeningRow"><label for="methodOpening">시작 잔액</label><input id="methodOpening" type="number" min="0" step="1" value="0"><span class="tiny muted">기록을 시작하기 전 잔액 · 충전과 중복 입력하지 마세요.</span></div><p id="methodError" class="formError" role="alert"></p><div class="formActions"><button type="button" class="textLink" onclick="resetPaymentForm()">취소</button><button class="primaryBtn">저장</button></div></form></div></section></div><script>
 const CATS=['식비','카페·간식','여가','뷰티','교통','장보기','편의점','구독·디지털','운동·건강','기타'];
-const DEFAULT_TX=[
-{id:1,date:'2026-09-04',cat:'교통',item:'코레일유통',pay:'일반카드',amount:1500},
-{id:2,date:'2026-09-04',cat:'뷰티',item:'올리브영',pay:'일반카드',amount:13360},
-{id:3,date:'2026-09-05',cat:'장보기',item:'롯데마트',pay:'일반카드',amount:18000},
-{id:4,date:'2026-09-06',cat:'구독·디지털',item:'Apple Services',pay:'일반카드',amount:14000},
-{id:5,date:'2026-09-06',cat:'카페·간식',item:'파리바게뜨',pay:'일반카드',amount:3370},
-{id:6,date:'2026-09-06',cat:'식비',item:'프레쉬팩토리',pay:'일반카드',amount:9300},
-{id:7,date:'2026-09-08',cat:'식비',item:'버거킹',pay:'일반카드',amount:8000},
-{id:8,date:'2026-09-08',cat:'구독·디지털',item:'Apple Services',pay:'일반카드',amount:2500},
-{id:9,date:'2026-09-10',cat:'편의점',item:'GS25',pay:'일반카드',amount:10000},
-{id:10,date:'2026-09-10',cat:'편의점',item:'GS25',pay:'일반카드',amount:2300},
-{id:11,date:'2026-09-10',cat:'기타',item:'네이버페이',pay:'일반카드',amount:2160},
-{id:12,date:'2026-09-11',cat:'식비',item:'CU·노랑통닭·호시타코야끼 (더치페이)',pay:'일반카드',amount:13300},
-{id:13,date:'2026-09-12',cat:'식비',item:'언뎁트 + 털보네떡꼬치',pay:'일반카드',amount:12000},
-{id:14,date:'2026-09-13',cat:'여가',item:'롯데월드 (더치페이 포함)',pay:'일반카드',amount:60000},
-{id:15,date:'2026-09-13',cat:'식비',item:'토스카노 (더치페이)',pay:'일반카드',amount:59000},
-{id:16,date:'2026-09-13',cat:'식비',item:'지인 송금',pay:'계좌이체',amount:4700},
-{id:17,date:'2026-09-15',cat:'식비',item:'점심 이체',pay:'계좌이체',amount:14600,purpose:'회사 점심'},
-{id:18,date:'2026-09-15',cat:'카페·간식',item:'쿠모쿠모베이커리',pay:'일반카드',amount:12700},
-{id:19,date:'2026-09-15',cat:'카페·간식',item:'마시쩡',pay:'일반카드',amount:600},
-// 안산 지역화폐 — 2026-09-10~17 확인 내역 (사용자 지정 중복 제외 기준)
-{id:20,date:'2026-09-10',cat:'카페·간식',item:'매머드익스프레스 안산그랑시티시',pay:'안산 지역화폐',amount:1400},
-{id:21,date:'2026-09-10',cat:'편의점',item:'GS25 안산그랑자이1차점',pay:'안산 지역화폐',amount:4300,purpose:'회사 점심'},
-{id:22,date:'2026-09-11',cat:'편의점',item:'GS25 안산그랑자이1차점',pay:'안산 지역화폐',amount:1500},
-{id:23,date:'2026-09-15',cat:'카페·간식',item:'뚜레쥬르 안산그랑시티자이점',pay:'안산 지역화폐',amount:7900,purpose:'회사 점심'},
-{id:24,date:'2026-09-15',cat:'식비',item:'샤오',pay:'안산 지역화폐',amount:9000},
-{id:25,date:'2026-09-15',cat:'식비',item:'깡우동 안산중앙점',pay:'안산 지역화폐',amount:32500},
-{id:26,date:'2026-09-16',cat:'편의점',item:'에스엔에스(SNS)무인분식&편의점',pay:'안산 지역화폐',amount:1100},
-{id:27,date:'2026-09-17',cat:'식비',item:'찐하오마라탕 그랑시티시그니처점',pay:'안산 지역화폐',amount:9596,purpose:'회사 점심'},
-{id:28,date:'2026-09-17',cat:'카페·간식',item:'슬로우도우 베이커리',pay:'안산 지역화폐',amount:8500},
-{id:29,date:'2026-09-17',cat:'기타',item:'자미당 중앙점',pay:'안산 지역화폐',amount:2500},
-// 일반카드 — 캐시백·리워드 제외, 교통은 캐시백 차감 후 실부담액
-{id:30,date:'2026-09-15',cat:'식비',item:'(주)우아한형제들',pay:'일반카드',amount:10490},
-{id:31,date:'2026-09-15',cat:'카페·간식',item:'공차 화성송산그린시티',pay:'일반카드',amount:600},
-{id:32,date:'2026-09-15',cat:'구독·디지털',item:'APPLE SERVICES PTE.',pay:'일반카드',amount:29000},
-{id:33,date:'2026-09-15',cat:'교통',item:'대중교통 (캐시백 반영)',pay:'일반카드',amount:29000}
-];
-const DEFAULT_BUDGETS={'식비':300000,'카페·간식':100000,'여가':200000,'뷰티':150000,'교통':100000,'장보기':150000,'편의점':50000,'구독·디지털':50000,'운동·건강':0,'기타':100000};
-const DEFAULT_STATE={
- categories:[...CATS],
- tx:DEFAULT_TX,
- budgets:{'2026-09':DEFAULT_BUDGETS},
- purposeBudgets:{'2026-09':{'회사 점심':180000}},
- prepaid:{
-  '군포 지역화폐':{opening:0,note:'주 사용: 요가 등',charges:[]},
-  '안산 지역화폐':{opening:0,note:'주 사용: 회사 점심',charges:[{id:1,date:'2026-09-01',amount:180000}]},
-  '화성 지역화폐':{opening:0,note:'최근 발급 · 현재 잔액 0원',charges:[]}
- },
- settlements:[
-  {id:1,type:'receive',title:'롯데월드 더치페이',person:'유해민',amount:49000,date:'2026-09-13',done:false,txId:14},
-  {id:2,type:'pay',title:'숙소 예약 정산',person:'유경선',amount:35000,date:'2026-09-15',done:false,txId:null},
-  {id:3,type:'receive',title:'식사비 정산',person:'지인',amount:22000,date:'2026-09-11',done:true,doneDate:'2026-09-11',txId:12}
- ]
-};
-
+// Personal records are stored in the browser and authenticated database, never in public defaults.
+const DEFAULT_STATE={categories:[...CATS],tx:[],budgets:{},purposeBudgets:{},prepaid:{},settlements:[]};
 
 'use strict';
 const STORAGE='spending-v8', LEGACY_STORAGE='spending-v7-1';
@@ -1193,7 +1140,7 @@ function prevYM(){return selectedMonth===1?[selectedYear-1,12]:[selectedYear,sel
 function monthContext(){const now=new Date(),key=ym(),current=ym(now.getFullYear(),now.getMonth()+1),days=new Date(selectedYear,selectedMonth,0).getDate();return {isCurrent:key===current,isFuture:key>current,days,elapsed:key===current?now.getDate():key>current?0:days,left:key===current?days-now.getDate()+1:0};}
 function comparedRows(){const c=monthContext(),[y,m]=prevYM(),end=Math.min(c.elapsed,new Date(y,m,0).getDate());return {rows:monthRows(y,m).filter(t=>Number(t.date.slice(8))<=end),end,y,m}}
 function budgets(){return state.budgets[ym()]||{}}
-function save(){if(storageLocked)return false;try{localStorage.setItem(STORAGE,JSON.stringify(state));storageIssue='';return true}catch(e){storageIssue='브라우저 저장이 차단되었거나 공간이 부족합니다. 현재 변경은 이 화면에만 있으니 전체 백업을 내려받아 주세요.';return false}}
+function save(){if(storageLocked)return false;try{localStorage.setItem(STORAGE,JSON.stringify(state));storageIssue='';window.dispatchEvent(new Event('spending-local-save'));return true}catch(e){storageIssue='브라우저 저장이 차단되었거나 공간이 부족합니다. 현재 변경은 이 화면에만 있으니 전체 백업을 내려받아 주세요.';return false}}
 function changed(message='저장했습니다.'){const ok=save();renderAll();toast(ok?message:'자동 저장 실패 · 백업 파일을 내려받아 주세요.')}
 function toast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,4500)}
 function renderStorage(){const msg=storageIssue||migrationNotice;$('storageNotice').textContent=msg;if(msg){const b=document.createElement('button');b.className='textLink';b.textContent='백업 · 데이터';b.onclick=openData;$('storageNotice').append(b)}}
@@ -1322,7 +1269,7 @@ function openModal(id){lastFocus=document.activeElement;$(id).classList.add('sho
 function closeModal(id){$(id).classList.remove('show');if(!document.querySelector('.modalBack.show'))document.body.style.overflow='';lastFocus?.focus()}
 function backdropClose(e,id){if(e.target.id===id)closeModal(id)}
 document.addEventListener('keydown',e=>{const modal=document.querySelector('.modalBack.show');if(!modal)return;if(e.key==='Escape')closeModal(modal.id);if(e.key==='Tab'){const els=[...modal.querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(x=>!x.disabled&&x.getClientRects().length),first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){last.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault()}}});
-window.addEventListener('storage',e=>{if(e.key===STORAGE){storageLocked=true;storageIssue='다른 창에서 데이터가 변경되었습니다. 충돌 방지를 위해 저장을 멈췄습니다. 이 창의 편집을 백업한 뒤 새로고침해 주세요.';renderStorage()}});
+window.addEventListener('storage',e=>{if(window.spendingCloudManaged)return;if(e.key===STORAGE){storageLocked=true;storageIssue='다른 창에서 데이터가 변경되었습니다. 충돌 방지를 위해 저장을 멈췄습니다. 이 창의 편집을 백업한 뒤 새로고침해 주세요.';renderStorage()}});
 
 
 /* Review revision: independent purposes and payment methods, list/calendar interactions. */
@@ -2145,4 +2092,429 @@ resetTransactionWindow();
 renderTx();
 </script>
 
+
+<style id="v824-final-style">
+/* v8.24 — mobile date-group fill + sync status */
+.syncStatus{display:inline-flex;align-items:center;min-height:28px;padding:0 8px;border:1px solid var(--line);border-radius:999px;color:#8e98a7;background:#ffffff03;font-size:10px;font-weight:650;white-space:nowrap;align-self:center}
+.syncStatus[data-state="syncing"]{color:#9fbdf0;border-color:#38557d;background:#1b2636}
+.syncStatus[data-state="synced"]{color:#8fc8ad;border-color:#315d4a;background:#182920}
+.syncStatus[data-state="pending"],.syncStatus[data-state="error"]{color:#e5bd82;border-color:#6c5534;background:#2d251b}
+.v824BasisNote{margin-top:7px;color:#8e98a7;font-size:11px;line-height:1.45}
+@media(max-width:760px){
+  /* tbody/table/date header must all own the full narrow viewport width. */
+  .transactionSection .tableWrap{width:100%!important;max-width:100%!important;overflow:hidden!important}
+  .transactionSection table{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important}
+  .transactionSection tbody{display:block!important;width:100%!important;max-width:100%!important}
+  .transactionSection .dateGroup{display:block!important;width:100%!important;max-width:100%!important;background:var(--ref-date)!important}
+  .transactionSection .dateGroup td{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;background:var(--ref-date)!important}
+  .transactionSection .dateGroup .dateGroupInner{display:flex!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  .transactionSection tr[data-tx]{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+  .syncStatus{font-size:0;width:28px;height:28px;min-width:28px;padding:0;justify-content:center;border-radius:50%}
+  .syncStatus:before{content:"";width:6px;height:6px;border-radius:50%;background:#7e8897}
+  .syncStatus[data-state="syncing"]:before{background:#77a7f5}
+  .syncStatus[data-state="synced"]:before{background:#6fbe92}
+  .syncStatus[data-state="pending"]:before,.syncStatus[data-state="error"]:before{background:#dfad62}
+}
+</style>
+
+<script id="v824-core-logic-and-sync">
+/*
+ v8.24 calculation model
+ - Analysis rows: actual purchases, including prepaid-card purchases.
+ - Actual-use rows: non-prepaid personal burden + non-refundable prepaid charges.
+ - Charge-basis prepaid purchases do not enter the total twice.
+ - Incentives/rewards increase prepaid balance but do not count as use.
+ - Linked reimbursements on charge-basis prepaid purchases reduce personal burden once.
+ - Sync remains local-first; an external adapter can be registered without changing core UI/data logic.
+*/
+const V824_SCHEMA_VERSION=824;
+const V824_SYNC_PENDING_KEY='spending-v8-sync-pending';
+let v824SyncAdapter=null,v824SyncUnsubscribe=null,v824SyncTimer=null,v824SyncState='local',v824RecordHashes=new Map();
+
+function v824Now(){return new Date().toISOString()}
+function v824ChargeType(entry){return entry?.type==='incentive'?'incentive':'charge'}
+function v824PrepaidBasis(name){return state.prepaid?.[name]?.spendBasis==='use'?'use':'charge'}
+function v824RecordContent(record){
+ const out={};for(const [k,v] of Object.entries(record||{}))if(!['created_at','updated_at','deleted_at'].includes(k))out[k]=v;return JSON.stringify(out);
+}
+function v824EntityEntries(s=state){
+ const rows=[];
+ for(const t of s.tx||[])rows.push([`tx:${t.id}`,t]);
+ for(const x of s.settlements||[])rows.push([`settlement:${x.id}`,x]);
+ for(const [name,p] of Object.entries(s.prepaid||{}))for(const c of p.charges||[])rows.push([`prepaid:${name}:${c.id}`,c]);
+ return rows;
+}
+function v824UpgradeState(s){
+ const now=v824Now();
+ s.syncMeta=s.syncMeta&&typeof s.syncMeta==='object'?s.syncMeta:{};
+ s.syncMeta.schemaVersion=V824_SCHEMA_VERSION;
+ s.syncMeta.revision=Number.isSafeInteger(s.syncMeta.revision)?s.syncMeta.revision:0;
+ s.syncMeta.updatedAt=s.syncMeta.updatedAt||now;
+ s.syncMeta.tombstones=Array.isArray(s.syncMeta.tombstones)?s.syncMeta.tombstones:[];
+ for(const p of Object.values(s.prepaid||{})){
+   p.spendBasis=p.spendBasis==='use'?'use':'charge';
+   for(const c of p.charges||[]){c.type=v824ChargeType(c);c.created_at=c.created_at||now;c.updated_at=c.updated_at||c.created_at;}
+ }
+ for(const t of s.tx||[]){t.created_at=t.created_at||now;t.updated_at=t.updated_at||t.created_at;}
+ for(const x of s.settlements||[]){x.created_at=x.created_at||now;x.updated_at=x.updated_at||x.created_at;}
+ s.schemaVersion=V824_SCHEMA_VERSION;
+ return s;
+}
+function v824ResetRecordTracker(){v824RecordHashes=new Map(v824EntityEntries().map(([k,r])=>[k,v824RecordContent(r)]))}
+function v824TouchRecords(){
+ const now=v824Now(),current=new Map();
+ for(const [key,record] of v824EntityEntries()){
+   const hash=v824RecordContent(record),prev=v824RecordHashes.get(key);
+   if(!record.created_at)record.created_at=now;
+   if(!record.updated_at)record.updated_at=record.created_at;
+   if(prev!==undefined&&prev!==hash)record.updated_at=now;
+   if(prev===undefined){record.created_at=record.created_at||now;record.updated_at=now;}
+   current.set(key,v824RecordContent(record));
+ }
+ for(const key of v824RecordHashes.keys())if(!current.has(key)&&!state.syncMeta.tombstones.some(t=>t.key===key))state.syncMeta.tombstones.push({key,deleted_at:now});
+ state.syncMeta.updatedAt=now;state.syncMeta.revision=(state.syncMeta.revision||0)+1;state.syncMeta.schemaVersion=V824_SCHEMA_VERSION;
+ v824RecordHashes=current;
+}
+
+/* Purchase/analysis view. Existing expenseRows/currentRows stay untouched so categories and purposes use purchases. */
+function v824ActualSpendRows(){
+ const rows=[];
+ for(const t of state.tx){
+   const prepaid=state.prepaid?.[t.pay];
+   if(prepaid&&v824PrepaidBasis(t.pay)==='charge'){
+     const reimburse=sum(state.settlements.filter(x=>x.type==='receive'&&x.affectsExpense&&x.txId===t.id));
+     if(reimburse>0)rows.push({id:`prepaid-reimburse-${t.id}`,date:t.date,item:`${t.item} · 상대 부담`,pay:t.pay,amount:-reimburse,kind:'prepaid-reimbursement'});
+     continue;
+   }
+   rows.push({...t,gross:t.amount,amount:ownAmount(t),kind:'purchase'});
+ }
+ for(const x of state.settlements.filter(x=>x.type==='pay'&&x.affectsExpense))rows.push({id:`settle-${x.id}`,date:x.date,item:x.title,pay:'정산 부담',amount:x.amount,kind:'settlement-pay'});
+ for(const [name,p] of Object.entries(state.prepaid||{})){
+   if(v824PrepaidBasis(name)!=='charge')continue;
+   for(const c of p.charges||[])if(v824ChargeType(c)==='charge')rows.push({id:`charge-${name}-${c.id}`,date:c.date,item:`${name} 충전`,pay:name,amount:c.amount,kind:'prepaid-charge'});
+ }
+ return rows;
+}
+function v824SpendMonthRows(y=selectedYear,m=selectedMonth){return v824ActualSpendRows().filter(x=>x.date.startsWith(ym(y,m)))}
+function v824SpendCurrentRows(y=selectedYear,m=selectedMonth){return v824SpendMonthRows(y,m).filter(x=>x.date<=localDate())}
+function v824ComparedSpendRows(){const c=monthContext(),[y,m]=prevYM(),end=Math.min(c.elapsed,new Date(y,m,0).getDate());return{rows:v824SpendMonthRows(y,m).filter(t=>Number(t.date.slice(8))<=end),end,y,m}}
+function v824SpendTotal(y=selectedYear,m=selectedMonth){return sum(v824SpendCurrentRows(y,m))}
+
+function renderSummary(){
+ const c=monthContext(),analysis=currentRows(),spendRows=v824SpendCurrentRows(),total=sum(spendRows),bt=sum(Object.values(budgets()).map(amount=>({amount}))),remain=bt-total,top=ranked(analysis)[0],comp=v824ComparedSpendRows(),prev=sum(comp.rows);
+ $('heroLabel').textContent=c.isFuture?'선택한 달의 예산':c.isCurrent?'이만큼 아꼈어요!':'이달 최종 예산 잔액';
+ $('heroAmount').textContent=bt?remain<0?won(-remain)+' 초과':won(remain):'예산을 설정해 주세요';$('heroAmount').className=bt&&remain<0?'pay':'';
+ $('heroDaily').textContent=!bt?'카테고리별 예산을 정하면 남은 금액을 함께 계산해 드려요.':c.isCurrent?remain>=0?`남은 ${c.left}일 · 하루 ${won(Math.floor(remain/c.left))} 사용 가능`:'예산을 초과했어요. 줄일 수 있는 항목을 확인해 보세요.':c.isFuture?'예산을 미리 준비할 수 있어요.':'마감된 달의 기록입니다.';
+ $('monthTotal').textContent=won(total);$('heroBudget').textContent=bt?won(bt):'미설정';$('heroProgress').style.width=bt?Math.min(100,Math.max(0,total)/bt*100)+'%':'0%';$('heroProgress').style.background=remain<0?'var(--danger)':'var(--accent)';
+ const recorded=[...new Set(spendRows.map(x=>x.date))].length,last=spendRows.map(x=>x.date).sort().at(-1),first=spendRows.map(x=>x.date).sort()[0];
+ const fresh=last?Math.round((Date.UTC(...localDate().split('-').map((n,i)=>Number(n)-(i===1?1:0)))-Date.UTC(...last.split('-').map((n,i)=>Number(n)-(i===1?1:0))))/86400000)<=2:false;
+ let forecast='예산과 사용 기록이 쌓이면 월말 예상 금액을 보여드려요.',note='환불 불가 선불 충전은 충전일에 사용금액으로 반영합니다.';
+ if(!c.isCurrent){forecast=c.isFuture?'미래 날짜의 기록은 아직 집계하지 않습니다.':'이달의 실제 사용금액으로 예산 결과를 확인하세요.';note='예상 금액은 현재 월에만 표시합니다.';}
+ else if(bt&&c.elapsed>=7&&recorded>=5&&first&&Number(first.slice(8))<=3&&fresh){const projection=Math.round(total/c.elapsed*c.days);forecast=`이 속도라면 월말 약 ${won(projection)} · ${projection>bt?won(projection-bt)+' 초과 예상':won(bt-projection)+' 여유 예상'}`;note='비선불 실제 부담액과 충전 시 소비 처리되는 선불 충전을 일수로 환산한 추정입니다.';}
+ else if(bt){forecast='아직 월말 사용금액을 예측하기에는 기록이 부족해요.';}
+ $('forecast').innerHTML=esc(forecast)+`<small>${esc(note)}</small>`;
+ $('grossTotal').textContent=won(total);
+ $('dailyAvg').textContent=c.elapsed?won(Math.round(total/c.elapsed)):'—';
+ $('prevCompare').textContent=c.isFuture||!comp.rows.length?'비교 기록 없음':(total-prev>=0?'+':'−')+won(Math.abs(total-prev));
+ $('topCatKpi').textContent=top&&top[1]>0?top[0]:'—';renderMonthCompare();
+}
+
+function baseRenderBudget(){
+ const analysis=currentRows(),spent=sum(v824SpendCurrentRows()),b=budgets(),bt=Object.values(b).reduce((n,v)=>n+v,0),remain=bt-spent,cats=catTotals(analysis);
+ $('budgetTotal').textContent=won(bt);$('budgetSpent').textContent=won(spent);$('budgetRemain').textContent=bt?(remain<0?won(-remain)+' 초과':won(remain)):'미설정';$('budgetRemain').className=bt&&remain<0?'pay':'';$('budgetRate').textContent=bt?Math.round(spent/bt*100)+'%':'—';
+ const all=[...new Set([...Object.keys(b),...Object.keys(cats)])];$('budgetRows').innerHTML=all.length?all.map(cat=>{const target=b[cat]||0,used=cats[cat]||0,d=target-used,status=!target?'미설정':d<0?'초과':used/target>=.8?'주의':'정상',tone=status==='초과'?'danger':status==='주의'?'warn':'ok';return `<div class="budgetRow"><div><div class="name">${esc(cat)}</div><div class="sub">예산 ${target?won(target):'미설정'}</div></div><div class="progress"><i style="width:${target?Math.min(100,used/target*100):0}%;background:${d<0&&target?'var(--danger)':'var(--accent)'}"></i></div><div class="amount">사용 ${won(used)}</div><div class="result">${target?`<span>${won(Math.abs(d))} ${d<0?'초과':'남음'}</span><span class="tag ${tone}">${status}</span>`:'<span class="muted">미설정</span>'}</div></div>`}).join(''):'<div class="empty">이달의 예산을 설정해 주세요.</div>';
+}
+
+function renderMonthCompare(){
+ if(monthContext().isFuture){$('monthCompare').innerHTML='<h2>월 비교</h2><p class="tiny muted spaceTop">미래 월은 비교하지 않습니다. 기록이 쌓인 뒤 확인해 주세요.</p>';return}
+ const {rows,y,m,end}=v824ComparedSpendRows(),current=v824SpendCurrentRows();
+ $('monthCompare').innerHTML=`<div class="panelHead"><h2>전월 동기간 비교</h2><span class="tiny muted">${y}년 ${m}월 1~${end}일 · 사용금액 기준</span></div><div class="heroRow"><span>선택한 달</span><b>${won(sum(current))}</b></div><div class="heroRow"><span>전월 동기간</span><b>${rows.length?won(sum(rows)):'기록 없음'}</b></div>`;
+}
+
+function renderYear(){
+ const spendRows=v824ActualSpendRows().filter(t=>t.date.startsWith(`${annualYear}-`)&&t.date<=localDate()),analysisRows=expenseRows().filter(t=>t.date.startsWith(`${annualYear}-`)&&t.date<=localDate()),total=sum(spendRows),analysisTotal=sum(analysisRows),months={};
+ spendRows.forEach(t=>{const m=Number(t.date.slice(5,7));months[m]=(months[m]||0)+t.amount});
+ const count=Object.keys(months).length,peak=Object.entries(months).sort((a,b)=>b[1]-a[1])[0],cats=ranked(analysisRows);
+ $('yearTotal').textContent=won(total);$('yearAvg').textContent=count?won(Math.round(total/count)):'—';$('yearPeak').textContent=peak?`${peak[0]}월`:'—';$('yearTopCat').textContent=cats[0]?.[0]||'—';$('yearNote').textContent=`기록된 ${count}개월 기준 · 총액은 실제 사용금액, 카테고리는 실제 구매내역 기준`;
+ const max=Math.max(...Object.values(months).map(v=>Math.max(v,0)),1);$('annualChart').innerHTML=Array.from({length:12},(_,i)=>{const v=months[i+1]||0;return `<div class="barCol" title="${i+1}월 ${won(v)}"><span class="barValue">${v?Math.round(v/10000)+'만':''}</span><div class="bar ${i+1===selectedMonth?'current':''}" style="height:${Math.max(0,v)/max*85}%"></div><span class="barLabel">${i+1}월</span></div>`}).join('');
+ $('annualCats').innerHTML=cats.map(([cat,v])=>`<div class="annualRow"><strong>${esc(cat)}</strong><div class="progress"><i style="width:${analysisTotal?v/analysisTotal*100:0}%"></i></div><span class="num">${won(v)}</span><span class="num muted">${analysisTotal?Math.round(v/analysisTotal*100):0}%</span></div>`).join('')||'<div class="empty">기록이 없습니다.</div>';
+}
+
+function prepaidBalance(name){const p=state.prepaid[name];return (p.opening||0)+sum((p.charges||[]).filter(c=>c.date<=localDate()))-sum(state.tx.filter(t=>t.pay===name&&t.date<=localDate()))}
+function renderPrepaid(){
+ const names=ledgerFilter?[ledgerFilter]:Object.keys(state.prepaid);
+ $('prepaidList').innerHTML=names.map(name=>{
+  const p=state.prepaid[name],uses=state.tx.filter(t=>t.pay===name&&t.date<=localDate()),totals=prepaidInflowTotals(p),balance=prepaidBalance(name),basis=v824PrepaidBasis(name);
+  const ledger=[...(p.charges||[]).map(c=>({...c,label:chargeEntryLabel(c),kind:'inflow',entryType:chargeEntryType(c)})),...state.tx.filter(t=>t.pay===name).map(t=>({id:t.id,date:t.date,amount:-t.amount,label:t.item,kind:'use'}))].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  return `<div class="prepaidItem"><div class="prepaidTop"><strong>${esc(name)}</strong><b class="${balance<0?'pay':''}">${won(balance)}</b></div><div class="prepaidSummary"><span>시작 ${won(p.opening||0)}</span><span>충전 ${won(totals.charge)}</span><span>인센티브 ${won(totals.incentive)}</span><span>사용 ${won(sum(uses))}</span></div><div class="v824BasisNote">${basis==='charge'?'충전 시 전체 사용금액 반영 · 카드 사용은 중복 합산하지 않음':'카드 사용 시 전체 사용금액 반영'}</div><div class="ledgerTitle">이력</div><div class="fullLedger">${ledger.map(c=>`<div class="ledgerRow"><span>${esc(c.date.slice(5))}</span><span class="ledgerLabel">${c.kind==='inflow'?`<span class="ledgerKind ${c.entryType==='incentive'?'incentive':''}">${esc(c.label)}</span>`:''}<span>${c.kind==='use'?esc(c.label):c.date>localDate()?'예정':'잔액 증가'}</span></span><span class="num ${c.amount>0?'receive':'pay'}">${c.amount>0?'+':''}${won(c.amount)}</span><span class="ledgerActions">${c.kind==='inflow'?`<button type="button" class="textLink" data-charge-action="edit" data-charge-name="${esc(name)}" data-charge-id="${c.id}">편집</button><button type="button" class="textLink dangerText" data-charge-action="delete" data-charge-name="${esc(name)}" data-charge-id="${c.id}">삭제</button>`:`<button type="button" class="textLink" onclick="closeModal('prepaidModal');openTransaction(${c.id})">소비 수정</button>`}</span></div>`).join('')||'<p class="tiny muted">아직 이력이 없습니다.</p>'}</div></div>`;
+ }).join('')||'<p class="empty">결제수단 관리에서 선불 항목을 추가해 주세요.</p>';
+ $('prepaidList').querySelectorAll('[data-charge-action]').forEach(btn=>{btn.addEventListener('click',()=>{const name=btn.dataset.chargeName,id=Number(btn.dataset.chargeId);if(btn.dataset.chargeAction==='edit')editChargeEntry(name,id);else deleteChargeEntry(name,id)})});
+ const current=$('chargeMethod')?.value;if($('chargeMethod')){$('chargeMethod').innerHTML=chargeOptionList(current);if(current&&state.prepaid[current])$('chargeMethod').value=current;}
+}
+function saveCharge(e){
+ e.preventDefault();
+ try{
+  const name=chargeEditing?.name||$('chargeMethod').value,date=$('chargeDate').value,amount=parseChargeAmount($('chargeAmount').value),type=$('chargeType').value==='incentive'?'incentive':'charge';
+  assert(state.prepaid[name]&&validDate(date)&&money(amount)&&amount>0,'일자와 1원 이상의 금액을 확인해 주세요.');
+  if(chargeEditing){const entry=state.prepaid[name].charges.find(c=>c.id===chargeEditing.id);assert(entry,'수정할 기록을 찾을 수 없습니다.');entry.date=date;entry.amount=amount;entry.type=type;}
+  else state.prepaid[name].charges.push({id:uid(),date,amount,type});
+  const basis=v824PrepaidBasis(name),message=chargeEditing?'잔액 기록을 수정했습니다.':type==='incentive'?'인센티브를 기록했습니다.':'충전을 기록했습니다.';
+  resetChargeForm(name);renderPrepaid();changed(message+(type==='incentive'?' 인센티브는 사용금액에서 제외됩니다.':basis==='charge'?' 충전액이 사용금액에 반영됩니다.':' 충전은 잔액에만 반영됩니다.'));
+ }catch(err){$('chargeError').textContent=err.message}
+}
+
+/* Local-first persistence + sync adapter hook. */
+function v824SetSyncStatus(mode,text){
+ v824SyncState=mode;const el=$('syncStatus');if(el){el.dataset.state=mode;el.textContent=text;el.title=text==='로컬 저장'?'현재 기기에 저장 중 · 동기화 어댑터 미연결':text;}
+ const info=$('syncDataInfo');if(info)info.textContent=`동기화 상태: ${text}`;
+}
+function v824Payload(){return{app:'spending-dashboard',version:'8.24',revision:state.syncMeta?.revision||0,updatedAt:state.syncMeta?.updatedAt||v824Now(),state:clone(state)}}
+function v824StorePending(){try{localStorage.setItem(V824_SYNC_PENDING_KEY,JSON.stringify(v824Payload()))}catch(e){}}
+function v824ClearPending(){try{localStorage.removeItem(V824_SYNC_PENDING_KEY)}catch(e){}}
+function v824RemoteTimestamp(payload){return Date.parse(payload?.updatedAt||payload?.state?.syncMeta?.updatedAt||'')||0}
+async function v824ApplyRemote(payload){
+ const remoteState=payload?.state||payload;if(!remoteState)return false;
+ const candidate=v824UpgradeState(validateState(remoteState));
+ state=candidate;storageLocked=false;storageIssue='';migrationNotice='';v824ResetRecordTracker();
+ try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}
+ renderAll();return true;
+}
+async function v824SyncNow(){
+ if(!v824SyncAdapter){v824SetSyncStatus('local','로컬 저장');return false}
+ v824SetSyncStatus('syncing','동기화 중');
+ try{
+   let remote=null;if(typeof v824SyncAdapter.pull==='function')remote=await v824SyncAdapter.pull();
+   const localTs=Date.parse(state.syncMeta?.updatedAt||'')||0,remoteTs=v824RemoteTimestamp(remote);
+   if(remote&&remoteTs>localTs)await v824ApplyRemote(remote);
+   else if(typeof v824SyncAdapter.push==='function')await v824SyncAdapter.push(v824Payload());
+   v824ClearPending();v824SetSyncStatus('synced','동기화됨');return true;
+ }catch(err){v824StorePending();v824SetSyncStatus('pending','동기화 대기');return false}
+}
+function v824QueueSync(){
+ if(window.spendingCloudManaged)return;
+ v824StorePending();
+ if(!v824SyncAdapter){v824SetSyncStatus('local','로컬 저장');return}
+ clearTimeout(v824SyncTimer);v824SetSyncStatus('syncing','동기화 중');v824SyncTimer=setTimeout(v824SyncNow,450);
+}
+window.SpendingDashboardSync={
+ register(adapter){
+   if(!adapter||typeof adapter!=='object'||(typeof adapter.push!=='function'&&typeof adapter.pull!=='function'))throw new Error('동기화 어댑터는 pull 또는 push 함수를 제공해야 합니다.');
+   if(v824SyncUnsubscribe)try{v824SyncUnsubscribe()}catch(e){};
+   v824SyncAdapter=adapter;
+   if(typeof adapter.subscribe==='function')v824SyncUnsubscribe=adapter.subscribe(async payload=>{try{const rt=v824RemoteTimestamp(payload),lt=Date.parse(state.syncMeta?.updatedAt||'')||0;if(rt>lt){await v824ApplyRemote(payload);v824SetSyncStatus('synced','동기화됨')}}catch(e){v824SetSyncStatus('error','동기화 확인')}})||null;
+   v824SyncNow();return true;
+ },
+ unregister(){if(v824SyncUnsubscribe)try{v824SyncUnsubscribe()}catch(e){};v824SyncUnsubscribe=null;v824SyncAdapter=null;v824SetSyncStatus('local','로컬 저장')},
+ syncNow:v824SyncNow,
+ getState(){return clone(state)},
+ applyRemote:v824ApplyRemote,
+ status(){return v824SyncState}
+};
+
+function save(){
+ if(storageLocked)return false;
+ try{v824UpgradeState(state);v824TouchRecords();localStorage.setItem(STORAGE,JSON.stringify(state));storageIssue='';window.dispatchEvent(new Event('spending-local-save'));return true}
+ catch(e){storageIssue='브라우저 저장이 차단되었거나 공간이 부족합니다. 현재 변경은 이 화면에만 있으니 전체 백업을 내려받아 주세요.';return false}
+}
+function changed(message='저장했습니다.'){
+ const ok=save();renderAll();if(ok){v824QueueSync();toast(message)}else toast('자동 저장 실패 · 백업 파일을 내려받아 주세요.');
+}
+function renderAll(){
+ $('monthLabel').textContent=`${selectedYear}년 ${selectedMonth}월`;document.querySelectorAll('.syncMonth').forEach(e=>e.textContent=`${selectedYear}년 ${selectedMonth}월`);$('yearLabel').textContent=`${annualYear}년`;
+ document.querySelectorAll('.navBtn').forEach(e=>e.setAttribute('aria-current',e.classList.contains('active')?'page':'false'));
+ renderSummary();renderAttention();renderTxFilters();renderTx();renderBudget();renderSettlements();renderYear();renderStorage();
+ if(!v824SyncAdapter&&!window.spendingCloudManaged)v824SetSyncStatus('local','로컬 저장');
+}
+
+function openData(){
+ const reviews=state.settlements.filter(s=>s.needsReview).length;$('dataSummary').textContent=`소비 ${state.tx.length}건 · 정산 ${state.settlements.length}건 · 예산 ${Object.keys(state.budgets).length}개월${reviews?' · 기존 정산 확인 '+reviews+'건':''}`;
+ $('storageDetail').textContent=storageIssue||'v8.24는 로컬 저장을 기본으로 사용하며, 외부 동기화 어댑터가 연결되면 동일 데이터 모델을 서버와 주고받을 수 있습니다.';
+ let info=$('syncDataInfo');if(!info){info=document.createElement('p');info.id='syncDataInfo';info.className='tiny muted spaceTop';$('dataSummary').insertAdjacentElement('afterend',info)};info.textContent=`동기화 상태: ${v824SyncAdapter?(v824SyncState==='synced'?'동기화됨':'연결됨 · '+v824SyncState):'로컬 저장 · 외부 어댑터 미연결'}`;
+ try{$('undoRestore').hidden=!localStorage.getItem(STORAGE+'-before-restore')}catch(e){$('undoRestore').hidden=true}openModal('dataModal');
+}
+function exportBackup(){download(JSON.stringify({app:'spending-dashboard',version:'8.24',exportedAt:v824Now(),state},null,2),`가계부_v8_24_전체백업_${localDate()}.json`,'application/json');toast('전체 백업 파일을 내려받습니다.')}
+async function previewImport(e){
+ pendingImport=null;$('restoreConfirm').hidden=true;$('importPreview').hidden=true;$('dataError').textContent='';
+ try{const f=e.target.files[0];if(!f)return;assert(f.size<=10*1024*1024,'백업 파일은 10MB 이하만 복원할 수 있습니다.');const data=JSON.parse(await f.text());const v=parseFloat(data.version||8);assert(!Number.isFinite(v)||v<=8.24,'더 최신 버전의 백업입니다. 해당 버전에서 복원해 주세요.');const candidate=v824UpgradeState(validateState(data.state||data));pendingImport=candidate;$('importPreview').textContent=`소비 ${candidate.tx.length}건 · 정산 ${candidate.settlements.length}건 · 예산 ${Object.keys(candidate.budgets).length}개월로 현재 데이터를 교체합니다. 기존 기록과 합치지 않습니다.`;$('importPreview').hidden=false;$('restoreConfirm').hidden=false;}catch(err){$('dataError').textContent='복원 불가: '+err.message}
+}
+function commitImport(){
+ if(!pendingImport||!confirm('현재 데이터를 선택한 백업으로 교체할까요?'))return;
+ try{localStorage.setItem(STORAGE+'-before-restore',JSON.stringify(state));state=v824UpgradeState(clone(pendingImport));pendingImport=null;deletionHistory=[];selectedTx.clear();storageLocked=false;storageIssue='';migrationNotice='';v824ResetRecordTracker();save();$('restoreConfirm').hidden=true;$('importPreview').hidden=true;$('restoreFile').value='';$('undoRestore').hidden=false;renderAll();openData();v824QueueSync();toast('복원했습니다. 잘못 선택했다면 직전 복원을 취소할 수 있습니다.')}catch(err){$('dataError').textContent='저장 공간 또는 권한 문제로 복원하지 못했습니다. 기존 데이터는 유지됩니다.'}
+}
+function undoImport(){
+ try{const raw=localStorage.getItem(STORAGE+'-before-restore');assert(raw,'취소할 복원이 없습니다.');const prev=v824UpgradeState(validateState(JSON.parse(raw)));if(!confirm('직전 복원 이전 데이터로 되돌릴까요?'))return;state=prev;deletionHistory=[];selectedTx.clear();localStorage.removeItem(STORAGE+'-before-restore');storageLocked=false;storageIssue='';v824ResetRecordTracker();save();renderAll();openData();v824QueueSync();toast('직전 복원을 취소했습니다.')}catch(err){$('dataError').textContent=err.message}
+}
+
+/* Existing data migration: preserve records, add v8.24 metadata and charge-basis defaults. */
+state=v824UpgradeState(state);v824ResetRecordTracker();
+if(!storageLocked)try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}
+window.addEventListener('storage',e=>{
+ if(window.spendingCloudManaged)return;
+ if(e.key===STORAGE&&e.newValue){try{state=v824UpgradeState(validateState(JSON.parse(e.newValue)));storageLocked=false;storageIssue='';v824ResetRecordTracker();renderAll()}catch(err){}}
+});
+if(window.SPENDING_SYNC_ADAPTER)try{window.SpendingDashboardSync.register(window.SPENDING_SYNC_ADAPTER)}catch(e){v824SetSyncStatus('error','동기화 확인')}else v824SetSyncStatus('local','로컬 저장');
+renderAll();
+</script>
+
+
+<style id="v824-hotfix-style">
+/* v8.24 hotfix — sticky list controls + inline purpose editing */
+.transactionSection{overflow:visible!important}
+.txStickyControls{
+  position:sticky;
+  top:0;
+  z-index:45;
+  background:var(--ref-card,var(--card));
+  border-radius:12px 12px 0 0;
+  box-shadow:0 8px 18px rgba(0,0,0,.14);
+}
+.txStickyControls .listHeader{background:var(--ref-card,var(--card));border-radius:12px 12px 0 0}
+.txStickyControls .filterSummary,.txStickyControls .selectionBar,.txStickyControls .undoBar{position:relative;z-index:1}
+.txPurpose{position:relative}
+.purposeQuickButton{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
+  min-height:26px;
+  padding:2px 7px;
+  border:1px solid transparent;
+  border-radius:5px;
+  background:transparent;
+  color:#8994a3;
+  font:inherit;
+  font-size:12px;
+  line-height:1.4;
+  text-align:left;
+  cursor:pointer;
+}
+.purposeQuickButton:hover,.purposeQuickButton:focus-visible{background:#22314a;border-color:#34527a;color:#b8cff7;outline:none}
+.purposeQuickButton.hasPurpose{background:#22314a;color:#aac5f6}
+.purposeInlineSelect{
+  max-width:100%;
+  height:30px;
+  min-width:0;
+  padding:0 26px 0 8px!important;
+  border:1px solid var(--line)!important;
+  border-radius:5px!important;
+  background-color:#202631!important;
+  color:#cbd4e0!important;
+  font-size:12px!important;
+}
+.mobilePurposeQuick{display:none}
+@media(max-width:760px){
+  .txStickyControls{top:0;border-radius:10px 10px 0 0}
+  .txStickyControls .listHeader{border-radius:10px 10px 0 0}
+  .mobilePurposeQuick{display:inline-flex;align-items:center}
+  .mobilePurposeQuick .purposeQuickButton{min-height:22px;padding:0 6px;font-size:11px}
+  .mobilePurposeQuick .purposeInlineSelect{height:24px;font-size:11px!important;padding-left:6px!important;max-width:118px}
+}
+</style>
+<script id="v824-hotfix-behavior">
+/* 1) Prevent accidental modal close after dragging/selecting text out of a dialog. */
+let v824BackdropGesture=null;
+document.querySelectorAll('.modalBack').forEach(backdrop=>{
+  backdrop.addEventListener('pointerdown',e=>{
+    v824BackdropGesture={id:backdrop.id,startOnBackdrop:e.target===backdrop,x:e.clientX,y:e.clientY,moved:false};
+  },true);
+});
+document.addEventListener('pointermove',e=>{
+  if(!v824BackdropGesture)return;
+  if(Math.hypot(e.clientX-v824BackdropGesture.x,e.clientY-v824BackdropGesture.y)>6)v824BackdropGesture.moved=true;
+},true);
+document.addEventListener('pointercancel',()=>{v824BackdropGesture=null},true);
+function backdropClose(e,id){
+ const g=v824BackdropGesture;
+ const valid=e.target===$(id)&&g&&g.id===id&&g.startOnBackdrop&&!g.moved;
+ v824BackdropGesture=null;
+ if(valid)closeModal(id);
+}
+
+/* 2) One-click purpose assignment in the transaction list.
+      - One purpose: click toggles that purpose directly.
+      - Two or more purposes: use an inline dropdown. */
+function v824PurposeOptions(){return Array.isArray(state.purposes)?state.purposes.filter(Boolean):[]}
+function v824PurposeControl(t,mobile=false){
+ const purposes=v824PurposeOptions();
+ if(!purposes.length)return mobile?'':'<span class="noPurpose">—</span>';
+ if(purposes.length===1){
+   const p=purposes[0],active=t.purpose===p;
+   const label=active?esc(p):'—';
+   const title=active?`${esc(p)} 해제`:`${esc(p)} 지정`;
+   return `<button type="button" class="purposeQuickButton${active?' hasPurpose':''}" title="${title}" aria-label="${title}" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation();v824ToggleSinglePurpose(${t.id})">${label}</button>`;
+ }
+ const options=['<option value="">—</option>',...purposes.map(p=>`<option value="${esc(p)}"${t.purpose===p?' selected':''}>${esc(p)}</option>`)].join('');
+ return `<select class="purposeInlineSelect" aria-label="${esc(t.item)} 목적" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()" onchange="event.stopPropagation();v824SetPurpose(${t.id},this.value)">${options}</select>`;
+}
+function v824SetPurpose(id,purpose){
+ const t=state.tx.find(x=>x.id===id);if(!t)return;
+ t.purpose=purpose||'';
+ changed(t.purpose?`목적을 ${t.purpose}(으)로 지정했습니다.`:'목적을 해제했습니다.');
+}
+function v824ToggleSinglePurpose(id){
+ const purposes=v824PurposeOptions();if(purposes.length!==1)return;
+ const t=state.tx.find(x=>x.id===id);if(!t)return;
+ v824SetPurpose(id,t.purpose===purposes[0]?'':purposes[0]);
+}
+function editRow(e,id){if(e.target.closest('input,button,select,option'))return;openTransaction(id)}
+function tapRow(e,id){if(!e.target.closest('input,button,select,option')&&matchMedia('(max-width:760px)').matches)openTransaction(id)}
+
+/* 3) Sticky list header/selection controls. */
+function v824SetupStickyControls(){
+ const section=document.querySelector('.transactionSection');
+ const header=section?.querySelector(':scope > .listHeader');
+ if(!section||!header||section.querySelector(':scope > .txStickyControls'))return;
+ const sticky=document.createElement('div');sticky.className='txStickyControls';
+ section.insertBefore(sticky,header);
+ for(const id of ['filterSummary','selectionBar','undoBar']){
+   const el=$(id);if(el)sticky.appendChild(el);
+ }
+ sticky.insertBefore(header,sticky.firstChild);
+}
+v824SetupStickyControls();
+
+/* 4) Final transaction renderer: preserves pagination/day totals and adds purpose quick controls. */
+function renderTx(){
+  const rows=visibleTransactions();
+  const sig=txCurrentSignature();
+  if(sig!==txListSignature){txVisibleLimit=TX_PAGE_SIZE;txListSignature=sig;}
+  const displayRows=transactionWindow(rows);
+  const ids=new Set(rows.map(t=>t.id));
+  selectedTx=new Set([...selectedTx].filter(id=>ids.has(id)));
+
+  $('rowCount').textContent=displayRows.length<rows.length?`${displayRows.length}/${rows.length}건`:`${rows.length}건`;
+  const dayTotals=new Map();for(const t of rows)dayTotals.set(t.date,(dayTotals.get(t.date)||0)+Number(t.amount||0));
+
+  let html='',lastDate='',filtering=filtersActive();
+  for(const t of displayRows){
+    if(t.date!==lastDate){
+      html+=`<tr class="dateGroup"><td colspan="5"><div class="dateGroupInner"><span>${esc(txDayLabel(t.date))}${t.date>localDate()?'<span class="futureDot" title="미래 기록"> · 예정</span>':''}</span><strong class="dateGroupTotal">${won(dayTotals.get(t.date)||0)}</strong></div></td></tr>`;
+      lastDate=t.date;
+    }
+    const purposeControl=v824PurposeControl(t,false);
+    const mobilePurpose=`<span class="mobilePurposeQuick">${v824PurposeControl(t,true)}</span>`;
+    const mobileMeta=`<span class="mobileTxMeta"><span class="plainTag">${esc(t.cat)}</span>${mobilePurpose}</span>`;
+    html+=`<tr data-tx="${t.id}" data-date="${t.date}" class="${selectedTx.has(t.id)?'isSelected':''}" tabindex="0" aria-label="${esc(t.item)} ${won(t.amount)}, 더블클릭 또는 Enter로 수정" onmouseenter="showRowRail(this,${t.id})" onmouseleave="scheduleRowRailHide()" onfocusin="showRowRail(this,${t.id})" ondblclick="editRow(event,${t.id})" onclick="tapRow(event,${t.id})" onkeydown="rowKey(event,${t.id})" draggable="false" ondragover="rowDragOver(event,${t.id})" ondragleave="rowDragLeave(event)" ondrop="rowDrop(event,${t.id})"><td class="txItem"><button type="button" class="dragHandle" aria-label="순서 이동" ${filtering?'disabled title="필터 적용 중에는 순서를 바꿀 수 없습니다"':''} onpointerdown="reorderPointerDown(event,${t.id})" onpointermove="reorderPointerMove(event)" onpointerup="reorderPointerUp(event)" onpointercancel="reorderPointerUp(event)"></button><span>${esc(t.item)}</span>${mobileMeta}</td><td class="txCategory"><span class="plainTag">${esc(t.cat)}</span></td><td class="txPurpose">${purposeControl}</td><td class="txPayment"><span class="paymentTag ${state.prepaid[t.pay]?'prepaid':''}">${esc(t.pay)}</span></td><td class="num txAmount"><span>${won(t.amount)}</span></td></tr>`;
+  }
+  $('txBody').innerHTML=html||'<tr class="emptyRow"><td colspan="5" class="empty">조건에 맞는 소비가 없습니다.</td></tr>';
+
+  const moreWrap=$('txLoadMoreWrap'),moreBtn=$('txLoadMoreBtn'),moreMeta=$('txLoadMoreMeta');
+  const remaining=Math.max(0,rows.length-displayRows.length);
+  if(moreWrap){moreWrap.hidden=remaining===0||expenseView!=='list';if(remaining&&moreMeta){moreMeta.textContent=`남은 ${remaining}건`;moreBtn?.setAttribute('aria-label',`이전 내역 더 보기, ${remaining}건 남음`);}}
+
+  $('listView').hidden=expenseView!=='list';$('calendarView').hidden=expenseView!=='calendar';
+  $('listTab').classList.toggle('active',expenseView==='list');$('calendarTab').classList.toggle('active',expenseView==='calendar');
+  $('listTab').setAttribute('aria-selected',expenseView==='list');$('calendarTab').setAttribute('aria-selected',expenseView==='calendar');
+
+  filtering=filtersActive();$('searchToggle').classList.toggle('filterActive',filtering);$('filterSummary').hidden=!filtering;
+  const bits=[];if($('txCatFilter').value)bits.push($('txCatFilter').value);if($('txPayFilter')?.value)bits.push($('txPayFilter').value);if($('txSearch').value.trim())bits.push($('txSearch').value.trim());
+  $('filterSummary').innerHTML=filtering?`<span>필터 적용 · ${esc(bits.join(' · '))}</span><button class="textLink" onclick="clearFilters()">초기화</button>`:'';
+
+  let n=$('reorderNotice');if(!n){n=document.createElement('div');n.id='reorderNotice';n.className='reorderNotice';$('listView').prepend(n)}n.hidden=!filtering;n.textContent=filtering?'검색·필터 적용 중에는 순서 변경을 사용할 수 없어요.':'';
+  renderSelection();renderCalendar(rows);const rail=$('rowHoverRail');if(rail)rail.hidden=true;rowRailTxId=null;
+}
+renderTx();
+</script>
+
+<script src="./spending-bridge.js"></script>
+<script type="module" src="./spending-sync.js"></script>
 </body></html>
