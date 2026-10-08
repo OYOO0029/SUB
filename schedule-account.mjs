@@ -5,6 +5,9 @@ export function createAccountData({storage, empty, validate}) {
  const key=id=>'myWeekPlanner_v5:account:'+id;
  const legacy=()=>storage.getItem('myWeekSyncDefaultsOnly_v1')==='true'?null:
    storage.getItem(legacyKey)||storage.getItem('myWeekPlanner_v1');
+ // The retired project has different user IDs. Its device-local records may be
+ // explicitly claimed once during the user-requested project migration.
+ const canClaimLegacy=()=>{const previous=storage.getItem(ownerKey);return !previous||previous.startsWith('https://cmsakakecnlsqdbhvzuu.supabase.co|');};
  return {
   get owner(){return owner;},
   get storageKey(){return owner?key(owner):null;},
@@ -25,10 +28,12 @@ export function createAccountData({storage, empty, validate}) {
   deactivate(){owner=null;return empty();},
   raw(){return owner?storage.getItem(key(owner)):null;},
   write(value){if(!owner)throw Error('계정 · 동기화에서 먼저 로그인해 주세요.');storage.setItem(key(owner),JSON.stringify(validate(value)));},
-  hasLegacy(){return !!owner&&!storage.getItem(ownerKey)&&!!legacy();},
+  hasLegacy(){return !!owner&&canClaimLegacy()&&!!legacy();},
   importLegacy(){
    if(!this.hasLegacy())throw Error('가져올 이전 기록이 없습니다.');
-   const value=validate(JSON.parse(legacy()));this.write(value);storage.setItem(ownerKey,owner);return value;
+   const value=validate(JSON.parse(legacy()));this.write(value);
+   const previous=storage.getItem(ownerKey);if(previous)storage.setItem('myWeekSyncPreviousOwner_v1',previous);
+   storage.setItem(ownerKey,owner);return value;
   },
   backupKeys(){return owner?storage.keys().filter(k=>k==='myWeekSyncPending:'+owner||k.startsWith('myWeekSyncBackup:'+owner+':')):[];}
  };
