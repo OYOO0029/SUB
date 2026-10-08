@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>MY WEEK v5.8</title>
+<title>MY WEEK</title>
+<link rel="stylesheet" href="./schedule-cloud.css">
 <style>
 :root{
   color-scheme:dark;
@@ -716,11 +717,12 @@ button:disabled{cursor:not-allowed;opacity:.45}
 
 <div class="toast" id="toast"><span id="toastMessage"></span><button id="toastAction" hidden>실행 취소</button></div>
 
-<script>
+<script type="module">
+import {appStorage} from "./schedule-storage.mjs";
+import {createAccountData} from "./schedule-account.mjs";
+import {validateState} from "./schedule-sync-core.mjs";
 (() => {
 "use strict";
-const STORAGE_KEY="myWeekPlanner_v5";
-const LEGACY_KEY="myWeekPlanner_v1";
 const DOW=["S","M","T","W","T","F","S"], DOW_KO=["일","월","화","수","목","금","토"];
 const SLOT_LABELS={morning:"오전",afternoon:"오후",evening:"저녁"};
 const MINUTES=["00","10","20","30","40","50"];
@@ -833,9 +835,6 @@ function defaultState(){
     ]
   };
 }
-let persistent=true;const mem={};
-function sget(k){try{return localStorage.getItem(k)}catch(e){persistent=false;return Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:null}}
-function sset(k,v){mem[k]=v;if(!persistent)return false;try{localStorage.setItem(k,v);return true}catch(e){persistent=false;return false}}
 function normalizeLegacy(parsed){
   const d=defaultState();
   const defs=(parsed.trackerDefs||d.trackerDefs).map((t,i)=>normalizeTrackerMeta({id:t.id||`tracker_${i}`,name:t.name||"트래커",emoji:t.emoji||"✅"}));
@@ -855,17 +854,11 @@ function normalizeLegacy(parsed){
     events:Array.isArray(parsed.events)?parsed.events:d.events
   };
 }
-function loadState(){
-  let raw=sget(STORAGE_KEY);
-  if(raw){try{return normalizeLegacy(JSON.parse(raw))}catch(e){}}
-  const legacy=sget(LEGACY_KEY);
-  if(legacy){try{const migrated=normalizeLegacy(JSON.parse(legacy));sset(STORAGE_KEY,JSON.stringify(migrated));return migrated}catch(e){}}
-  const d=defaultState();sset(STORAGE_KEY,JSON.stringify(d));return d;
+function emptyState(){
+ const d=defaultState();d.events=[];d.trackerLogs={};d.sleepLogs={};d.workExceptions={};d.workOverrides={};d.workConfig.weekdays=[];return d;
 }
-// Preserve provenance before loadState creates defaults.
-const syncOriginalCache=sget(STORAGE_KEY)||sget(LEGACY_KEY);
-if(!syncOriginalCache)sset('myWeekSyncDefaultsOnly_v1','true');
-let state=loadState();
+const accounts=createAccountData({storage:appStorage,empty:emptyState,validate:v=>validateState(v?.version===5?v:normalizeLegacy(v))});
+let state=emptyState();
 let focusDate=nowDate(),viewMode="week";
 let eventFormSnapshot="",dirtyCloseTarget=null;
 let pendingAction=null,pendingEvent=null;
@@ -875,8 +868,8 @@ let dragPayload=null;
 
 // ---------- helpers ----------
 function saveState(msg,undo){
-  sset(STORAGE_KEY,JSON.stringify(state));syncStorageWarning();render();
-  sset('myWeekSyncDefaultsOnly_v1','false');
+  if(!accounts.owner){state=emptyState();render();window.dispatchEvent(new Event("my-week-login-request"));return}
+  accounts.write(state);syncStorageWarning();render();
   window.dispatchEvent(new Event('my-week-local-save'));
   if(msg)toast(msg,undo);
 }
@@ -885,8 +878,8 @@ function toast(msg,undo){
   m.textContent=msg;undoFn=typeof undo==="function"?undo:null;a.hidden=!undoFn;
   el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>{el.classList.remove("show");undoFn=null},3200);
 }
-function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",!persistent)}
-function openModal(id){document.getElementById(id).classList.add("open")}
+function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",!appStorage.persistent)}
+function openModal(id){if(!accounts.owner&&id!=="settingsModal"){window.dispatchEvent(new Event("my-week-login-request"));return}document.getElementById(id).classList.add("open")}
 function closeModal(id){document.getElementById(id).classList.remove("open")}
 function selectedDateLabel(){
   return `${focusDate.getMonth()+1}월 ${focusDate.getDate()}일 ${DOW_KO[focusDate.getDay()]}요일`;
@@ -1469,7 +1462,8 @@ function exportData(){
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`my-week-v5-${fmtDate(new Date())}.json`;a.click();URL.revokeObjectURL(url);
 }
 function importData(file){
-  const r=new FileReader();r.onload=()=>{try{const p=normalizeLegacy(JSON.parse(r.result));state=p;closeModal("settingsModal");saveState("백업을 불러왔어요.")}catch(e){toast("올바른 MY WEEK 백업 파일이 아닙니다.")}};r.readAsText(file);
+  if(!accounts.owner){window.dispatchEvent(new Event("my-week-login-request"));return}
+  const importOwner=accounts.owner;const r=new FileReader();r.onload=()=>{if(accounts.owner!==importOwner)return;try{const raw=JSON.parse(r.result),p=validateState(raw?.version===5?raw:normalizeLegacy(raw));state=p;closeModal("settingsModal");saveState("백업을 불러왔어요.")}catch(e){toast("올바른 MY WEEK 백업 파일이 아닙니다.")}};r.readAsText(file);
 }
 
 // ---------- navigation / dirty ----------
@@ -1548,16 +1542,33 @@ document.getElementById("calendarScroll").addEventListener("touchend",e=>{
   if(!weekNeedsHorizontalScroll && Math.abs(dx)>85&&Math.abs(dx)>Math.abs(dy)*1.4)navigate(dx<0?1:-1);
 },{passive:true});
 
+function resetAccount(scope){
+ for(const modal of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal)'))modal.classList.remove('open');
+ for(const field of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal) input,.modal-backdrop:not(#syncCloudModal) textarea')){if(!['checkbox','radio'].includes(field.type))field.value='';}
+ clearTimeout(toast.t);document.getElementById('toast').classList.remove('show');undoFn=null;dragPayload=null;pendingAction=null;pendingEvent=null;settingsDraft=null;eventFormSnapshot='';dirtyCloseTarget=null;
+ state=emptyState();render();state=scope?accounts.activate(scope):accounts.deactivate();render();syncStorageWarning();
+}
 window.myWeekSyncBridge=Object.freeze({
-  read:()=>clone(state),originalCache:sget('myWeekSyncDefaultsOnly_v1')==='true'?null:syncOriginalCache,
-  busy:()=>!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
-  apply:incoming=>{
-    const next=clone(incoming),previous=state;
-    try{state=next;render()}catch(error){state=previous;render();throw error}
-    if(!sset(STORAGE_KEY,JSON.stringify(state)))throw new Error('로컬 캐시 저장 실패. 서버 데이터는 유지됩니다.');
-    syncStorageWarning();
-  }
+ read:()=>clone(state),originalCache:null,
+ setAccount:resetAccount,
+ hasLegacy:()=>accounts.hasLegacy(),
+ hasCache:()=>!!accounts.raw(),
+ importLegacy:()=>{state=accounts.importLegacy();render()},
+ backupKeys:()=>accounts.backupKeys(),
+ get storageKey(){return accounts.storageKey},
+ validate:validateState,
+ isPristine:()=>!accounts.raw(),
+ export:()=>exportData(),
+ download:(text,name)=>{const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},
+ busy:()=>!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
+ apply:incoming=>{
+  const next=validateState(incoming),previous=state;
+  try{state=next;render()}catch(error){state=previous;render();throw error}
+  accounts.write(state);syncStorageWarning();
+ }
 });
+window.addEventListener('my-week-storage-limited',syncStorageWarning);
+window.dispatchEvent(new Event('my-week-ready'));
 render();
 })();
 </script>
@@ -1569,7 +1580,7 @@ render();
  group.id='scheduleHeaderActions';toggle.setAttribute('aria-controls',group.id);header.insertBefore(toggle,group);
  const buttons=[...group.querySelectorAll('button')];
  function close(focus=false){header.classList.remove('actions-open');toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
- function layout(){const extra=document.getElementById('syncCloudBtn')?96:0;const narrow=leading.getBoundingClientRect().width+116+12+extra>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
+ function layout(){const extra=document.getElementById('syncCloudBtn')?114:0;const narrow=leading.getBoundingClientRect().width+116+12+extra>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
  toggle.addEventListener('click',()=>{const open=!header.classList.contains('actions-open');header.classList.toggle('actions-open',open);toggle.setAttribute('aria-expanded',String(open));if(open)buttons[0].focus()});
  group.addEventListener('click',event=>{if(event.target.closest('button'))close()});
  document.addEventListener('click',event=>{if(!header.contains(event.target))close()});

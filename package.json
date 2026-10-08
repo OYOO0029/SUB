@@ -1,0 +1,6 @@
+{
+ "name":"my-week-and-spending",
+ "private":true,
+ "scripts":{"test":"node --test --test-isolation=none tests/*.test.mjs"},
+ "devDependencies":{"jsdom":"26.1.0"}
+}
