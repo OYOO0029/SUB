@@ -1,9 +1,9 @@
-import {CloudSync,equalState,cloudValue} from './schedule-cloud-core.mjs';
+import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=work-integration-1';
 import {SYNC_CONFIG,SUPABASE_SDK} from './schedule-config.mjs';
 import {appStorage} from './schedule-storage.mjs';
 import {authErrorMessage} from './schedule-auth-errors.mjs';
 
-export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPABASE_SDK)}={}){
+export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPABASE_SDK),slot=CLOUD_SLOT,namespace='my-week',autoInitialize=true}={}){
  let client,connecting,engine,user,generation=0,authRevision=0,channel,working=false,disposed=false;
  let statusKind='offline',statusText='로그인해 주세요';
  const dialog=document.createElement('dialog');dialog.id='cloud-dialog';
@@ -51,7 +51,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
   if(disposed||user?.id===account.id&&engine)return;
   stop();user=account;const current=generation;
   bridge.setAccount(SYNC_CONFIG.url+'|'+account.id);status('waiting','서버 기록을 확인하는 중');
-  const key='my-week.cloud.v1:'+SYNC_CONFIG.url+':'+account.id;
+  const key=namespace+'.cloud.v1:'+SYNC_CONFIG.url+':'+account.id;
   const api={
    read:async()=>{const{data,error}=await client.from('spending_state').select('state,updated_at').eq('user_id',account.id).maybeSingle();if(error)throw error;return data;},
    write:async(state,stamp)=>{
@@ -60,17 +60,19 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
    }
   };
   try{
-   engine=new CloudSync({api,bridge,storage,key,status:(kind,message)=>{if(current===generation)status(kind,message);}});
+   engine=new CloudSync({api,bridge,storage,key,slot,status:(kind,message)=>{if(current===generation)status(kind,message);}});
    if(engine.meta?.linked&&!engine.meta.pending&&!equalState(bridge.read(),engine.meta.base?.data))engine.meta.linked=false;
    if(engine.meta?.pending&&!equalState(engine.meta.pending,bridge.read()))engine.meta.conflict=true;
    engine.checkpoint();
-   channel=client.channel('my-week-'+account.id).on('postgres_changes',{event:'*',schema:'public',table:'spending_state',filter:'user_id=eq.'+account.id},()=>engine?.reconcile()).subscribe();
+   channel=client.channel(namespace+'-'+account.id).on('postgres_changes',{event:'*',schema:'public',table:'spending_state',filter:'user_id=eq.'+account.id},()=>engine?.reconcile()).subscribe();
    // Empty new devices join the existing server snapshot without a destructive
    // choice. Migrated/offline records and conflicts always require a decision.
    if(!engine.meta?.linked&&!engine.meta?.pending&&!engine.meta?.conflict&&bridge.isPristine()&&!bridge.hasLegacy?.()&&!bridge.busy()){
     const row=await api.read();if(current!==generation)return;
-    const remote=cloudValue(row,bridge.validate);
-    if(remote||!engine.meta?.pending)await engine.choose(remote?'pull':'push');
+    const remote=cloudValue(row,bridge.validate,slot);
+    if(remote)await engine.choose('pull');
+    else if(autoInitialize)await engine.choose('push');
+    else{engine.meta={linked:true,base:null,pending:null};engine.checkpoint();status('online','연결됨 · 업무를 추가하세요');}
    }else await engine.reconcile();
   }catch(error){if(current===generation)report(error);}
  }
@@ -151,7 +153,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
    if(!user)throw Error('먼저 로그인해 주세요.');
    if(action==='backup'){bridge.export();return;}
    if(action==='protected'){
-    const prefix='my-week.cloud.v1:'+SYNC_CONFIG.url+':'+user.id;
+    const prefix=namespace+'.cloud.v1:'+SYNC_CONFIG.url+':'+user.id;
     const backups=storage.keys().filter(k=>k===prefix||k.startsWith(prefix+':')).map(key=>({key,value:JSON.parse(storage.getItem(key))}));
     bridge.download(JSON.stringify({app:'MY WEEK protected backups',backups}),'my-week-protected-backups.json');return;
    }
@@ -198,5 +200,5 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
   if(engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
  });
  paint();const ready=connect().catch(report);
- return {ready,destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
+ return {ready,get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }

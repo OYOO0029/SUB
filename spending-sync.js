@@ -1,5 +1,6 @@
 import {SyncEngine, same} from './sync-core.mjs';
 import {SYNC_CONFIG, SUPABASE_SDK} from './sync-config.mjs';
+import {preserveAppSlots} from './shared-row.mjs';
 
 const bridge = window.spendingSyncBridge;
 const storage = window.localStorage;
@@ -52,7 +53,7 @@ async function activate(account) {
   const api={
     read:async()=>{const {data,error}=await client.from(TABLE).select('state,updated_at').eq('user_id',account.id).maybeSingle();return check(data,error)},
     insert:async state=>{const {data,error}=await client.from(TABLE).insert({user_id:account.id,state}).select('state,updated_at').single();if(error?.code==='23505')return null;return check(data,error)},
-    update:async(state,stamp)=>{const {data,error}=await client.from(TABLE).update({state}).eq('user_id',account.id).eq('updated_at',stamp).select('state,updated_at').maybeSingle();return check(data,error)}
+    update:async(state,stamp)=>{const current=await api.read();if(!current||current.updated_at!==stamp)return null;const merged=preserveAppSlots(state,current.state);const {data,error}=await client.from(TABLE).update({state:merged}).eq('user_id',account.id).eq('updated_at',stamp).select('state,updated_at').maybeSingle();return check(data,error)}
   };
   connected=storage.getItem('spendingCloudLinked:'+scope)==='true'&&storage.getItem(OWNER)===scope;
   const missed=storage.getItem(UNSENT);

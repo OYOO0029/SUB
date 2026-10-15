@@ -25,6 +25,7 @@ const server=http.createServer(async(req,res)=>{
   if(url.pathname==='/fixture-status'){res.setHeader('content-type','application/json');res.end(JSON.stringify([...rows]));return}
   if(url.pathname==='/vendor/supabase.js'||url.pathname==='/blocked/vendor/supabase.js'){res.setHeader('content-type','text/javascript');res.end(sdk);return}
   let name=decodeURIComponent(url.pathname).replace(/^\/blocked\//,'/').slice(1)||'schedule.html';
+  if(name.endsWith('/'))name+='index.html';
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)||name.includes('..')||name.startsWith('.')){res.writeHead(404);res.end();return}
   let body=await fs.readFile(target);
   if(name==='schedule.html'&&url.pathname.startsWith('/blocked/'))body=Buffer.from(body.toString().replace('<head>',`<head><script>Object.defineProperty(window,'localStorage',{get(){throw new Error('Fixture: storage denied')}})</script>`));

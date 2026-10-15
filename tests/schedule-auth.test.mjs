@@ -10,15 +10,18 @@ const initialState=()=>({version:5,workConfig:{weekdays:[],label:'회사',start:
 import {CLOUD_SLOT} from '../schedule-cloud-core.mjs';
 import {authErrorMessage} from '../schedule-auth-errors.mjs';
 import {SYNC_CONFIG} from '../schedule-config.mjs';
+import {createWorkAccount,emptyWorkState} from '../work/work-account.mjs';
+import {validate as validateWork} from '../work/repository.js';
 const copy=x=>structuredClone(x),tick=()=>new Promise(r=>setTimeout(r,5));
 async function until(fn){for(let i=0;i<80;i++){if(fn())return;await tick();}assert.ok(fn(),'timed out waiting for UI');}
-function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=false,invalidSession=false}={}){
+function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=false,invalidSession=false,work=false}={}){
  const dom=new JSDOM('<button data-action="cloud-open"><span data-cloud-label></span><small data-cloud-status></small></button>',{url:'https://embed.example/'});
  for(const key of ['window','document','navigator','Event'])Object.defineProperty(globalThis,key,{value:dom.window[key],configurable:true});
  dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
  const cache=new Map(seed),storage={persistent,getItem:k=>cache.get(k)??null,setItem:(k,v)=>cache.set(k,String(v)),removeItem:k=>cache.delete(k),keys:()=>[...cache.keys()]};
- const account=createAccountData({storage,key:STORAGE_KEY,empty:initialState,validate:validateState});let state=initialState(),listener,reads=0,writes=0,seen=[];
- const bridge={read:()=>copy(state),validate:validateState,get storageKey(){return account.storageKey;},busy:()=>false,isPristine:()=>JSON.stringify(state)===JSON.stringify(initialState()),hasLegacy:()=>account.hasLegacy(),importLegacy:()=>state=account.importLegacy(),setAccount:id=>state=id?account.activate(id):account.deactivate(),apply:value=>{account.write(value);state=copy(value);},export:()=>{},download:()=>{}};
+ const empty=work?emptyWorkState:initialState,validate=work?validateWork:validateState;
+ const account=work?createWorkAccount({storage,validate}):createAccountData({storage,key:STORAGE_KEY,empty,validate});let state=empty(),listener,reads=0,writes=0,seen=[];
+ const bridge={read:()=>copy(state),validate,get storageKey(){return account.storageKey;},busy:()=>false,isPristine:()=>JSON.stringify(state)===JSON.stringify(empty()),hasLegacy:()=>work?false:account.hasLegacy(),importLegacy:()=>state=account.importLegacy(),setAccount:id=>state=id?account.activate(id):account.deactivate(),apply:value=>{account.write(value);state=copy(value);},export:()=>{},download:()=>{}};
  const client={auth:{
   onAuthStateChange:fn=>{listener=fn;return{data:{subscription:{unsubscribe(){}}}};},getSession:async()=>({data:{session},error:null}),getUser:async()=>({data:{user:invalidSession?null:session?.user},error:invalidSession?{code:'invalid_credentials'}:null}),
   signInWithPassword:async credentials=>{seen.push(credentials);if(invalid)return{error:{code:'invalid_credentials'}};session={user:{id:credentials.email.startsWith('a')?'A':'B',email:credentials.email}};listener('SIGNED_IN',session);return{data:{user:session.user,session},error:null};},
@@ -31,7 +34,7 @@ function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=fals
    const row={state:copy(payload.state),updated_at:String(writes+10)};rows.set(id,row);return{data:copy(row),error:null};
   }};return q;
  }};
- const ui=startCloud(bridge,{storage,loadClient:async()=>({createClient:()=>client})});
+ const ui=startCloud(bridge,{storage,...(work?{slot:'myWorkV1',namespace:'my-work',autoInitialize:false}:{}),loadClient:async()=>({createClient:()=>client})});
  const submit=email=>{const form=document.querySelector('form');form.elements.email.value=email;form.elements.password.value='test-password';form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};
  const click=action=>document.querySelector('[data-cloud="'+action+'"]').click();
  return{ui,dom,cache,rows,seen,submit,click,get state(){return state},get reads(){return reads},get writes(){return writes},status:()=>document.querySelector('#cloud-detail').textContent,close(){ui.destroy();dom.window.close();}};
@@ -73,4 +76,17 @@ test('missing account cache never replaces pending edits with automatic server d
 });
 test('connection failures are distinct from wrong credentials',()=>{
  assert.match(authErrorMessage(new TypeError('Failed to fetch')),/서버에 연결/);assert.match(authErrorMessage({name:'AbortError'}),/초과/);assert.match(authErrorMessage({code:'42501'}),/권한/);
+});
+
+test('work login shares verified identity without creating an empty server slot or replacing personal data',async()=>{
+ const before=snapshot(700),app=setup({work:true,session:{user:{id:'A',email:'a@example.test'}},rows:new Map([['A',before]])});
+ try{await app.ui.ready;assert.equal(app.ui.account.id,'A');assert.deepEqual(app.state,emptyWorkState());assert.equal(app.writes,0);assert.deepEqual(app.rows.get('A'),before);assert.match(app.status(),/업무를 추가/);}finally{app.close();}
+});
+
+test('work imports into its own slot and account switches clear the first account data',async()=>{
+ const before=snapshot(700),app=setup({work:true,rows:new Map([['A',before],['B',snapshot(900)]])});
+ try{await app.ui.ready;app.submit('a@example.test');await until(()=>app.status().includes('업무를 추가'));const incoming=emptyWorkState();incoming.workStages=['검토'];
+ assert.equal(await app.ui.importData(incoming,()=>incoming),true);assert.deepEqual(app.rows.get('A').state.myWeekV1,before.state.myWeekV1);assert.deepEqual(app.rows.get('A').state.myWorkV1.data.workStages,['검토']);
+ app.click('logout');await until(()=>app.status()==='로그인해 주세요');assert.deepEqual(app.state,emptyWorkState());await until(()=>!document.querySelector('button[type=submit]').disabled);app.submit('b@example.test');await until(()=>app.ui.account?.id==='B');assert.deepEqual(app.state,emptyWorkState());assert.equal(app.rows.get('B').state.myWorkV1,undefined);
+ }finally{app.close();}
 });
