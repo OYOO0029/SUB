@@ -404,15 +404,13 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
 <link rel="stylesheet" href="./planner-ui.css?v=20261016">
-<link rel="stylesheet" href="./personal-ui.css?v=20261016">
+<link rel="stylesheet" href="./personal-ui.css?v=20261016-reference">
 </head>
 <body>
 <div class="app">
   <header class="header">
-      <nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav>
-      <div class="selection-line">
-        <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
-      </div>
+      <div class="personal-brand"><h1>WHAT TO DO</h1><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav></div>
+
     <div class="header-actions">
       <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.75 7H7M7 7H12.25M7 7V12.25M7 7V1.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -435,13 +433,15 @@ button:disabled{cursor:not-allowed;opacity:.45}
   <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
 
   <main class="personal-workspace" aria-label="개인 일정">
-    <div class="personal-toolbar">
+    <div class="personal-toolbar"><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
+        <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
+      </div><button class="date-step" id="toolbarNextBtn" aria-label="다음 기간">›</button></div><div class="personal-tools"><div id="personalQuickActions"></div>
       <select class="view-select" id="viewSelect" aria-label="보기 선택">
         <option value="day">일간</option>
         <option value="week" selected>주간</option>
         <option value="month">월간</option>
       </select>
-      <span class="personal-toolbar-label">개인 일정</span>
+      </div>
     </div>
   <section class="calendar-shell">
     <button class="side-nav prev" id="prevBtn" aria-label="이전">‹</button>
@@ -887,8 +887,12 @@ function toast(msg,undo){
 function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",!appStorage.persistent)}
 function openModal(id){if(!accounts.owner&&id!=="settingsModal"){window.dispatchEvent(new Event("my-week-login-request"));return}document.getElementById(id).classList.add("open")}
 function closeModal(id){document.getElementById(id).classList.remove("open")}
+function trackerIcon(t){
+ const kind=t.id==='coffee'||t.emoji==='☕'?'coffee':t.id==='yoga_tracker'||t.emoji==='🧘'?'meditation':['bell','bowel'].includes(t.id)||['🔔','🚽','💩'].includes(t.emoji)?'poo':null;
+ return kind?`<span class="tracker-svg tracker-${kind}" aria-hidden="true"></span>`:esc(t.emoji);
+}
 function selectedDateLabel(){
-  return `${focusDate.getMonth()+1}월 ${focusDate.getDate()}일 ${DOW_KO[focusDate.getDay()]}요일`;
+  return `${focusDate.getMonth()+1}/${focusDate.getDate()}(${DOW_KO[focusDate.getDay()]})`;
 }
 function getSlot(time){
   if(!time)return "morning";const [h,m]=time.split(":").map(Number),v=h*60+m;
@@ -1029,15 +1033,15 @@ function renderMobileMonthStatic(){
   const first=new Date(focusDate.getFullYear(),focusDate.getMonth(),1),start=startOfWeek(first),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
   let h="";DOW_KO.forEach(d=>h+=`<div class="mobile-month-dow">${d}</div>`);
   for(let i=0;i<42;i++){
-    const d=addDays(start,i),ds=fmtDate(d),outside=d.getMonth()!==focusDate.getMonth(),holiday=getHoliday(d),flags=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,4).map(t=>t.emoji).join("");
-    h+=`<div class="mobile-month-cell ${outside?"outside":""} ${isPastDate(d)?"is-past":""} ${ds===sel?"selected":""}"><button class="mobile-month-date ${ds===today?"today":""}" data-mobile-date="${ds}" type="button">${d.getDate()}</button><div class="mobile-month-flags">${esc(flags)}</div>${holiday?`<div class="mobile-month-holiday">${esc(holiday.names[0])}</div>`:""}</div>`;
+    const d=addDays(start,i),ds=fmtDate(d),outside=d.getMonth()!==focusDate.getMonth(),holiday=getHoliday(d),flags=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,4).map(t=>trackerIcon(t)).join("");
+    h+=`<div class="mobile-month-cell ${outside?"outside":""} ${isPastDate(d)?"is-past":""} ${ds===sel?"selected":""}"><button class="mobile-month-date ${ds===today?"today":""}" data-mobile-date="${ds}" type="button">${d.getDate()}</button><div class="mobile-month-flags">${flags}</div>${holiday?`<div class="mobile-month-holiday">${esc(holiday.names[0])}</div>`:""}</div>`;
   }
   grid.innerHTML=h;
 }
 function fillMobileSelectedRows(date){
   const ds=fmtDate(date),past=isPastDate(date),wake=sleepValue(date,"wake"),bed=sleepValue(date,"bed");
   const label=document.getElementById("mobileSelectedLabel");if(label)label.textContent=`${date.getMonth()+1}월 ${date.getDate()}일 ${DOW_KO[date.getDay()]}요일`;
-  const tracker=document.getElementById("mobileTrackerContent");if(tracker)tracker.innerHTML=state.trackerDefs.length?state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(date,t.id)?"active":""}" data-mobile-tracker-date="${ds}" data-mobile-tracker-id="${esc(t.id)}" title="${esc(t.name)}" type="button">${esc(t.emoji)}</button>`).join(""):`<span class="mobile-empty">트래커 없음</span>`;
+  const tracker=document.getElementById("mobileTrackerContent");if(tracker)tracker.innerHTML=state.trackerDefs.length?state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(date,t.id)?"active":""}" data-mobile-tracker-date="${ds}" data-mobile-tracker-id="${esc(t.id)}" aria-pressed="${getTrackerLog(date,t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}" type="button">${trackerIcon(t)}</button>`).join(""):`<span class="mobile-empty">트래커 없음</span>`;
   const wakeBtn=document.getElementById("mobileWakeBtn"),bedBtn=document.getElementById("mobileBedBtn");
   if(wakeBtn){wakeBtn.textContent=wake||"+ 시간 입력";wakeBtn.classList.toggle("empty",!wake);wakeBtn.dataset.mobileSleep="wake";wakeBtn.dataset.mobileDate=ds}
   if(bedBtn){bedBtn.textContent=bed||"+ 시간 입력";bedBtn.classList.toggle("empty",!bed);bedBtn.dataset.mobileSleep="bed";bedBtn.dataset.mobileDate=ds}
@@ -1099,7 +1103,7 @@ function renderTrackerRow(dates,selected){
   let s=`<tr class="tracker-row"><th class="row-head">트래커</th>`;
   dates.forEach(d=>{
     const ds=fmtDate(d),defs=viewMode==="day"?state.trackerDefs:state.trackerDefs.slice(0,5);
-    const icons=defs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}" aria-pressed="${getTrackerLog(d,t.id)}">${esc(t.emoji)}</button>`).join("");
+    const icons=defs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}" aria-pressed="${getTrackerLog(d,t.id)}">${trackerIcon(t)}</button>`).join("");
     const extra=state.trackerDefs.length>defs.length?`<span class="tracker-overflow">+${state.trackerDefs.length-defs.length}</span>`:"";
     s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""}" data-date-col="${ds}"><div class="tracker-icons">${icons}${extra}</div></td>`;
   });return s+`</tr>`;
@@ -1135,7 +1139,7 @@ function renderMonth(){
     html+=`<div class="month-cell ${out?"outside":""} ${ds===sel?"selected":""} ${isPastDate(d)?"is-past":""}">
       <div class="month-top"><button class="month-date ${ds===today?"today":""}" data-month-date="${ds}">${d.getDate()}</button></div>
       ${h?`<div class="month-holiday">${esc(h.names.join(" · "))}</div>`:""}
-      <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}">${esc(t.emoji)}</span>`).join("")}</div>
+      <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</span>`).join("")}</div>
       ${evs.slice(0,2).map(o=>`<div class="month-event ${esc(o.event.category||"personal")}">${esc(o.event.title)}</div>`).join("")}
       ${evs.length>2?`<button class="month-more" data-month-date="${ds}">+${evs.length-2}개</button>`:""}
     </div>`;
@@ -1145,7 +1149,7 @@ function renderMonth(){
 }
 function renderMonthDetail(){
   const d=new Date(focusDate),ds=fmtDate(d),h=getHoliday(d),evs=occurrences(d),work=getWorkStatus(d),dur=sleepDurationForWake(d);
-  const trackerBtns=state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}">${esc(t.emoji)}</button>`).join("");
+  const trackerBtns=state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</button>`).join("");
   return `<div class="month-detail">
     <div><h3>${d.getMonth()+1}월 ${d.getDate()}일 ${DOW_KO[d.getDay()]}요일</h3><div class="month-detail-sub">${h?esc(h.names.join(" · "))+" · ":""}${work==="holiday"?"휴일":work==="leave"?"연차":work==="amleave"?"오전반차":work==="pmleave"?"오후반차":"정상근무"}</div>
       <div class="month-detail-trackers">${trackerBtns||'<span class="hint">등록된 트래커 없음</span>'}</div>
@@ -1446,7 +1450,7 @@ function renderTrackerDraft(){
   const box=document.getElementById("trackerList");box.innerHTML="";
   settingsDraft.trackerDefs.forEach((t,i)=>{
     const row=document.createElement("div");row.className="tracker-manage-row";
-    row.innerHTML=`<div class="tracker-manage-icon">${esc(t.emoji)}</div><input class="input" value="${esc(t.name)}"><button class="order-btn" data-up="${i}" ${i===0?"disabled":""}>↑</button><button class="order-btn" data-down="${i}" ${i===settingsDraft.trackerDefs.length-1?"disabled":""}>↓</button><button class="btn danger">삭제</button>`;
+    row.innerHTML=`<div class="tracker-manage-icon">${trackerIcon(t)}</div><input class="input" value="${esc(t.name)}"><button class="order-btn" data-up="${i}" ${i===0?"disabled":""}>↑</button><button class="order-btn" data-down="${i}" ${i===settingsDraft.trackerDefs.length-1?"disabled":""}>↓</button><button class="btn danger">삭제</button>`;
     row.querySelector("input").oninput=e=>t.name=e.target.value;
     row.querySelector("[data-up]")?.addEventListener("click",()=>{[settingsDraft.trackerDefs[i-1],settingsDraft.trackerDefs[i]]=[settingsDraft.trackerDefs[i],settingsDraft.trackerDefs[i-1]];renderTrackerDraft()});
     row.querySelector("[data-down]")?.addEventListener("click",()=>{[settingsDraft.trackerDefs[i+1],settingsDraft.trackerDefs[i]]=[settingsDraft.trackerDefs[i],settingsDraft.trackerDefs[i+1]];renderTrackerDraft()});
@@ -1489,6 +1493,8 @@ function requestClose(id){
 fillTimeSelects();
 document.getElementById("viewSelect").onchange=e=>{viewMode=e.target.value;render()};
 document.getElementById("selectedDateLabel").onclick=()=>{focusDate=nowDate();render()};
+document.getElementById("toolbarPrevBtn").onclick=()=>navigate(-1);
+document.getElementById("toolbarNextBtn").onclick=()=>navigate(1);
 document.getElementById("prevBtn").onclick=()=>navigate(-1);
 document.getElementById("nextBtn").onclick=()=>navigate(1);
 document.getElementById("quickAddBtn").onclick=()=>openEventForm({date:fmtDate(focusDate),slot:"morning"});
@@ -1579,20 +1585,10 @@ render();
 })();
 </script>
 <script>
-// Responsive header action disclosure; existing action buttons and handlers are retained.
+// Keep existing action IDs and handlers while placing shortcuts beside view selection.
 (()=>{
- const header=document.querySelector('.header'),group=header.querySelector('.header-actions'),leading=header.firstElementChild;
- const toggle=document.createElement('button');toggle.id='scheduleActionToggle';toggle.className='header-action-toggle';toggle.type='button';toggle.textContent='⋮';toggle.setAttribute('aria-label','스케줄 메뉴');toggle.setAttribute('aria-expanded','false');
- group.id='scheduleHeaderActions';toggle.setAttribute('aria-controls',group.id);header.insertBefore(toggle,group);
- const buttons=[...group.querySelectorAll('button')];
- function close(focus=false){header.classList.remove('actions-open');toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
- function layout(){const narrow=header.clientWidth<497;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
- toggle.addEventListener('click',()=>{const open=!header.classList.contains('actions-open');header.classList.toggle('actions-open',open);toggle.setAttribute('aria-expanded',String(open));if(open)buttons[0].focus()});
- group.addEventListener('click',event=>{if(event.target.closest('button'))close()});
- document.addEventListener('click',event=>{if(!header.contains(event.target))close()});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('actions-open')){event.preventDefault();close(true)}});
- header.addEventListener('focusout',()=>{requestAnimationFrame(()=>{if(!header.contains(document.activeElement))close()})});
- new ResizeObserver(layout).observe(header);new ResizeObserver(layout).observe(leading);window.addEventListener('my-week-sync-status',layout);layout();
+ const quick=document.getElementById('personalQuickActions');
+ ['quickAddBtn','workStatusBtn'].forEach(id=>quick.append(document.getElementById(id)));
 })();
 </script><script type="module" src="./schedule-sync.js?v=work-integration-1"></script></body>
 </html>

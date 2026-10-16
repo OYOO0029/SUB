@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {reminderFixture} from './reminder-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const state=title=>({version:5,workConfig:{weekdays:[],label:'회사',start:'09:00',end:'18:00'},workExceptions:{},workOverrides:{},categories:[{id:'personal',name:'개인',color:'#84d7dc'}],trackerDefs:[],trackerLogs:{},sleepLogs:{},events:[{id:'fixture',title,startDate:'2026-10-08',startTime:'10:00',endTime:'11:00',category:'personal',notes:'',active:true,recurrence:{type:'none'},exdates:[]}]});
+const state=title=>({version:5,workConfig:{weekdays:[],label:'회사',start:'09:00',end:'18:00'},workExceptions:{},workOverrides:{},categories:[{id:'personal',name:'개인',color:'#84d7dc'}],trackerDefs:[{id:"coffee",name:"커피",emoji:"☕"},{id:"yoga_tracker",name:"명상",emoji:"🧘"},{id:"bell",name:"배변",emoji:"💩"}],trackerLogs:{"2026-10-16":{coffee:true,bell:true}},sleepLogs:{},events:[{id:'fixture',title,startDate:'2026-10-08',startTime:'10:00',endTime:'11:00',category:'personal',notes:'',active:true,recurrence:{type:'none'},exdates:[]}]});
 let revision=1;
 const rows=new Map(['A','B'].map(id=>[id,{state:{mySpendingV1:{schema:1,revision:'ledger',data:{fixture:'preserve ledger'}},myWeekV1:{schema:1,revision:'schedule',data:state(id+' 테스트 일정')}},updated_at:String(revision)}]));
 if(process.env.REMINDER_QA==='1')for(const row of rows.values())row.state.myWorkV1={schema:1,revision:'reminder-fixture',data:reminderFixture()};
