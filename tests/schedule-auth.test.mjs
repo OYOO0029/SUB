@@ -44,6 +44,8 @@ test('temporary verification failure recovers the saved session on reconnect wit
  const app=setup({verificationFailures:1,session:{user:{id:'A',email:'a@example.test'}},rows:new Map([['A',snapshot(700)]])});
  try{
   await app.ui.ready;assert.equal(app.ui.account,null);assert.equal(app.reads,0);
+  assert.equal(document.querySelector('#cloud-fields').hidden,true);
+  assert.equal(document.querySelector('[data-cloud-label]').textContent,'로그인 확인 중');
   window.dispatchEvent(new Event('online'));
   await until(()=>app.ui.account?.id==='A'&&app.state.budgets['2026-10']?.total===700);
   assert.equal(app.verifications,2);assert.equal(app.seen.length,0);

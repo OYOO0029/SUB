@@ -49,6 +49,10 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  }
  function status(kind,message){statusKind=kind;statusText=message;paint();}
  function report(error){status('error',authErrorMessage(error));}
+ function restoreError(error){
+  restorePending=error instanceof TypeError||error?.name==='AbortError'||error?.name==='AuthRetryableFetchError'||error?.status>=500;
+  status('error',(restorePending?'저장된 로그인을 다시 확인하고 있습니다 · ':'')+authErrorMessage(error));
+ }
  function stop(){generation++;engine?.stop();engine=null;if(channel)Promise.resolve(client?.removeChannel(channel)).catch(()=>{});channel=null;}
  function signedOut(){
   sessionChecked=true;restorePending=false;
@@ -125,10 +129,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  }
  function recover(){
   if(disposed||connecting||working)return;
-  if(!sessionChecked)connect().catch(error=>{
-   restorePending=false;
-   status('error','로그인 확인을 다시 시도합니다 · '+authErrorMessage(error));
-  });
+  if(!sessionChecked)connect().catch(restoreError);
   else engine?.reconcile();
  }
  listen(loginForm.elements.rememberEmail,'change',()=>{
@@ -234,6 +235,6 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(window,'beforeunload',event=>{
   if(engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
  });
- paint();const ready=connect().catch(error=>{restorePending=false;report(error);});
+ paint();const ready=connect().catch(restoreError);
  return {ready,get status(){return statusKind;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }
