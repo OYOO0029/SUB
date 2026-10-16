@@ -1,0 +1,12 @@
+/* Shared personal/work navigation. Filled silhouettes follow the supplied reference. */
+:root{--planner-mint:#8dccd0;--planner-selected:#3b5057;--planner-switch:#2a2d35}
+.planner-switch,.new-header .planner-switch{display:inline-flex;align-items:center;gap:0;padding:0;background:var(--planner-switch);border-radius:999px;width:72px;height:36px;flex:none}
+.planner-switch .planner-mode,.new-header .planner-switch .planner-mode{display:grid;place-items:center;width:36px;height:36px;min-width:36px;padding:0;border:0;border-radius:50%;background:transparent;color:#76797f;text-decoration:none;cursor:pointer;transition:background .15s,color .15s}
+.planner-switch .planner-mode.active,.new-header .planner-switch .planner-mode.active{color:var(--planner-mint);background:var(--planner-selected)}
+.planner-switch .planner-mode:hover{color:#c4d1d8}
+.planner-switch .planner-mode:focus-visible{outline:2px solid #bdc2ce;outline-offset:3px}
+.planner-mode::before{content:"";display:block;width:22px;height:22px;background:currentColor;mask:var(--mode-icon) center/contain no-repeat}
+.planner-mode[data-value=personal]{--mode-icon:url('./assets/mode-personal.svg')}
+.planner-mode[data-value=work]{--mode-icon:url('./assets/mode-work.svg')}
+.planner-mode>.icon{display:none}
+@media(prefers-reduced-motion:reduce){.planner-switch .planner-mode{transition:none}}

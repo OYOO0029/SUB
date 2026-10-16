@@ -403,21 +403,16 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
+<link rel="stylesheet" href="./planner-ui.css?v=20261016">
+<link rel="stylesheet" href="./personal-ui.css?v=20261016">
 </head>
 <body>
 <div class="app">
   <header class="header">
-    <div>
-      <div class="planner-mode-switch"><h1 class="brand-title">MY WEEK</h1><nav aria-label="개인 업무 전환"><span aria-current="page">개인</span><a href="./work/">업무</a></nav></div>
+      <nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav>
       <div class="selection-line">
-        <div class="selected-date-label" id="selectedDateLabel">9월 20일 일요일</div>
-        <select class="view-select" id="viewSelect" aria-label="보기 선택">
-          <option value="day">일간</option>
-          <option value="week" selected>주간</option>
-          <option value="month">월간</option>
-        </select>
+        <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
       </div>
-    </div>
     <div class="header-actions">
       <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.75 7H7M7 7H12.25M7 7V12.25M7 7V1.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -439,6 +434,15 @@ button:disabled{cursor:not-allowed;opacity:.45}
 
   <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
 
+  <main class="personal-workspace" aria-label="개인 일정">
+    <div class="personal-toolbar">
+      <select class="view-select" id="viewSelect" aria-label="보기 선택">
+        <option value="day">일간</option>
+        <option value="week" selected>주간</option>
+        <option value="month">월간</option>
+      </select>
+      <span class="personal-toolbar-label">개인 일정</span>
+    </div>
   <section class="calendar-shell">
     <button class="side-nav prev" id="prevBtn" aria-label="이전">‹</button>
     <div class="calendar-card">
@@ -504,6 +508,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
     </div>
     <noscript><div class="storage-warning show" style="margin-top:10px">이 미리보기에서는 JavaScript가 꺼져 있어 일정 값은 표시할 수 없지만 모바일 화면 구조는 그대로 확인할 수 있습니다.</div></noscript>
   </section>
+  </main>
 </div>
 
 <!-- 일정 추가/수정 -->
@@ -1581,7 +1586,7 @@ render();
  group.id='scheduleHeaderActions';toggle.setAttribute('aria-controls',group.id);header.insertBefore(toggle,group);
  const buttons=[...group.querySelectorAll('button')];
  function close(focus=false){header.classList.remove('actions-open');toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
- function layout(){const extra=document.getElementById('syncCloudBtn')?114:0;const narrow=leading.getBoundingClientRect().width+116+12+extra>header.clientWidth;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
+ function layout(){const narrow=header.clientWidth<497;header.classList.toggle('actions-collapsed',narrow);if(!narrow)close()}
  toggle.addEventListener('click',()=>{const open=!header.classList.contains('actions-open');header.classList.toggle('actions-open',open);toggle.setAttribute('aria-expanded',String(open));if(open)buttons[0].focus()});
  group.addEventListener('click',event=>{if(event.target.closest('button'))close()});
  document.addEventListener('click',event=>{if(!header.contains(event.target))close()});

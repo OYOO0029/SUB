@@ -31,7 +31,7 @@ const server=http.createServer(async(req,res)=>{
   const target=path.resolve(root,name);if(!target.startsWith(root+path.sep)||name.includes('..')||name.startsWith('.')){res.writeHead(404);res.end();return}
   let body=await fs.readFile(target);
   if(name==='schedule.html'&&url.pathname.startsWith('/blocked/'))body=Buffer.from(body.toString().replace('<head>',`<head><script>Object.defineProperty(window,'localStorage',{get(){throw new Error('Fixture: storage denied')}})</script>`));
-  res.setHeader('content-type',name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.css')?'text/css':name.endsWith('.js')||name.endsWith('.mjs')?'text/javascript':'application/octet-stream');
+  res.setHeader('content-type',name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.css')?'text/css':name.endsWith('.svg')?'image/svg+xml':name.endsWith('.js')||name.endsWith('.mjs')?'text/javascript':'application/octet-stream');
   res.setHeader('cache-control','no-store');res.setHeader('Content-Security-Policy',"connect-src 'self';");res.end(body);
  }catch(e){res.writeHead(404);res.end('Not found')}
 });server.listen(4175,'127.0.0.1',()=>console.log('Synthetic preview http://127.0.0.1:4175/schedule.html'));
