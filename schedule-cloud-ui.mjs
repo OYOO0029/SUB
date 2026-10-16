@@ -5,6 +5,8 @@ import {authErrorMessage} from './schedule-auth-errors.mjs';
 
 export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPABASE_SDK),slot=CLOUD_SLOT,namespace='my-week',autoInitialize=true}={}){
  let client,connecting,engine,user,generation=0,authRevision=0,channel,working=false,disposed=false;
+ let sessionChecked=false,restorePending=true;
+ const emailKey='my-week.login-email.v1';
  let statusKind='offline',statusText='로그인해 주세요';
  const dialog=document.createElement('dialog');dialog.id='cloud-dialog';
  dialog.setAttribute('aria-label','로그인 · 동기화');
@@ -13,6 +15,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  '<p id="cloud-account" class="cloud-account"></p><p id="cloud-detail" role="status" tabindex="-1"></p>',
  '<div id="cloud-fields"><label>이메일<input name="email" type="email" autocomplete="username" required></label>',
  '<label>비밀번호<input name="password" type="password" autocomplete="current-password" required></label>',
+ '<label class="cloud-remember"><input name="rememberEmail" type="checkbox">아이디 저장하기</label>',
  '<button class="btn-primary full" type="submit">로그인</button><button type="button" data-cloud="signup" class="full space-top">처음 사용 · 계정 만들기</button>',
  '<p class="small">가계부와 같은 이메일과 비밀번호를 사용하세요. ChatGPT 로그인은 필요하지 않습니다.</p></div>',
  '<div id="cloud-connected" hidden><button type="button" data-cloud="refresh" class="full">지금 동기화</button>',
@@ -24,17 +27,21 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  '<p class="small">노션과 다른 기기에서 같은 계정으로 로그인하면 기록이 동기화됩니다.</p><p id="cloud-storage" class="small"></p></form>'
  ].join('');
  document.body.append(dialog);
+ const loginForm=dialog.querySelector('form');
+ const savedEmail=storage.getItem(emailKey)||'';
+ loginForm.elements.email.value=savedEmail;
+ loginForm.elements.rememberEmail.checked=!!savedEmail;
  const text=(selector,value)=>dialog.querySelector(selector).textContent=value;
  const cleanups=[];
  function listen(target,event,fn){target.addEventListener(event,fn);cleanups.push(()=>target.removeEventListener(event,fn));}
  function paint(){
   if(disposed)return;
-  document.querySelectorAll('[data-cloud-label]').forEach(el=>el.textContent=user?'계정 · 동기화':'로그인 · 동기화');
+  document.querySelectorAll('[data-cloud-label]').forEach(el=>el.textContent=user?'계정 · 동기화':restorePending?'로그인 확인 중':'로그인 · 동기화');
   document.querySelectorAll('[data-cloud-status]').forEach(el=>{el.textContent=statusText;el.dataset.state=statusKind;});
   window.dispatchEvent(new Event('my-week-sync-status'));text('#cloud-detail',statusText);dialog.querySelector('#cloud-detail').dataset.state=statusKind;
   text('#cloud-account',user?.email||'같은 계정으로 어디서나 이어서 기록하세요.');
   text('#cloud-storage',storage.persistent?'':'이 환경에서는 로그인 상태가 이 창에서만 유지됩니다. 닫기 전에 ‘동기화됨’을 확인하세요.');
-  dialog.querySelector('#cloud-fields').hidden=!!user;
+  dialog.querySelector('#cloud-fields').hidden=!!user||restorePending;
   dialog.querySelector('#cloud-connected').hidden=!user;
   dialog.querySelector('#cloud-link-choices').hidden=!!engine?.meta?.linked&&!engine?.meta?.conflict;
   dialog.querySelector('[data-cloud="legacy"]').hidden=!user||!bridge.hasLegacy?.();
@@ -44,10 +51,12 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  function report(error){status('error',authErrorMessage(error));}
  function stop(){generation++;engine?.stop();engine=null;if(channel)Promise.resolve(client?.removeChannel(channel)).catch(()=>{});channel=null;}
  function signedOut(){
+  sessionChecked=true;restorePending=false;
   stop();user=null;bridge.setAccount(null);dialog.querySelector('[name=password]').value='';
   status('offline','로그인해 주세요');
  }
  async function activate(account){
+  sessionChecked=true;restorePending=false;
   if(disposed||user?.id===account.id&&engine)return;
   stop();user=account;const current=generation;
   bridge.setAccount(SYNC_CONFIG.url+'|'+account.id);status('waiting','서버 기록을 확인하는 중');
@@ -76,10 +85,12 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
    }else await engine.reconcile();
   }catch(error){if(current===generation)report(error);}
  }
- async function connect(){
+ async function connect(restore=true){
   if(connecting)return connecting;
-  if(client)return client;
+  if(client&&(!restore||sessionChecked))return client;
   connecting=(async()=>{
+   restorePending=true;status('waiting','저장된 로그인 상태를 확인하는 중');
+   if(!client){
    const{createClient}=await loadClient();
    client=createClient(SYNC_CONFIG.url,SYNC_CONFIG.key,{
     auth:{storage,storageKey:'my-week.supabase.auth.v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},
@@ -99,16 +110,31 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
     },0);
    });
    cleanups.push(()=>subscription.data.subscription.unsubscribe());
+   }
+   if(!restore){restorePending=false;return client;}
    const restoring=generation;
    const{data,error}=await client.auth.getSession();if(error)throw error;
    if(data.session){
     const verified=await client.auth.getUser();if(verified.error)throw verified.error;
     if(!disposed&&restoring===generation&&verified.data.user)await activate(verified.data.user);
    }
+   if(!disposed&&restoring===generation){sessionChecked=true;restorePending=false;if(!user)status('offline','로그인해 주세요');}
    return client;
   })();
   try{return await connecting;}finally{connecting=null;}
  }
+ function recover(){
+  if(disposed||connecting||working)return;
+  if(!sessionChecked)connect().catch(error=>{
+   restorePending=false;
+   status('error','로그인 확인을 다시 시도합니다 · '+authErrorMessage(error));
+  });
+  else engine?.reconcile();
+ }
+ listen(loginForm.elements.rememberEmail,'change',()=>{
+  if(!loginForm.elements.rememberEmail.checked)storage.removeItem(emailKey);
+  else if(loginForm.elements.email.validity.valid&&loginForm.elements.email.value.trim())storage.setItem(emailKey,loginForm.elements.email.value.trim());
+ });
  async function run(fn){
   if(working)return;working=true;paint();
   try{await fn();}catch(error){report(error);}finally{working=false;paint();}
@@ -129,10 +155,13 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(dialog.querySelector('form'),'submit',event=>{
   event.preventDefault();const form=event.target;
   run(async()=>{
-   await connect();status('waiting','로그인하는 중');
+   await connect(false);status('waiting','로그인하는 중');
    try{
     const{data,error}=await client.auth.signInWithPassword({email:form.elements.email.value.trim(),password:form.elements.password.value});
-    if(error)throw error;await activate(data.user);
+    if(error)throw error;
+    if(form.elements.rememberEmail.checked)storage.setItem(emailKey,form.elements.email.value.trim());
+    else storage.removeItem(emailKey);
+    await activate(data.user);
    }finally{form.elements.password.value='';}
   });
  });
@@ -143,7 +172,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
    if(action==='signup'){
     const form=dialog.querySelector('form');if(!form.reportValidity())return;
     if(form.elements.password.value.length<8)throw Error('비밀번호를 8자 이상 입력해 주세요.');
-    await connect();
+    await connect(false);
     try{
      const{data,error}=await client.auth.signUp({email:form.elements.email.value.trim(),password:form.elements.password.value,options:{emailRedirectTo:'https://oyoo0029.github.io/SUB/schedule.html'}});
      if(error)throw error;if(data.session)await activate(data.session.user);else status('waiting','이메일의 확인 링크를 누른 뒤 이 화면에서 로그인해 주세요.');
@@ -186,19 +215,20 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(window,'my-week-render',paint);
  listen(window,'my-week-login-request',()=>{document.querySelectorAll('.modal-backdrop.open').forEach(el=>el.classList.remove('open'));paint();dialog.showModal();connect().catch(report);});
  listen(window,'my-week-storage-limited',paint);
- listen(window,'online',()=>engine?.reconcile());
+ listen(window,'online',recover);
  listen(window,'offline',()=>{if(user)status('offline','오프라인 · 연결되면 다시 동기화합니다');});
- listen(document,'visibilitychange',()=>{if(!document.hidden)engine?.reconcile();});
+ listen(document,'visibilitychange',()=>{if(!document.hidden)recover();});
+ listen(window,'focus',recover);
  listen(window,'storage',event=>{
   if(event.key===bridge.storageKey){
    if(engine?.meta?.pending){engine.meta.conflict=true;engine.checkpoint();status('conflict','다른 창에서도 수정했습니다. 기록을 선택해 주세요.');}
    else engine?.reconcile();
   }
  });
- const interval=setInterval(()=>{if(!document.hidden&&navigator.onLine)engine?.reconcile();},15000);
+ const interval=setInterval(()=>{if(!document.hidden&&navigator.onLine)recover();},15000);
  listen(window,'beforeunload',event=>{
   if(engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
  });
- paint();const ready=connect().catch(report);
+ paint();const ready=connect().catch(error=>{restorePending=false;report(error);});
  return {ready,get status(){return statusKind;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }

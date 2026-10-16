@@ -14,16 +14,16 @@ import {createWorkAccount,emptyWorkState} from '../work/work-account.mjs';
 import {validate as validateWork} from '../work/repository.js';
 const copy=x=>structuredClone(x),tick=()=>new Promise(r=>setTimeout(r,5));
 async function until(fn){for(let i=0;i<80;i++){if(fn())return;await tick();}assert.ok(fn(),'timed out waiting for UI');}
-function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=false,invalidSession=false,work=false}={}){
+function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=false,invalidSession=false,work=false,verificationFailures=0}={}){
  const dom=new JSDOM('<button data-action="cloud-open"><span data-cloud-label></span><small data-cloud-status></small></button>',{url:'https://embed.example/'});
  for(const key of ['window','document','navigator','Event'])Object.defineProperty(globalThis,key,{value:dom.window[key],configurable:true});
  dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
  const cache=new Map(seed),storage={persistent,getItem:k=>cache.get(k)??null,setItem:(k,v)=>cache.set(k,String(v)),removeItem:k=>cache.delete(k),keys:()=>[...cache.keys()]};
  const empty=work?emptyWorkState:initialState,validate=work?validateWork:validateState;
- const account=work?createWorkAccount({storage,validate}):createAccountData({storage,key:STORAGE_KEY,empty,validate});let state=empty(),listener,reads=0,writes=0,seen=[];
+ const account=work?createWorkAccount({storage,validate}):createAccountData({storage,key:STORAGE_KEY,empty,validate});let state=empty(),listener,reads=0,writes=0,seen=[],clientOptions,verifications=0;
  const bridge={read:()=>copy(state),validate,get storageKey(){return account.storageKey;},busy:()=>false,isPristine:()=>JSON.stringify(state)===JSON.stringify(empty()),hasLegacy:()=>work?false:account.hasLegacy(),importLegacy:()=>state=account.importLegacy(),setAccount:id=>state=id?account.activate(id):account.deactivate(),apply:value=>{account.write(value);state=copy(value);},export:()=>{},download:()=>{}};
  const client={auth:{
-  onAuthStateChange:fn=>{listener=fn;return{data:{subscription:{unsubscribe(){}}}};},getSession:async()=>({data:{session},error:null}),getUser:async()=>({data:{user:invalidSession?null:session?.user},error:invalidSession?{code:'invalid_credentials'}:null}),
+  onAuthStateChange:fn=>{listener=fn;return{data:{subscription:{unsubscribe(){}}}};},getSession:async()=>({data:{session},error:null}),getUser:async()=>{verifications++;if(verificationFailures-->0)return{data:{user:null},error:new TypeError('Failed to fetch')};return{data:{user:invalidSession?null:session?.user},error:invalidSession?{code:'invalid_credentials'}:null}},
   signInWithPassword:async credentials=>{seen.push(credentials);if(invalid)return{error:{code:'invalid_credentials'}};session={user:{id:credentials.email.startsWith('a')?'A':'B',email:credentials.email}};listener('SIGNED_IN',session);return{data:{user:session.user,session},error:null};},
   signOut:async()=>{session=null;listener('SIGNED_OUT',null);return{error:null};}
  },channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){},from:()=>{
@@ -34,12 +34,43 @@ function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=fals
    const row={state:copy(payload.state),updated_at:String(writes+10)};rows.set(id,row);return{data:copy(row),error:null};
   }};return q;
  }};
- const ui=startCloud(bridge,{storage,...(work?{slot:'myWorkV1',namespace:'my-work',autoInitialize:false}:{}),loadClient:async()=>({createClient:()=>client})});
+ const ui=startCloud(bridge,{storage,...(work?{slot:'myWorkV1',namespace:'my-work',autoInitialize:false}:{}),loadClient:async()=>({createClient:(_url,_key,options)=>{clientOptions=options;return client}})});
  const submit=email=>{const form=document.querySelector('form');form.elements.email.value=email;form.elements.password.value='test-password';form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};
  const click=action=>document.querySelector('[data-cloud="'+action+'"]').click();
- return{ui,dom,cache,rows,seen,submit,click,get state(){return state},get reads(){return reads},get writes(){return writes},status:()=>document.querySelector('#cloud-detail').textContent,close(){ui.destroy();dom.window.close();}};
+ return{ui,dom,cache,rows,seen,submit,click,get clientOptions(){return clientOptions},get verifications(){return verifications},get state(){return state},get reads(){return reads},get writes(){return writes},status:()=>document.querySelector('#cloud-detail').textContent,close(){ui.destroy();dom.window.close();}};
 }
 const snapshot=amount=>{const state=initialState();state.budgets['2026-10']={total:amount,allocations:{}};return{state:{[CLOUD_SLOT]:{schema:1,revision:'r1',data:state}},updated_at:'1'};};
+test('temporary verification failure recovers the saved session on reconnect without another password',async()=>{
+ const app=setup({verificationFailures:1,session:{user:{id:'A',email:'a@example.test'}},rows:new Map([['A',snapshot(700)]])});
+ try{
+  await app.ui.ready;assert.equal(app.ui.account,null);assert.equal(app.reads,0);
+  window.dispatchEvent(new Event('online'));
+  await until(()=>app.ui.account?.id==='A'&&app.state.budgets['2026-10']?.total===700);
+  assert.equal(app.verifications,2);assert.equal(app.seen.length,0);
+  assert.equal(app.clientOptions.auth.persistSession,true);assert.equal(app.clientOptions.auth.autoRefreshToken,true);
+  app.click('logout');await until(()=>app.ui.account===null);
+  window.dispatchEvent(new Event('online'));await tick();assert.equal(app.ui.account,null);
+ }finally{app.close();}
+});
+test('remember ID survives logout and reopening, stores no password, and can be cleared',async()=>{
+ const key='my-week.login-email.v1';let seed;
+ const app=setup({rows:new Map([['A',snapshot(700)]])});
+ try{
+  await app.ui.ready;document.querySelector('[name=rememberEmail]').checked=true;
+  app.submit('a@example.test');await until(()=>app.status()==='동기화됨');
+  assert.equal(app.cache.get(key),'a@example.test');
+  assert.equal(JSON.stringify([...app.cache]).includes('test-password'),false);
+  app.click('logout');await until(()=>app.ui.account===null);
+  seed=[...app.cache];assert.equal(app.cache.get(key),'a@example.test');
+ }finally{app.close();}
+ const reopened=setup({seed});
+ try{
+  await reopened.ui.ready;assert.equal(document.querySelector('[name=email]').value,'a@example.test');
+  const checkbox=document.querySelector('[name=rememberEmail]');assert.equal(checkbox.checked,true);
+  checkbox.click();assert.equal(reopened.cache.has(key),false);
+  assert.equal(document.querySelector('[name=password]').value,'');
+ }finally{reopened.close();}
+});
 test('direct password login works with blocked storage and pulls server data',async()=>{
  const app=setup({persistent:false,rows:new Map([['A',snapshot(700)]])});try{await app.ui.ready;app.submit('a@example.test');await until(()=>app.status()==='동기화됨');
  assert.equal(app.state.budgets['2026-10'].total,700);assert.equal(app.writes,0);assert.equal(document.querySelector('[name=password]').value,'');

@@ -1,4 +1,4 @@
-import {startCloud} from '../schedule-cloud-ui.mjs?v=20261016-bell';
+import {startCloud} from '../schedule-cloud-ui.mjs?v=20261016-persistent-auth';
 import {appStorage} from '../schedule-storage.mjs';
 import {workAccount,validate} from './repository.js?v=work-integration-1';
 import {mergeWorkData} from './work-account.mjs';
