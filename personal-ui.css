@@ -3,23 +3,23 @@
 :root{--bg:#191c23;--panel:#22262d;--panel-2:#2a2d35;--panel-3:#30343e;--line:#393e49;--line-strong:#515967;--text:#eceef2;--muted:#a0a6b2;--muted-2:#858d9c;--blue:#3b5057;--blue-2:#8dccd0;--blue-soft:#8dccd01a;--cyan:#8dccd0;--shadow:0 16px 60px #0005}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.015em;line-height:1.5}
 .app{width:100%;max-width:none;padding:0 0 28px;margin:0;min-height:100dvh}
-.header{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px;min-height:60px;margin:0;padding:0 34px;border-bottom:1px solid #30343c}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;height:96px;min-height:96px;margin:0;padding:0 34px;border-bottom:0}
 .header .selection-line{margin:0;justify-content:center;gap:8px}
 .selected-date-label{font-size:18px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;border:0;background:none;padding:6px}
 .header .header-actions{gap:6px;margin:0;justify-self:end}
 .header-actions .action-btn{color:#8e99a9;border-radius:8px}
 .header-actions .action-btn:hover{background:#2d323b;color:var(--text)}
 .header-actions .header-action-svg{width:20px;height:20px}
-.personal-workspace{background:transparent;border-radius:0;min-height:0;padding:0 34px}
-.personal-toolbar{display:flex;align-items:center;justify-content:space-between;height:76px;gap:12px;color:var(--muted);font-size:12px}
+.personal-workspace{background:#21242b;border-radius:32px;min-height:calc(100dvh - 130px);margin:0 34px;padding:0 28px 28px}
+.personal-toolbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:82px;gap:12px;color:var(--muted);font-size:12px}
 .personal-toolbar-label{font-weight:500;color:var(--muted)}
 .view-select{height:34px;border:0;border-radius:6px;background-color:#30343e;color:var(--text);font-size:13px}
-.calendar-card,.mobile-card{border:1px solid #383b42;border-radius:10px;background:#21242b}
+.calendar-card,.mobile-card{border:1px solid #383b42;border-radius:12px;background:#191c23}
 .schedule-table{min-width:0}
-.row-head{width:8%;font-size:18px;background:#21242b;color:#8b8d93;font-weight:500}
-.day-head,.data-cell,.mobile-day-btn,.mobile-row-label,.mobile-row-content,.mobile-month-cell{background:#21242b}
+.row-head{width:8%;font-size:18px;background:#191c23;color:#8b8d93;font-weight:500}
+.day-head,.data-cell,.mobile-day-btn,.mobile-row-label,.mobile-row-content,.mobile-month-cell{background:#191c23}
 .day-head{height:94px;padding:12px 6px}.dow{font-size:16px}.day-number{font-size:20px;width:42px;height:42px}
-.day-head.selected,.data-cell.selected,.mobile-day-btn.selected,.mobile-row-content.selected,.mobile-month-cell.selected{background:#21242b}
+.day-head.selected,.data-cell.selected,.mobile-day-btn.selected,.mobile-row-content.selected,.mobile-month-cell.selected{background:#191c23}
 .day-number.today,.mobile-day-btn .mdate.today,.mobile-month-date.today,.month-date.today{background:#3b5057;color:#a6e0e2}
 .side-nav{display:none}
 .side-nav.prev{left:-26px}.side-nav.next{right:-26px}
@@ -55,14 +55,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .personal-brand .planner-switch{width:52px;height:26px}.personal-brand .planner-mode{width:26px;height:26px;min-width:26px}.personal-brand .planner-mode::before{width:16px;height:16px}
 .personal-date-nav,.personal-tools,#personalQuickActions{display:flex;align-items:center;gap:8px}.personal-date-nav .selection-line{margin:0}.selected-date-label{font-size:20px;padding:0;font-weight:600}.date-step{display:grid;place-items:center;width:32px;height:36px;border:0;background:none;color:#bdc2ce;font-size:28px;border-radius:6px}.date-step:hover{background:#2a2d35}
 .view-select{background-color:transparent;color:#a6a9b5;font-size:14px}.personal-tools{gap:12px}
-#personalQuickActions{opacity:0;transition:opacity .15s}.personal-toolbar:hover #personalQuickActions,#personalQuickActions:focus-within{opacity:1}
-#personalQuickActions .action-btn{width:32px;height:32px;color:#a6a9b5;border-radius:6px}#personalQuickActions svg{width:18px;height:18px}
+#personalQuickActions{opacity:1}.personal-toolbar:hover #personalQuickActions,#personalQuickActions:focus-within{opacity:1}
+#personalQuickActions .action-btn{width:auto;height:32px;color:#a6a9b5;border-radius:6px;display:flex;align-items:center;gap:5px;font-size:13px}#personalQuickActions svg{width:18px;height:18px}
 .header .header-actions{margin-left:auto;gap:8px}.header #settingsBtn{order:0}.header #syncCloudBtn{order:1}
 .header-action-toggle{display:none!important}
 .schedule-table th,.schedule-table td{border-color:#383b42}
-.day-head.is-past,.data-cell.is-past,.day-head.is-past.selected,.data-cell.is-past.selected{background:#21242b}
+.day-head.is-past,.data-cell.is-past,.day-head.is-past.selected,.data-cell.is-past.selected{background:#191c23}
 .day-head.is-past .dow,.day-head.is-past .day-number{opacity:.35}.day-head.saturday .dow,.day-head.saturday .day-number:not(.today){color:#8eb8ff}
-.day-head.today-col:not(.selected){background:#21242b}
+.day-head.today-col:not(.selected){background:#191c23}
 .tracker-row .data-cell,.wake-row .data-cell,.bed-row .data-cell{height:52px;padding:6px 8px}
 .tracker-icons{gap:8px}.tracker-toggle{width:28px;height:30px;padding:4px}.tracker-svg{display:inline-block;width:20px;height:20px;vertical-align:middle;background:currentColor;mask:var(--tracker-image) center/contain no-repeat;flex:none}
 .tracker-coffee{--tracker-image:url('./assets/tracker-coffee.svg')}.tracker-meditation{--tracker-image:url('./assets/tracker-meditation.svg')}.tracker-poo{--tracker-image:url('./assets/tracker-poo.svg')}
@@ -73,7 +73,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .event-card:hover,.event-card:focus-visible{background:#4e5362;border-color:#8dd5d8}.event-card:focus-visible{outline:2px solid #8dd5d8;outline-offset:2px}
 .event-card.work:hover{background:#363b45;border-color:#626a79}
 
-@media(max-width:1100px){.header{padding-inline:24px}.personal-workspace{padding-inline:24px}.row-head{font-size:14px}.event-title{font-size:15px}.event-time{font-size:12px}.tracker-icons{gap:2px}.tracker-toggle{width:24px}.tracker-svg{width:18px;height:18px}}
-@media(max-width:900px){.header{padding-inline:18px}.personal-workspace{padding-inline:18px}.personal-toolbar{height:66px}.mobile-week-toolbar{display:none}.mobile-card{margin:0}.mobile-row-content.selected{background:#21242b}.mobile-row-label{background:#21242b}.mobile-row-content{background:#21242b}.mobile-day-btn{background:#21242b}.mobile-row{min-height:54px}.mobile-day-btn.is-past{opacity:.5}.mobile-row.is-past .mobile-events{opacity:.5}}
-@media(max-width:520px){.header{height:60px;min-height:60px;padding:0 16px;gap:8px}.personal-brand{gap:10px}.personal-brand h1{font-size:15px}.header .header-actions{gap:2px}.personal-workspace{padding:0 12px}.selected-date-label{font-size:18px}.personal-tools{gap:4px}.personal-toolbar{gap:4px}.view-select{padding-left:6px;padding-right:26px}.date-step{width:24px}.personal-date-nav{gap:2px}.mobile-row{grid-template-columns:48px minmax(0,1fr)}.mobile-row-content{padding:10px}.modal-backdrop{align-items:center;padding:12px}.modal{border-radius:14px;max-height:calc(100dvh - 24px)}.modal-head,.modal-body,.settings-pane,.modal-foot{padding:18px}.settings-layout{min-height:0}.settings-nav{gap:4px}.settings-nav button{font-size:12px;padding:9px}.event-title{font-size:14px}.event-time{font-size:12px}#personalQuickActions{opacity:1}#personalQuickActions .action-btn{width:26px}.tracker-toggle{min-width:30px}}
+@media(max-width:1100px){.header{padding-inline:24px}.personal-workspace{margin-inline:24px;padding-inline:20px}.row-head{font-size:14px}.event-title{font-size:15px}.event-time{font-size:12px}.tracker-icons{gap:2px}.tracker-toggle{width:24px}.tracker-svg{width:18px;height:18px}}
+@media(max-width:900px){.header{padding-inline:18px}.personal-workspace{margin-inline:18px;padding-inline:14px;border-radius:24px}.personal-toolbar{height:66px}.mobile-week-toolbar{display:none}.mobile-card{margin:0}.mobile-row-content.selected{background:#191c23}.mobile-row-label{background:#191c23}.mobile-row-content{background:#191c23}.mobile-day-btn{background:#191c23}.mobile-row{min-height:54px}.mobile-day-btn.is-past{opacity:.5}.mobile-row.is-past .mobile-events{opacity:.5}}
+@media(max-width:520px){.header{height:72px;min-height:72px;padding:0 16px;gap:8px}.personal-brand{gap:10px}.personal-brand h1{font-size:15px}.header .header-actions{gap:2px}.personal-workspace{margin:0 12px;padding:0 10px 12px;border-radius:20px;min-height:calc(100dvh - 88px)}.selected-date-label{font-size:18px}.personal-tools{gap:4px}.personal-toolbar{gap:4px;grid-template-columns:1fr auto}.view-select{padding-left:6px;padding-right:26px}.date-step{width:24px}.personal-date-nav{gap:2px}.mobile-row{grid-template-columns:48px minmax(0,1fr)}.mobile-row-content{padding:10px}.modal-backdrop{align-items:center;padding:12px}.modal{border-radius:14px;max-height:calc(100dvh - 24px)}.modal-head,.modal-body,.settings-pane,.modal-foot{padding:18px}.settings-layout{min-height:0}.settings-nav{gap:4px}.settings-nav button{font-size:12px;padding:9px}.event-title{font-size:14px}.event-time{font-size:12px}#personalQuickActions{opacity:1}#personalQuickActions .action-btn{width:26px}#personalQuickActions .action-btn span{display:none}.tracker-toggle{min-width:30px}}
 @media(hover:none){#personalQuickActions{opacity:1}.cell-add{opacity:1;pointer-events:auto}}
+
+.personal-date-nav{grid-column:2;justify-self:center}.personal-tools{grid-column:3;justify-self:end}.personal-tools .view-select{order:-1}.personal-countdown{font-size:12px;color:#858d9c;white-space:nowrap}.personal-countdown strong{font-size:14px;font-weight:500;color:#eceef2;margin-left:6px;font-variant-numeric:tabular-nums}.header #settingsBtn{order:2;font-size:26px}.header #syncCloudBtn{order:1}.personal-brand{gap:16px}.personal-toolbar .selected-date-label{font-size:18px}.row-head{width:84px;font-size:14px}.day-head.selected .day-number:not(.today){box-shadow:inset 0 0 0 1px #8dccd0}.mobile-day-btn.selected .mdate:not(.today){box-shadow:inset 0 0 0 1px #8dccd0}
+@media(max-width:720px){.personal-toolbar{grid-template-columns:1fr auto}.personal-date-nav{grid-column:1;justify-self:start}.personal-tools{grid-column:2}.personal-countdown{font-size:10px}.personal-countdown strong{font-size:12px}.personal-brand{gap:10px}}

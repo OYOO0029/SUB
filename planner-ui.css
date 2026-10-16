@@ -1,12 +1,30 @@
 /* Shared personal/work navigation. Filled silhouettes follow the supplied reference. */
 :root{--planner-mint:#8dccd0;--planner-selected:#3b5057;--planner-switch:#2a2d35}
-.planner-switch,.new-header .planner-switch{display:inline-flex;align-items:center;gap:0;padding:0;background:var(--planner-switch);border-radius:999px;width:72px;height:36px;flex:none}
+.planner-switch,.new-header .planner-switch{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:0;padding:0;background:var(--planner-switch);border-radius:999px;width:72px;height:36px;flex:none}
+.planner-switch::before{content:"";position:absolute;inset:0 auto 0 0;width:50%;border-radius:50%;background:var(--planner-selected);transform:translateX(0);transition:transform 180ms cubic-bezier(.2,.7,.3,1);z-index:-1}
+.planner-switch:has(.planner-mode[data-value=work].active)::before,.planner-switch[data-target=work]::before{transform:translateX(100%)}
+.planner-switch[data-target=personal]::before{transform:translateX(0)}
+.planner-switch[data-target]{pointer-events:none}
 .planner-switch .planner-mode,.new-header .planner-switch .planner-mode{display:grid;place-items:center;width:36px;height:36px;min-width:36px;padding:0;border:0;border-radius:50%;background:transparent;color:#76797f;text-decoration:none;cursor:pointer;transition:background .15s,color .15s}
-.planner-switch .planner-mode.active,.new-header .planner-switch .planner-mode.active{color:var(--planner-mint);background:var(--planner-selected)}
+.planner-switch .planner-mode.active,.new-header .planner-switch .planner-mode.active{color:var(--planner-mint);background:transparent}
+.planner-switch[data-target] .planner-mode{color:#76797f}
+.planner-switch[data-target=work] .planner-mode[data-value=work],.planner-switch[data-target=personal] .planner-mode[data-value=personal]{color:var(--planner-mint)}
 .planner-switch .planner-mode:hover{color:#c4d1d8}
 .planner-switch .planner-mode:focus-visible{outline:2px solid #bdc2ce;outline-offset:3px}
 .planner-mode::before{content:"";display:block;width:22px;height:22px;background:currentColor;mask:var(--mode-icon) center/contain no-repeat}
 .planner-mode[data-value=personal]{--mode-icon:url('./assets/mode-personal.svg')}
 .planner-mode[data-value=work]{--mode-icon:url('./assets/mode-work.svg')}
 .planner-mode>.icon{display:none}
-@media(prefers-reduced-motion:reduce){.planner-switch .planner-mode{transition:none}}
+@media(prefers-reduced-motion:reduce){.planner-switch .planner-mode,.planner-switch::before{transition:none}}
+/* Both destinations share the same outer shell so switching preserves orientation. */
+.new-header{height:96px}.new-header .header-inner{display:flex;justify-content:space-between;width:auto;max-width:none;margin:0 34px;padding:0;height:100%}
+.new-header .planner-switch{width:52px;height:26px}.new-header .planner-switch .planner-mode{width:26px;height:26px;min-width:26px}.new-header .planner-mode::before{width:16px;height:16px}
+.new-header .header-start{flex-direction:row;align-items:center;gap:16px}
+#app>.main{width:auto;max-width:none;margin:0 34px 28px;padding:0}
+#app>.main>.new-workspace{border-radius:32px;background:#21242b;min-height:calc(100dvh - 130px)}
+.new-workspace .workspace-nav{display:grid;grid-template-columns:1fr auto 1fr;min-height:82px;padding:16px 28px;gap:12px}
+.new-workspace .workspace-nav>.date-navigation{grid-column:2;justify-self:center;gap:4px}.new-workspace .workspace-actions{justify-self:end}
+.new-workspace .date-label{font-size:18px;font-weight:600}.new-workspace .workspace-content{padding:0 28px 28px}
+@media(max-width:1100px){.new-header .header-inner{margin-inline:24px}#app>.main{margin-inline:24px}.new-workspace .workspace-nav{padding-inline:20px}}
+@media(max-width:720px){.new-header{height:72px}.new-header .header-inner{margin-inline:16px}#app>.main{margin:0 12px 16px}#app>.main>.new-workspace{border-radius:20px;min-height:calc(100dvh - 88px)}.new-workspace .workspace-nav{grid-template-columns:1fr auto;padding:12px;gap:8px}.new-workspace .workspace-nav>.date-navigation{grid-column:1;grid-row:1;justify-self:start}.new-workspace .workspace-actions{grid-column:2;grid-row:1}.new-workspace .workspace-nav>.view-tabs{grid-column:1 / -1;grid-row:2;justify-self:start}.new-workspace .workspace-content{padding:0 12px 16px}}
+@media(max-width:720px){.new-header .header-start{gap:10px}.new-header .leave-countdown{font-size:10px}.new-header .leave-countdown strong{font-size:12px;margin-left:6px}}

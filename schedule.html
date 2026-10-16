@@ -403,13 +403,14 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261016">
-<link rel="stylesheet" href="./personal-ui.css?v=20261016-reference">
+<link rel="stylesheet" href="./planner-ui.css?v=20261016-motion">
+<link rel="stylesheet" href="./personal-ui.css?v=20261016-shell">
+<script defer src="./planner-navigation.js?v=20261016-motion"></script>
 </head>
 <body>
 <div class="app">
   <header class="header">
-      <div class="personal-brand"><h1>WHAT TO DO</h1><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav></div>
+      <div class="personal-brand"><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav><span class="personal-countdown">퇴근까지 <strong id="personalLeaveCount">00:00</strong></span></div>
 
     <div class="header-actions">
       <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1500,6 +1501,14 @@ document.getElementById("nextBtn").onclick=()=>navigate(1);
 document.getElementById("quickAddBtn").onclick=()=>openEventForm({date:fmtDate(focusDate),slot:"morning"});
 document.getElementById("workStatusBtn").onclick=openWork;
 document.getElementById("settingsBtn").onclick=openSettings;
+function updateLeaveCount(){
+ const now=new Date(),end=state.workConfig.end||'18:00';
+ const [hour,minute]=end.split(':').map(Number);
+ const remaining=Math.max(0,hour*60+minute-now.getHours()*60-now.getMinutes());
+ document.getElementById('personalLeaveCount').textContent=pad(Math.floor(remaining/60))+':'+pad(remaining%60);
+}
+updateLeaveCount();setInterval(updateLeaveCount,30000);
+window.addEventListener('my-week-sync-status',updateLeaveCount);
 
 document.getElementById("repeatToggle").onclick=()=>{const c=document.getElementById("repeatContent");c.hidden=!c.hidden};
 document.getElementById("repeatType").onchange=()=>updateRepeatUI(true);
@@ -1588,7 +1597,10 @@ render();
 // Keep existing action IDs and handlers while placing shortcuts beside view selection.
 (()=>{
  const quick=document.getElementById('personalQuickActions');
- ['quickAddBtn','workStatusBtn'].forEach(id=>quick.append(document.getElementById(id)));
+ ['workStatusBtn','quickAddBtn'].forEach(id=>quick.append(document.getElementById(id)));
+ document.getElementById('quickAddBtn').insertAdjacentHTML('afterbegin','<span>추가</span>');
+ document.getElementById('workStatusBtn').insertAdjacentHTML('afterbegin','<span>근무</span>');
+ document.getElementById('settingsBtn').innerHTML='<span aria-hidden="true">⋯</span>';
 })();
 </script><script type="module" src="./schedule-sync.js?v=work-integration-1"></script></body>
 </html>
