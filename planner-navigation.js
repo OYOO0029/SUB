@@ -1,28 +1,23 @@
-// The mode switch animates locally, then follows the existing page route.
+// Embedded views retain their own state; the shell controls navigation.
 (() => {
-  let pending;
-  document.addEventListener('click', event => {
-    const control = event.target.closest('.planner-switch .planner-mode');
-    if (!control || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const toggle = control.closest('.planner-switch');
-    if (control.classList.contains('active')) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-    const target = control.dataset.value;
-    if (!['personal', 'work'].includes(target)) return;
-    const url = control.getAttribute('href') || (target === 'personal' ? '../schedule.html' : './work/');
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    if (pending) return;
-    toggle.dataset.target = target;
-    const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180;
-    pending = setTimeout(() => location.assign(url), delay);
-  }, true);
-  window.addEventListener('pageshow', () => {
-    clearTimeout(pending);
-    pending = undefined;
-    document.querySelectorAll('.planner-switch[data-target]').forEach(toggle => delete toggle.dataset.target);
-  });
+ const embedded = new URLSearchParams(location.search).has('embedded');
+ const shell = new URL('./schedule.html', document.currentScript.src);
+ if (!embedded) {
+  shell.searchParams.set('mode', location.pathname.includes('/work/') ? 'work' : 'personal');
+  location.replace(shell);
+  return;
+ }
+ document.documentElement.classList.add('planner-embedded');
+ window.plannerInactive=window.frameElement?.hidden ?? false;
+ document.addEventListener('click', event => {
+  const control = event.target.closest('.planner-mode, a[href$="schedule.html"]');
+  if (!control || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault(); event.stopImmediatePropagation();
+  parent.postMessage({type:'planner-mode',mode:control.dataset.value || 'personal'}, location.origin);
+ },true);
+ window.addEventListener('message',event=>{
+  if(event.origin!==location.origin || event.source!==parent || event.data?.type!=='planner-active')return;
+  window.plannerInactive=!event.data.active;
+  document.dispatchEvent(new Event('visibilitychange'));
+ });
 })();

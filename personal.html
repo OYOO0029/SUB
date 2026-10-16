@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MY WEEK</title>
+<link rel="stylesheet" href="./schedule-cloud.css">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#171a20;
+  --panel:#20232a;
+  --panel-2:#262a32;
+  --panel-3:#2d313a;
+  --line:#383d47;
+  --line-strong:#515866;
+  --text:#f4f5f7;
+  --muted:#a2a6b0;
+  --muted-2:#737985;
+  --blue:#0a6bea;
+  --blue-2:#67a7ff;
+  --blue-soft:rgba(10,107,234,.13);
+  --red:#ef6666;
+  --red-soft:rgba(239,102,102,.14);
+  --cyan:#84d7dc;
+  --green:#7ccf9a;
+  --green-soft:rgba(124,207,154,.14);
+  --shadow:0 18px 60px rgba(0,0,0,.24);
+  --radius:12px;
+  --pill:999px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-size:14px;line-height:1.45;letter-spacing:-.012em;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
+[hidden]{display:none!important}
+.app{min-height:100vh;padding:44px 4.7vw 56px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+.brand-title{margin:0;color:#9b9ea6;font-size:18px;font-weight:600;letter-spacing:-.02em}
+.selection-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.selected-date-label{font-size:22px;font-weight:650;letter-spacing:-.035em;cursor:pointer;display:inline-flex;align-items:center;border-radius:8px;padding:1px 0;transition:opacity .15s,color .15s}
+.view-select{
+  height:34px;padding:0 34px 0 12px;border:1px solid var(--line);border-radius:7px;
+  color:#d9dbe0;background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%238f939d' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+  appearance:none;font-size:12px;
+}
+.header-actions{display:flex;gap:14px;align-items:center;flex-wrap:nowrap;padding-top:10px;flex:0 0 auto}
+.selected-date-label:hover{opacity:.86;color:#ffffff}
+.header-actions{display:flex;gap:14px;align-items:center;flex-wrap:nowrap;padding-top:10px;flex:0 0 auto}
+.action-btn{
+  width:24px;height:24px;min-height:24px;border:0;border-radius:0;padding:0;
+  background:transparent;color:#f3f4f6;display:grid;place-items:center;opacity:.86;
+}
+.action-btn:hover{background:transparent;opacity:1}
+.action-btn.primary{background:transparent}
+.action-btn .dim{display:none}
+.action-btn .icon-img{width:24px;height:24px;display:block;opacity:1;object-fit:contain}
+.storage-warning{
+  display:none;margin:-12px 0 18px;padding:10px 13px;border:1px solid #7e5b2a;border-radius:9px;
+  background:#2a231a;color:#f1c985;font-size:12px;
+}
+.storage-warning.show{display:block}
+
+.calendar-shell{position:relative}
+.calendar-card{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.side-nav{
+  position:absolute;top:50%;translate:0 -50%;z-index:15;width:48px;height:64px;border:0;background:transparent;
+  color:#b4b8c2;font-size:45px;font-weight:300;line-height:1;display:grid;place-items:center;border-radius:10px;
+}
+.side-nav:hover{color:#fff;background:rgba(255,255,255,.035)}
+.side-nav.prev{left:-58px}.side-nav.next{right:-58px}
+.calendar-scroll{overflow:auto;scrollbar-color:#555b68 #1f2229}
+.schedule-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:980px}
+.schedule-table th,.schedule-table td{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.schedule-table tr>*:last-child{border-right:0}
+.schedule-table tbody tr:last-child>*{border-bottom:0}
+.row-head{
+  width:116px;background:#20232a;color:#8f939d;text-align:center;font-size:13px;font-weight:600;
+  position:sticky;left:0;z-index:7;
+}
+.day-head{height:90px;text-align:center;position:relative;background:#20232a;padding:11px 6px 7px;font-weight:400}
+.day-head.selected{background:#31343b}
+.day-head.today-col:not(.selected){background:#252930}
+.day-head.is-past{background:#1c1f25}
+.day-head.is-past.selected{background:#292c33}
+.day-head.is-past .dow,.day-head.is-past .day-number,.day-head.is-past .holiday-name{opacity:.48}
+.day-head.is-past:hover .dow,.day-head.is-past:hover .day-number{opacity:.7}
+.dow{font-size:12px;color:#999da7;font-weight:600}
+.day-head.sunday .dow,.day-head.sunday .day-number:not(.today){color:#df6b6b}
+.day-head.saturday .dow,.day-head.saturday .day-number:not(.today){color:var(--cyan)}
+.day-number{
+  display:grid;place-items:center;width:38px;height:38px;margin:4px auto 0;border:0;background:transparent;
+  color:#f5f6f8;border-radius:50%;font-size:19px;font-weight:650;
+}
+.day-number.today{background:var(--blue);color:#fff}
+.holiday-name{
+  min-height:14px;margin-top:1px;color:#ff8585;font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.data-cell{padding:10px;background:#20232a;vertical-align:top;position:relative}
+.data-cell.selected{background:#31343b}
+.data-cell.is-past{background:#1c1f25}
+.data-cell.is-past.selected{background:#292c33}
+.data-cell.is-past .event-card{opacity:.38;filter:saturate(.65)}
+.data-cell.is-past .event-card:hover{opacity:.62}
+.data-cell.is-past .time-cell-btn{color:#666c76}
+.data-cell.is-past .tracker-toggle{opacity:.08}
+.data-cell.is-past .tracker-toggle.active{opacity:.42;filter:grayscale(.3)}
+.data-cell.is-past:hover .time-cell-btn{color:#858b96}
+.data-cell.is-past-slot .event-card{opacity:.46;filter:saturate(.72)}
+.data-cell.is-past-slot .event-card:hover{opacity:.68}
+.tracker-row .data-cell,.wake-row .data-cell,.bed-row .data-cell{height:43px;padding:5px 8px;vertical-align:middle;text-align:center}
+.tracker-icons{display:flex;align-items:center;justify-content:center;gap:9px;min-height:30px;flex-wrap:nowrap}
+.tracker-toggle{
+  border:0;background:transparent;padding:4px;font-size:16px;line-height:1;border-radius:6px;opacity:.18;filter:grayscale(.45);
+}
+.tracker-toggle.active{opacity:1;filter:none}
+.tracker-toggle:hover{opacity:.75;background:rgba(255,255,255,.04)}
+.tracker-overflow{font-size:9px;color:var(--muted)}
+.time-cell-btn{
+  width:100%;min-height:32px;border:0;background:transparent;color:#c7cad0;border-radius:7px;font-size:14px;font-weight:500;
+}
+.time-cell-btn.empty{color:#5d626d}
+.time-cell-btn:hover{background:rgba(255,255,255,.04);color:#fff}
+.schedule-row .data-cell{height:auto;padding:8px 10px;vertical-align:top}
+.schedule-row .events:empty::before{content:"";display:block;height:34px}
+.events{display:flex;flex-direction:column;gap:8px}
+.event-card{
+  width:100%;border:1px solid #4a505d;background:#282c34;border-radius:9px;padding:12px 13px;text-align:left;color:#fff;
+  transition:border-color .12s,transform .12s,opacity .12s;position:relative;user-select:none;cursor:grab;
+}
+.event-card[draggable="true"]:active{cursor:grabbing}
+.event-card:hover{border-color:#6c7484}
+.event-card:active{transform:scale(.99)}
+.event-card.work{background:#292d35;border-color:#515866}
+.event-card.work .event-title{color:#f1f2f4}
+.event-card.exercise{background:rgba(10,107,234,.11);border-color:rgba(10,107,234,.25)}
+.event-card.exercise .event-title{color:#6aa8ff}
+.event-card.social{background:var(--green-soft);border-color:rgba(124,207,154,.38)}
+.event-card.social .event-title{color:#9fe0b8}
+.event-card.personal,.event-card.other{background:#282c34}
+.event-card.leave{border-style:dashed;color:#b9bdc7}
+.event-card.dragging{opacity:.35}
+.event-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-time{font-size:11px;color:#a8acb5;margin-top:6px}
+.repeat-mark{position:absolute;right:9px;top:8px;color:var(--blue-2);font-size:11px}
+.drop-ready{box-shadow:inset 0 0 0 2px rgba(103,167,255,.8)}
+.cell-add{
+  position:absolute;left:10px;right:10px;bottom:8px;height:26px;margin-top:0;border:1px dashed transparent;background:transparent;border-radius:7px;color:#6c717d;
+  opacity:0;font-size:11px;pointer-events:none;
+}
+.schedule-row .data-cell:hover .cell-add,.schedule-row .data-cell:focus-within .cell-add,.cell-add:focus-visible{opacity:1;pointer-events:auto}
+.cell-add:hover{border-color:#484e5a;color:#c9ccd2;background:#262a32}
+.more-btn{border:0;background:transparent;color:#7eb1ff;padding:3px 0;text-align:left;font-size:10px;font-weight:600}
+
+.day-mode .schedule-table{min-width:0}
+.day-mode .day-head{height:84px}
+.day-mode .schedule-row .data-cell{height:auto;padding:10px 12px}
+.day-mode .schedule-row .events:empty::before{height:44px}
+.day-mode .row-head{width:145px}
+.day-mode .event-card{max-width:680px;margin-inline:auto}
+.day-mode .tracker-icons{gap:18px}
+.day-mode .tracker-toggle{font-size:24px;padding:8px}
+.day-mode .time-cell-btn{font-size:18px;min-height:52px}
+
+.month-view{padding:0;background:var(--panel)}
+.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.month-dow{
+  min-height:46px;display:grid;place-items:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  color:#9397a0;font-size:12px;font-weight:600;background:#23262e;
+}
+.month-dow:nth-child(7){border-right:0}
+.month-cell{
+  min-height:132px;padding:8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#20232a;overflow:hidden;
+}
+.month-cell:nth-child(7n){border-right:0}
+.month-cell.outside{background:#1a1d23;opacity:.55}
+.month-cell.selected{background:#30333a;box-shadow:inset 0 0 0 1px #596170}
+.month-cell.is-past:not(.selected){background:#1c1f25}
+.month-cell.is-past .month-date,.month-cell.is-past .month-holiday,.month-cell.is-past .month-trackers,.month-cell.is-past .month-event,.month-cell.is-past .month-more{opacity:.46}
+.month-cell.is-past:hover .month-date,.month-cell.is-past:hover .month-trackers{opacity:.7}
+.month-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px}
+.month-date{
+  width:30px;height:30px;border:0;border-radius:50%;background:transparent;color:#d9dbe0;font-weight:600;
+}
+.month-date.today{background:var(--blue);color:#fff}
+.month-holiday{margin:2px 0 4px;color:#ff8585;font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month-trackers{display:flex;gap:4px;min-height:18px;align-items:center;font-size:13px}
+.month-event{margin-top:4px;padding:4px 6px;border-radius:6px;background:#292d35;color:#d8dbe0;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.month-event.exercise{color:#75afff;background:rgba(10,107,234,.1)}
+.month-event.social{color:#9fe0b8;background:rgba(124,207,154,.12)}
+.month-more{border:0;background:transparent;color:#80b3ff;font-size:9px;font-weight:600;padding:4px 0}
+.month-detail{
+  border-top:1px solid var(--line);padding:18px;background:#1f2229;display:grid;grid-template-columns:minmax(220px,.7fr) 1fr auto;gap:18px;align-items:start;
+}
+.month-detail h3{margin:0 0 5px;font-size:17px}
+.month-detail-sub{color:var(--muted);font-size:11px}
+.month-detail-trackers{display:flex;gap:8px;margin-top:12px}
+.month-detail-trackers .tracker-toggle{font-size:20px}
+.month-detail-times{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:#c2c5cc}
+.month-detail-events{display:grid;gap:6px}
+.month-detail-actions{display:flex;gap:8px;flex-direction:column}
+.small-btn{
+  min-height:38px;border:1px solid var(--line);background:#282c34;border-radius:8px;padding:8px 12px;color:#e7e9ed;font-weight:500;
+}
+.small-btn:hover{border-color:#606777}
+.small-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.modal-backdrop{
+  position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.58);
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  width:min(560px,100%);max-height:90dvh;overflow:auto;border:1px solid var(--line);border-radius:16px;background:#20232a;box-shadow:var(--shadow)
+}
+.modal.wide{width:min(760px,100%)}
+.modal-head{display:flex;justify-content:space-between;gap:18px;padding:21px 22px 16px;border-bottom:1px solid var(--line)}
+.modal-head h2{margin:0;font-size:20px}
+.modal-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.close-btn{width:38px;height:38px;border:0;border-radius:50%;background:#2c3038;color:#aeb2ba;font-size:20px}
+.modal-body{padding:20px 22px}
+.modal-foot{
+  position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:8px;padding:14px 22px;background:#20232a;border-top:1px solid var(--line);z-index:2
+}
+.btn{
+  min-height:40px;border:1px solid var(--line);border-radius:9px;padding:9px 15px;background:#292d35;color:#f1f2f4;font-weight:600
+}
+.btn:hover{border-color:#626a79}.btn.primary{background:var(--blue);border-color:var(--blue)}.btn.danger{color:#ff9292;background:#312528;border-color:#613c42}
+.field{margin-bottom:16px}
+.field label,.section-label{display:block;margin-bottom:7px;color:#a7abb5;font-size:12px;font-weight:600}
+.input,.select,.textarea{
+  width:100%;min-height:44px;border:1px solid var(--line);border-radius:9px;background:#292d35;padding:10px 12px;color:#fff;outline:none
+}
+.textarea{min-height:86px;resize:vertical}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--blue-2);box-shadow:0 0 0 2px rgba(103,167,255,.11)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.hint{color:#858a95;font-size:11px}
+.choice-list{display:grid;gap:8px}
+.choice{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:9px;padding:11px;background:#272b33}
+.choice input{accent-color:var(--blue)}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.time-parts{display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;gap:6px}
+.time-colon{text-align:center;font-size:22px;font-weight:500;color:#858a95}
+.segment{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  min-width:42px;min-height:40px;border:1px solid var(--line);border-radius:var(--pill);background:#292d35;color:#c9ccd2;padding:7px 11px
+}
+.chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.repeat-box{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:13px;background:#242830}
+.repeat-toggle{
+  width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;padding:0;color:#f2f3f5;font-weight:600
+}
+.repeat-content{margin-top:14px}
+
+.settings-layout{display:grid;grid-template-columns:150px 1fr;min-height:430px}
+.settings-nav{border-right:1px solid var(--line);padding:14px}
+.settings-nav button{
+  width:100%;text-align:left;border:0;border-radius:8px;padding:10px;background:transparent;color:#9ca1ab;font-weight:500;margin-bottom:3px
+}
+.settings-nav button.active{background:#2b3038;color:#fff}
+.settings-pane{padding:20px 22px}
+.category-row,.tracker-manage-row{display:flex;align-items:center;gap:8px;margin:8px 0}
+.category-row .input,.tracker-manage-row .input{min-width:0;flex:1}
+.tracker-manage-icon{font-size:23px;width:42px;text-align:center}
+.order-btn{width:34px;height:34px;border:1px solid var(--line);background:#292d35;border-radius:7px;color:#adb1ba}
+.settings-new{display:flex;gap:8px;margin-top:12px}
+.settings-new .input{flex:1}
+.data-actions{display:flex;gap:8px;flex-wrap:wrap}
+.file-input{display:none}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:200;translate:-50% 20px;opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:12px;max-width:min(92vw,520px);background:#eff1f4;color:#1b1e24;
+  padding:10px 13px;border-radius:var(--pill);font-size:12px;font-weight:600;transition:.18s;
+}
+.toast.show{opacity:1;translate:-50% 0;pointer-events:auto}
+.toast button{border:0;background:transparent;color:#075fcf;font-weight:650;padding:4px}
+
+
+/* v5.6 resilient shared mobile surface: visible by default so the structure survives restricted previews */
+.calendar-shell{display:none}
+.mobile-shell{display:block}
+.mobile-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+.mobile-week-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+.mobile-nav-btn{width:44px;height:44px;border:0;border-radius:10px;background:#262a31;color:#c7cad2;font-size:28px;line-height:1}
+.mobile-period{font-size:13px;font-weight:600;color:#e8e9ec;text-align:center}
+.mobile-day-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.mobile-day-btn{min-width:0;min-height:68px;border:0;border-right:1px solid var(--line);background:#20232a;color:#a3a7b0;padding:7px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px}
+.mobile-day-btn:last-child{border-right:0}.mobile-day-btn.selected{background:#30343b;color:#fff}.mobile-day-btn.is-past{opacity:.52}
+.mobile-day-btn .mdow{font-size:9px;font-weight:600}.mobile-day-btn .mdate{width:29px;height:29px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:650}
+.mobile-day-btn .mdate.today{background:var(--blue);color:#fff}.mobile-day-btn .mholiday{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;color:#ff8d8d;font-weight:600;text-align:center}
+.mobile-selected-label{padding:12px 14px 8px;color:#8f949e;font-size:11px;font-weight:600}
+.mobile-rows{border-top:1px solid var(--line)}
+.mobile-row{display:grid;grid-template-columns:68px minmax(0,1fr);border-bottom:1px solid var(--line);min-height:54px}
+.mobile-row:last-child{border-bottom:0}.mobile-row.is-past{opacity:.52}
+.mobile-row-label{display:flex;align-items:center;justify-content:center;background:#20232a;color:#8f939d;border-right:1px solid var(--line);font-size:11px;font-weight:600;padding:8px 4px}
+.mobile-row-content{min-width:0;padding:8px 9px;background:#20232a;display:flex;flex-direction:column;justify-content:center;gap:7px;position:relative}
+.mobile-row-content.selected{background:#2f333a}.mobile-row-content .tracker-icons{justify-content:flex-start;gap:10px}
+.mobile-row-content .tracker-toggle{min-width:38px;min-height:38px;font-size:18px}
+.mobile-time-btn{width:100%;min-height:38px;border:0;background:transparent;color:#d4d6dc;text-align:left;border-radius:8px;padding:7px 9px;font-weight:500}
+.mobile-time-btn.empty{color:#626873}.mobile-time-btn:active{background:#292d35}
+.mobile-events{display:flex;flex-direction:column;gap:7px}.mobile-events .event-card{padding:10px 11px}.mobile-events .event-time{margin-top:4px}
+.mobile-add{min-height:38px;border:1px dashed #3e444f;border-radius:8px;background:transparent;color:#8b909b;font-size:11px;font-weight:500}
+.mobile-add:active{background:#282c34;color:#d8dae0}
+.mobile-month{padding:10px}.mobile-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.mobile-month-dow{height:28px;display:grid;place-items:center;background:#252930;color:#8f949e;font-size:9px;font-weight:600;border-right:1px solid var(--line)}
+.mobile-month-dow:nth-child(7){border-right:0}.mobile-month-cell{min-height:54px;border-right:1px solid var(--line);border-top:1px solid var(--line);background:#20232a;padding:3px;min-width:0}
+.mobile-month-cell:nth-child(7n){border-right:0}.mobile-month-cell.outside{opacity:.28}.mobile-month-cell.is-past{opacity:.5}.mobile-month-cell.selected{background:#30343b}
+.mobile-month-date{width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:#d7d9df;font-size:11px;font-weight:650}.mobile-month-date.today{background:var(--blue);color:#fff}
+.mobile-month-flags{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.mobile-month-holiday{font-size:7px;color:#ff8d8d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-month-detail{margin-top:10px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.mobile-empty{color:#666c77;font-size:11px;padding:8px 0}
+
+@media(min-width:901px){
+  .calendar-shell{display:block}
+  .mobile-shell{display:none}
+}
+@media (pointer:coarse) and (max-width:1100px){
+  .calendar-shell{display:none!important}
+  .mobile-shell{display:block!important}
+}
+@media(max-width:900px){
+  .app{padding:24px 18px 42px}
+  .header{display:block}
+  .header-actions{padding-top:10px}
+  .side-nav{width:44px;height:54px;font-size:34px;background:rgba(23,26,32,.85);backdrop-filter:blur(6px)}
+  .side-nav.prev{left:-10px}.side-nav.next{right:-10px}
+  .calendar-card{margin-inline:8px}
+  .schedule-table{min-width:840px}
+  .month-detail{grid-template-columns:1fr}
+  .month-detail-actions{flex-direction:row}
+}
+@media(max-width:620px){
+  .app{padding:18px 10px 34px}
+  .calendar-shell{display:none}
+  .mobile-shell{display:block}
+  .header{display:block;margin-bottom:14px}
+  .header-actions{padding-top:10px;display:flex;gap:12px;overflow-x:visible;flex-wrap:nowrap;padding-bottom:0;scrollbar-width:none}
+  .brand-title{font-size:17px}
+  .selected-date-label{font-size:21px}
+  .selection-line{gap:8px}
+  .header-actions::-webkit-scrollbar{display:none}
+  .action-btn{width:22px;height:22px;min-height:22px;padding:0;justify-content:center;white-space:nowrap;flex:0 0 auto}
+  .action-btn .icon-img{width:22px;height:22px}
+  .calendar-card{margin-inline:3px}
+  .side-nav{top:48%;width:42px}
+  .side-nav.prev{left:-8px}.side-nav.next{right:-8px}
+  .schedule-table{min-width:760px}
+  .row-head{width:76px;font-size:11px}
+  .day-head{height:76px}
+  .tracker-row .data-cell,.wake-row .data-cell,.bed-row .data-cell{height:48px}
+  .schedule-row .data-cell{height:auto;padding:7px}
+  .schedule-row .events:empty::before{height:36px}
+  .event-card{padding:9px}.event-title{font-size:12px}.event-time{font-size:10px;margin-top:4px}
+  .cell-add{min-height:28px;color:#858b97}
+  .tracker-toggle{min-width:34px;min-height:34px}
+  .month-cell{min-height:76px;padding:4px 3px}
+  .month-dow{min-height:36px;font-size:10px}
+  .month-date{width:29px;height:29px;font-size:11px}
+  .month-holiday{font-size:8px;margin-top:0}
+  .month-event{display:none}
+  .month-trackers{font-size:11px}
+  .modal-backdrop{padding:8px;align-items:flex-end}
+  .modal{width:100%;max-height:94dvh;border-radius:18px 18px 0 0}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .settings-layout{display:block}
+  .settings-nav{display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px}
+  .settings-nav button{white-space:nowrap;width:auto;margin:0}
+  .settings-pane{padding:16px}
+  .month-detail{padding:14px}
+}
+
+/* v5.6: core mobile structure remains readable before JS hydration */
+#mobileDayPanel{display:block}
+#mobileMonthPanel[hidden],#mobileDayStrip[hidden]{display:none!important}
+.mobile-shell .mobile-empty{min-height:20px;display:flex;align-items:center}
+
+
+/* Header action icons: shared size, color and hit area. */
+.header-actions .action-btn{width:36px;height:36px;min-width:36px;min-height:36px;padding:0;margin:0;display:grid;place-items:center;color:#878787;opacity:1;background:transparent;border:0;transition:color .15s}
+.header-actions .action-btn:hover{color:#b0b0b0;opacity:1;background:transparent}
+.header-actions .header-action-svg{display:block;width:16px;height:16px;min-width:16px;min-height:16px;padding:0;margin:0;flex:none}
+@media(max-width:640px){.header-actions .action-btn{width:44px;height:44px;min-width:44px;min-height:44px}}
+
+/* Keep actions on the date row; collapse only when the row cannot fit. */
+.header{display:flex;align-items:flex-end;gap:12px;position:relative}
+.header>div:first-child{flex:0 0 auto;min-width:0}
+.header .selection-line{flex-wrap:nowrap}
+.header .header-actions{gap:4px;padding-top:0;margin-left:auto;overflow:visible;flex-wrap:nowrap;align-items:center}
+.header .header-actions .action-btn{width:36px;height:36px;min-width:36px;min-height:36px}
+.header-action-toggle{display:none;width:36px;height:36px;flex:0 0 36px;padding:0;border:0;background:transparent;color:#878787;font-size:24px;line-height:1;margin-left:auto}
+.header-action-toggle:hover{color:#b0b0b0;background:transparent}
+.header.actions-collapsed .header-action-toggle{display:grid;place-items:center}
+.header.actions-collapsed .header-actions{display:none}
+.header.actions-collapsed.actions-open .header-actions{display:flex;flex-direction:column;position:absolute;right:0;top:calc(100% + 8px);z-index:1000;width:148px;padding:6px;margin:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #0005;gap:4px}
+.header.actions-collapsed .header-actions .action-btn{width:100%;height:44px;display:flex;justify-content:flex-start;gap:10px;padding:0 10px}
+.header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
+.planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
+</style>
+<link rel="stylesheet" href="./planner-ui.css?v=20261016-shell-live">
+<link rel="stylesheet" href="./personal-ui.css?v=20261016-centered">
+<script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+      <div class="personal-brand"><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav></div>
+
+    <div class="header-actions">
+      <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.75 7H7M7 7H12.25M7 7V12.25M7 7V1.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></button>
+      <button class="action-btn" id="workStatusBtn" aria-label="근무상태" title="근무상태"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0.7 0.7 14.6 14.6" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="path-1-inside-1_56_278" fill="white">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.2055 4.68429C10.134 4.75461 10.0772 4.83839 10.0382 4.9308C9.99929 5.02321 9.97902 5.12241 9.97861 5.22269C9.97819 5.32297 9.99764 5.42234 10.0358 5.51506C10.074 5.60779 10.1302 5.69204 10.2011 5.76295C10.272 5.83385 10.3562 5.89002 10.449 5.9282C10.5417 5.96639 10.6411 5.98583 10.7413 5.98542C10.8416 5.98501 10.9408 5.96474 11.0332 5.92579C11.1256 5.88684 11.2094 5.82998 11.2797 5.75849L12.1653 4.86609C12.3069 4.72452 12.3864 4.53252 12.3864 4.33232C12.3864 4.13213 12.3068 3.94014 12.1652 3.79859C12.0951 3.72851 12.0119 3.67291 11.9203 3.63499C11.8287 3.59706 11.7306 3.57755 11.6315 3.57756C11.4313 3.57757 11.2393 3.65712 11.0977 3.79869L10.2055 4.68429ZM13.8951 7.98169C13.8951 7.78199 13.816 7.59043 13.6751 7.44896C13.5341 7.30748 13.3428 7.22763 13.1431 7.22689L11.8861 7.22209C11.6847 7.22209 11.4915 7.30212 11.349 7.44457C11.2066 7.58703 11.1265 7.78023 11.1265 7.98169C11.1265 8.18315 11.2066 8.37636 11.349 8.51881C11.4915 8.66126 11.6847 8.74129 11.8861 8.74129L13.1433 8.73649C13.343 8.7357 13.5342 8.65582 13.6751 8.51436C13.816 8.37289 13.8951 8.18136 13.8951 7.98169ZM12.1633 12.1627C12.3045 12.0215 12.384 11.8301 12.3844 11.6304C12.3848 11.4307 12.306 11.239 12.1653 11.0973L11.2799 10.2049C11.2094 10.1344 11.1256 10.0784 11.0335 10.0402C10.9413 10.0021 10.8425 9.98244 10.7428 9.98245C10.643 9.98246 10.5442 10.0021 10.4521 10.0403C10.3599 10.0785 10.2762 10.1344 10.2056 10.205C10.1351 10.2755 10.0792 10.3593 10.041 10.4515C10.0028 10.5436 9.98318 10.6424 9.98319 10.7422C9.9832 10.8419 10.0029 10.9407 10.041 11.0329C10.0792 11.125 10.1352 11.2088 10.2057 11.2793L11.0981 12.1649C11.2399 12.3055 11.4315 12.3842 11.6311 12.3838C11.8308 12.3835 12.0221 12.3038 12.1633 12.1627ZM7.98234 13.8949C8.18204 13.8949 8.3736 13.8158 8.51507 13.6748C8.65654 13.5339 8.73639 13.3426 8.73714 13.1429L8.74194 11.8859C8.74194 11.7861 8.72229 11.6874 8.68411 11.5952C8.64594 11.503 8.58999 11.4193 8.51945 11.3488C8.44892 11.2782 8.36518 11.2223 8.27302 11.1841C8.18086 11.1459 8.08209 11.1263 7.98234 11.1263C7.88258 11.1263 7.78381 11.1459 7.69165 11.1841C7.59949 11.2223 7.51575 11.2782 7.44522 11.3488C7.37468 11.4193 7.31873 11.503 7.28056 11.5952C7.24238 11.6874 7.22274 11.7861 7.22274 11.8859L7.22754 13.1431C7.22833 13.3428 7.3082 13.534 7.44967 13.6749C7.59114 13.8158 7.78267 13.8949 7.98234 13.8949ZM3.80114 12.1629C3.94234 12.3041 4.13374 12.3836 4.33342 12.3839C4.53311 12.3843 4.7248 12.3056 4.86654 12.1649L5.75894 11.2795C5.82948 11.209 5.88545 11.1252 5.92363 11.0331C5.96181 10.9409 5.98147 10.8421 5.98148 10.7424C5.98149 10.6426 5.96185 10.5438 5.92368 10.4517C5.88552 10.3595 5.82957 10.2757 5.75904 10.2052C5.6885 10.1346 5.60477 10.0787 5.5126 10.0405C5.42044 10.0023 5.32166 9.98266 5.22191 9.98265C5.12215 9.98264 5.02337 10.0023 4.9312 10.0404C4.83903 10.0786 4.75528 10.1346 4.68474 10.2051L3.79914 11.0975C3.65847 11.2392 3.57971 11.4309 3.58008 11.6306C3.58046 11.8303 3.65994 12.0217 3.80114 12.1629ZM2.06954 7.98189C2.06953 8.18159 2.14867 8.37316 2.28962 8.51463C2.43057 8.6561 2.62184 8.73595 2.82154 8.73669L4.07854 8.74149C4.27999 8.74149 4.4732 8.66146 4.61565 8.51901C4.75811 8.37656 4.83814 8.18335 4.83814 7.98189C4.83814 7.78043 4.75811 7.58723 4.61565 7.44477C4.4732 7.30232 4.27999 7.22229 4.07854 7.22229L2.82134 7.22709C2.62164 7.22783 2.43037 7.30768 2.28942 7.44916C2.14847 7.59063 2.06953 7.78219 2.06954 7.98189ZM3.80134 3.80089C3.66014 3.9421 3.58066 4.13349 3.58028 4.33318C3.57991 4.53286 3.65867 4.72456 3.79934 4.86629L4.68474 5.75869C4.75506 5.83018 4.83884 5.88704 4.93124 5.92599C5.02365 5.96494 5.12286 5.98521 5.22313 5.98562C5.32341 5.98603 5.42278 5.96659 5.51551 5.9284C5.60823 5.89022 5.69248 5.83405 5.76339 5.76315C5.8343 5.69224 5.89046 5.60799 5.92865 5.51526C5.96683 5.42254 5.98628 5.32317 5.98586 5.22289C5.98545 5.12261 5.96518 5.02341 5.92624 4.931C5.88729 4.83859 5.83043 4.75481 5.75894 4.68449L4.86654 3.79889C4.7248 3.65823 4.53311 3.57946 4.33342 3.57984C4.13374 3.58021 3.94254 3.6597 3.80134 3.80089ZM7.98194 2.06929C7.78224 2.06929 7.59067 2.14843 7.4492 2.28938C7.30773 2.43032 7.22788 2.62159 7.22714 2.82129L7.22234 4.07829C7.22234 4.27975 7.30237 4.47296 7.44482 4.61541C7.58727 4.75786 7.78048 4.83789 7.98194 4.83789C8.18339 4.83789 8.3766 4.75786 8.51905 4.61541C8.66151 4.47296 8.74154 4.27975 8.74154 4.07829L8.73674 2.82109C8.73599 2.62139 8.65614 2.43012 8.51467 2.28918C8.3732 2.14823 8.18164 2.06909 7.98194 2.06909"/>
+</mask>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.2055 4.68429C10.134 4.75461 10.0772 4.83839 10.0382 4.9308C9.99929 5.02321 9.97902 5.12241 9.97861 5.22269C9.97819 5.32297 9.99764 5.42234 10.0358 5.51506C10.074 5.60779 10.1302 5.69204 10.2011 5.76295C10.272 5.83385 10.3562 5.89002 10.449 5.9282C10.5417 5.96639 10.6411 5.98583 10.7413 5.98542C10.8416 5.98501 10.9408 5.96474 11.0332 5.92579C11.1256 5.88684 11.2094 5.82998 11.2797 5.75849L12.1653 4.86609C12.3069 4.72452 12.3864 4.53252 12.3864 4.33232C12.3864 4.13213 12.3068 3.94014 12.1652 3.79859C12.0951 3.72851 12.0119 3.67291 11.9203 3.63499C11.8287 3.59706 11.7306 3.57755 11.6315 3.57756C11.4313 3.57757 11.2393 3.65712 11.0977 3.79869L10.2055 4.68429ZM13.8951 7.98169C13.8951 7.78199 13.816 7.59043 13.6751 7.44896C13.5341 7.30748 13.3428 7.22763 13.1431 7.22689L11.8861 7.22209C11.6847 7.22209 11.4915 7.30212 11.349 7.44457C11.2066 7.58703 11.1265 7.78023 11.1265 7.98169C11.1265 8.18315 11.2066 8.37636 11.349 8.51881C11.4915 8.66126 11.6847 8.74129 11.8861 8.74129L13.1433 8.73649C13.343 8.7357 13.5342 8.65582 13.6751 8.51436C13.816 8.37289 13.8951 8.18136 13.8951 7.98169ZM12.1633 12.1627C12.3045 12.0215 12.384 11.8301 12.3844 11.6304C12.3848 11.4307 12.306 11.239 12.1653 11.0973L11.2799 10.2049C11.2094 10.1344 11.1256 10.0784 11.0335 10.0402C10.9413 10.0021 10.8425 9.98244 10.7428 9.98245C10.643 9.98246 10.5442 10.0021 10.4521 10.0403C10.3599 10.0785 10.2762 10.1344 10.2056 10.205C10.1351 10.2755 10.0792 10.3593 10.041 10.4515C10.0028 10.5436 9.98318 10.6424 9.98319 10.7422C9.9832 10.8419 10.0029 10.9407 10.041 11.0329C10.0792 11.125 10.1352 11.2088 10.2057 11.2793L11.0981 12.1649C11.2399 12.3055 11.4315 12.3842 11.6311 12.3838C11.8308 12.3835 12.0221 12.3038 12.1633 12.1627ZM7.98234 13.8949C8.18204 13.8949 8.3736 13.8158 8.51507 13.6748C8.65654 13.5339 8.73639 13.3426 8.73714 13.1429L8.74194 11.8859C8.74194 11.7861 8.72229 11.6874 8.68411 11.5952C8.64594 11.503 8.58999 11.4193 8.51945 11.3488C8.44892 11.2782 8.36518 11.2223 8.27302 11.1841C8.18086 11.1459 8.08209 11.1263 7.98234 11.1263C7.88258 11.1263 7.78381 11.1459 7.69165 11.1841C7.59949 11.2223 7.51575 11.2782 7.44522 11.3488C7.37468 11.4193 7.31873 11.503 7.28056 11.5952C7.24238 11.6874 7.22274 11.7861 7.22274 11.8859L7.22754 13.1431C7.22833 13.3428 7.3082 13.534 7.44967 13.6749C7.59114 13.8158 7.78267 13.8949 7.98234 13.8949ZM3.80114 12.1629C3.94234 12.3041 4.13374 12.3836 4.33342 12.3839C4.53311 12.3843 4.7248 12.3056 4.86654 12.1649L5.75894 11.2795C5.82948 11.209 5.88545 11.1252 5.92363 11.0331C5.96181 10.9409 5.98147 10.8421 5.98148 10.7424C5.98149 10.6426 5.96185 10.5438 5.92368 10.4517C5.88552 10.3595 5.82957 10.2757 5.75904 10.2052C5.6885 10.1346 5.60477 10.0787 5.5126 10.0405C5.42044 10.0023 5.32166 9.98266 5.22191 9.98265C5.12215 9.98264 5.02337 10.0023 4.9312 10.0404C4.83903 10.0786 4.75528 10.1346 4.68474 10.2051L3.79914 11.0975C3.65847 11.2392 3.57971 11.4309 3.58008 11.6306C3.58046 11.8303 3.65994 12.0217 3.80114 12.1629ZM2.06954 7.98189C2.06953 8.18159 2.14867 8.37316 2.28962 8.51463C2.43057 8.6561 2.62184 8.73595 2.82154 8.73669L4.07854 8.74149C4.27999 8.74149 4.4732 8.66146 4.61565 8.51901C4.75811 8.37656 4.83814 8.18335 4.83814 7.98189C4.83814 7.78043 4.75811 7.58723 4.61565 7.44477C4.4732 7.30232 4.27999 7.22229 4.07854 7.22229L2.82134 7.22709C2.62164 7.22783 2.43037 7.30768 2.28942 7.44916C2.14847 7.59063 2.06953 7.78219 2.06954 7.98189ZM3.80134 3.80089C3.66014 3.9421 3.58066 4.13349 3.58028 4.33318C3.57991 4.53286 3.65867 4.72456 3.79934 4.86629L4.68474 5.75869C4.75506 5.83018 4.83884 5.88704 4.93124 5.92599C5.02365 5.96494 5.12286 5.98521 5.22313 5.98562C5.32341 5.98603 5.42278 5.96659 5.51551 5.9284C5.60823 5.89022 5.69248 5.83405 5.76339 5.76315C5.8343 5.69224 5.89046 5.60799 5.92865 5.51526C5.96683 5.42254 5.98628 5.32317 5.98586 5.22289C5.98545 5.12261 5.96518 5.02341 5.92624 4.931C5.88729 4.83859 5.83043 4.75481 5.75894 4.68449L4.86654 3.79889C4.7248 3.65823 4.53311 3.57946 4.33342 3.57984C4.13374 3.58021 3.94254 3.6597 3.80134 3.80089ZM7.98194 2.06929C7.78224 2.06929 7.59067 2.14843 7.4492 2.28938C7.30773 2.43032 7.22788 2.62159 7.22714 2.82129L7.22234 4.07829C7.22234 4.27975 7.30237 4.47296 7.44482 4.61541C7.58727 4.75786 7.78048 4.83789 7.98194 4.83789C8.18339 4.83789 8.3766 4.75786 8.51905 4.61541C8.66151 4.47296 8.74154 4.27975 8.74154 4.07829L8.73674 2.82109C8.73599 2.62139 8.65614 2.43012 8.51467 2.28918C8.3732 2.14823 8.18164 2.06909 7.98194 2.06909" fill="currentColor"/>
+<path d="M10.2055 4.68429L11.047 5.53981L11.0509 5.53596L10.2055 4.68429ZM11.2797 5.75849L10.428 4.91321L10.4242 4.917L11.2797 5.75849ZM12.1653 4.86609L11.3167 4.01764L11.3136 4.02081L12.1653 4.86609ZM12.1652 3.79859L11.3168 4.6472L12.1652 3.79859ZM11.6315 3.57756L11.6314 2.37756V2.37756L11.6315 3.57756ZM11.0977 3.79869L11.9431 4.65037L11.9463 4.64714L11.0977 3.79869ZM13.8951 7.98169L12.6951 7.98168V7.9817L13.8951 7.98169ZM13.1431 7.22689L13.1386 8.42688L13.1387 8.42688L13.1431 7.22689ZM11.8861 7.22209L11.8907 6.02209H11.8861V7.22209ZM11.8861 8.74129V9.9413L11.8907 9.94128L11.8861 8.74129ZM13.1433 8.73649L13.1479 9.93648L13.1481 9.93648L13.1433 8.73649ZM12.1633 12.1627L13.0117 13.0114L13.0119 13.0112L12.1633 12.1627ZM12.1653 11.0973L11.3135 11.9425L11.3136 11.9426L12.1653 11.0973ZM11.2799 10.2049L12.1318 9.3597L12.1284 9.35629L11.2799 10.2049ZM10.4521 10.0403L10.9114 11.1489L10.4521 10.0403ZM10.041 10.4515L8.93229 9.99234L10.041 10.4515ZM10.041 11.0329L11.1497 10.5735L10.041 11.0329ZM10.2057 11.2793L9.35728 12.1279L9.36046 12.1311L10.2057 11.2793ZM11.0981 12.1649L10.2529 13.0167L10.253 13.0168L11.0981 12.1649ZM7.98234 13.8949L7.98234 12.6949H7.98233L7.98234 13.8949ZM8.73714 13.1429L7.53714 13.1383L7.53714 13.1384L8.73714 13.1429ZM8.74194 11.8859L9.94194 11.8905V11.8859H8.74194ZM7.22274 11.8859H6.02273L6.02274 11.8905L7.22274 11.8859ZM7.22754 13.1431L6.02755 13.1477L6.02755 13.1479L7.22754 13.1431ZM3.80114 12.1629L2.95258 13.0114L2.95264 13.0115L3.80114 12.1629ZM4.86654 12.1649L4.02136 11.313L4.02123 11.3132L4.86654 12.1649ZM5.75894 11.2795L6.60412 12.1314L6.60739 12.1281L5.75894 11.2795ZM5.5126 10.0405L5.05328 11.1491L5.5126 10.0405ZM4.68474 10.2051L3.83628 9.35648L3.83297 9.35981L4.68474 10.2051ZM3.79914 11.0975L4.65088 11.9428L4.6509 11.9428L3.79914 11.0975ZM2.06954 7.98189L3.26954 7.9819V7.98188L2.06954 7.98189ZM2.82154 8.73669L2.82612 7.5367L2.82599 7.5367L2.82154 8.73669ZM4.07854 8.74149L4.07395 9.94149H4.07854V8.74149ZM4.83814 7.98189H6.03814H4.83814ZM4.07854 7.22229V6.02228L4.07395 6.0223L4.07854 7.22229ZM2.82134 7.22709L2.82579 8.42708L2.82592 8.42708L2.82134 7.22709ZM3.80134 3.80089L2.95284 2.95233L2.95278 2.9524L3.80134 3.80089ZM3.79934 4.86629L4.6512 4.02111L4.65108 4.02099L3.79934 4.86629ZM4.68474 5.75869L5.54025 4.91719L5.5366 4.91351L4.68474 5.75869ZM5.75894 4.68449L4.91365 5.53627L4.91744 5.54L5.75894 4.68449ZM4.86654 3.79889L4.02123 4.65063L4.02126 4.65066L4.86654 3.79889ZM7.22714 2.82129L8.42713 2.82587L8.42713 2.82574L7.22714 2.82129ZM7.22234 4.07829L6.02234 4.07371V4.07829H7.22234ZM8.74154 4.07829H9.94155L9.94153 4.07371L8.74154 4.07829ZM8.73674 2.82109L7.53674 2.82554L7.53674 2.82567L8.73674 2.82109ZM10.2055 4.68429L9.36404 3.82879C9.17961 4.0102 9.03292 4.22633 8.93245 4.46472L10.0382 4.9308L11.144 5.39688C11.1214 5.45045 11.0885 5.49903 11.047 5.5398L10.2055 4.68429ZM10.0382 4.9308L8.93245 4.46472C8.83197 4.70311 8.77969 4.95904 8.77862 5.21774L9.97861 5.22269L11.1786 5.22765C11.1784 5.28578 11.1666 5.3433 11.144 5.39688L10.0382 4.9308ZM9.97861 5.22269L8.77862 5.21774C8.77755 5.47643 8.82771 5.73278 8.92622 5.97199L10.0358 5.51506L11.1454 5.05813C11.1676 5.1119 11.1788 5.16951 11.1786 5.22765L9.97861 5.22269ZM10.0358 5.51506L8.92622 5.97199C9.02473 6.21121 9.16963 6.42855 9.35255 6.61147L10.2011 5.76295L11.0496 4.91442C11.0907 4.95553 11.1233 5.00437 11.1454 5.05813L10.0358 5.51506ZM10.2011 5.76295L9.35255 6.61147C9.53548 6.7944 9.75282 6.9393 9.99203 7.03781L10.449 5.9282L10.9059 4.8186C10.9597 4.84074 11.0085 4.87331 11.0496 4.91442L10.2011 5.76295ZM10.449 5.9282L9.99203 7.03781C10.2312 7.13631 10.4876 7.18648 10.7463 7.18541L10.7413 5.98542L10.7364 4.78543C10.7945 4.78519 10.8521 4.79646 10.9059 4.8186L10.449 5.9282ZM10.7413 5.98542L10.7463 7.18541C11.005 7.18434 11.2609 7.13206 11.4993 7.03158L11.0332 5.92579L10.5672 4.82C10.6207 4.79742 10.6782 4.78567 10.7364 4.78543L10.7413 5.98542ZM11.0332 5.92579L11.4993 7.03158C11.7377 6.9311 11.9538 6.78442 12.1352 6.59998L11.2797 5.75849L10.4242 4.917C10.465 4.87555 10.5136 4.84258 10.5672 4.82L11.0332 5.92579ZM11.2797 5.75849L12.1315 6.60377L13.0171 5.71137L12.1653 4.86609L11.3136 4.02081L10.428 4.91322L11.2797 5.75849ZM12.1653 4.86609L13.0139 5.71454C13.3805 5.3479 13.5864 4.85066 13.5864 4.33221L12.3864 4.33232L11.1864 4.33243C11.1864 4.21437 11.2333 4.10114 11.3167 4.01764L12.1653 4.86609ZM12.3864 4.33232L13.5864 4.33221C13.5863 3.81375 13.3803 3.31655 13.0137 2.94998L12.1652 3.79859L11.3168 4.6472C11.2333 4.56372 11.1864 4.4505 11.1864 4.33243L12.3864 4.33232ZM12.1652 3.79859L13.0137 2.94998C12.8321 2.76848 12.6166 2.62451 12.3794 2.52629L11.9203 3.63499L11.4612 4.74369C11.4072 4.72132 11.3581 4.68853 11.3168 4.6472L12.1652 3.79859ZM11.9203 3.63499L12.3794 2.52629C12.1423 2.42807 11.8881 2.37753 11.6314 2.37756L11.6315 3.57756L11.6316 4.77756C11.5731 4.77756 11.5152 4.76605 11.4612 4.74369L11.9203 3.63499ZM11.6315 3.57756L11.6314 2.37756C11.1129 2.3776 10.6157 2.58361 10.2491 2.95024L11.0977 3.79869L11.9463 4.64714C11.8629 4.73063 11.7496 4.77754 11.6316 4.77756L11.6315 3.57756ZM11.0977 3.79869L10.2524 2.94702L9.36016 3.83262L10.2055 4.68429L11.0509 5.53596L11.9431 4.65036L11.0977 3.79869ZM13.8951 7.98169L15.0951 7.9817C15.0951 7.46451 14.8902 6.96839 14.5252 6.60201L13.6751 7.44896L12.8249 8.29591C12.7418 8.21246 12.6951 8.09947 12.6951 7.98168L13.8951 7.98169ZM13.6751 7.44896L14.5252 6.60201C14.1601 6.23562 13.6648 6.02882 13.1476 6.0269L13.1431 7.22689L13.1387 8.42688C13.0209 8.42645 12.9081 8.37935 12.8249 8.29591L13.6751 7.44896ZM13.1431 7.22689L13.1477 6.0269L11.8907 6.0221L11.8861 7.22209L11.8816 8.42208L13.1386 8.42688L13.1431 7.22689ZM11.8861 7.22209V6.02209C11.3664 6.02209 10.868 6.22855 10.5005 6.59605L11.349 7.44457L12.1975 8.2931C12.115 8.37569 12.0029 8.42209 11.8861 8.42209V7.22209ZM11.349 7.44457L10.5005 6.59605C10.133 6.96354 9.92654 7.46198 9.92654 7.98169H11.1265H12.3265C12.3265 8.09849 12.2801 8.21051 12.1975 8.2931L11.349 7.44457ZM11.1265 7.98169H9.92654C9.92654 8.50141 10.133 8.99984 10.5005 9.36734L11.349 8.51881L12.1975 7.67028C12.2801 7.75287 12.3265 7.86489 12.3265 7.98169H11.1265ZM11.349 8.51881L10.5005 9.36734C10.868 9.73484 11.3664 9.94129 11.8861 9.94129V8.74129V7.54129C12.0029 7.54129 12.115 7.58769 12.1975 7.67028L11.349 8.51881ZM11.8861 8.74129L11.8907 9.94128L13.1479 9.93648L13.1433 8.73649L13.1388 7.5365L11.8816 7.5413L11.8861 8.74129ZM13.1433 8.73649L13.1481 9.93648C13.6652 9.93443 14.1604 9.72757 14.5253 9.36119L13.6751 8.51436L12.8249 7.66752C12.908 7.58408 13.0208 7.53697 13.1386 7.5365L13.1433 8.73649ZM13.6751 8.51436L14.5253 9.36119C14.8903 8.99482 15.0951 8.49878 15.0951 7.98168L13.8951 7.98169L12.6951 7.9817C12.6951 7.86393 12.7418 7.75096 12.8249 7.66752L13.6751 8.51436ZM12.1633 12.1627L13.0119 13.0112C13.3776 12.6455 13.5834 12.1498 13.5844 11.6327L12.3844 11.6304L11.1844 11.6282C11.1846 11.5104 11.2315 11.3975 11.3148 11.3142L12.1633 12.1627ZM12.3844 11.6304L13.5844 11.6327C13.5854 11.1155 13.3814 10.6191 13.0171 10.252L12.1653 11.0973L11.3136 11.9426C11.2306 11.859 11.1842 11.7459 11.1844 11.6282L12.3844 11.6304ZM12.1653 11.0973L13.0172 10.2521L12.1318 9.35971L11.2799 10.2049L10.4281 11.0501L11.3135 11.9425L12.1653 11.0973ZM11.2799 10.2049L12.1284 9.35629C11.9464 9.17433 11.7304 9.03001 11.4926 8.93155L11.0335 10.0402L10.5744 11.1489C10.5209 11.1268 10.4724 11.0944 10.4315 11.0535L11.2799 10.2049ZM11.0335 10.0402L11.4926 8.93155C11.2548 8.83309 11 8.78242 10.7427 8.78245L10.7428 9.98245L10.7429 11.1824C10.6851 11.1825 10.6278 11.1711 10.5744 11.1489L11.0335 10.0402ZM10.7428 9.98245L10.7427 8.78245C10.4853 8.78247 10.2305 8.83318 9.99274 8.93169L10.4521 10.0403L10.9114 11.1489C10.858 11.171 10.8007 11.1824 10.7429 11.1824L10.7428 9.98245ZM10.4521 10.0403L9.99274 8.93169C9.755 9.03019 9.53898 9.17456 9.35703 9.35654L10.2056 10.205L11.0542 11.0534C11.0134 11.0943 10.9648 11.1268 10.9114 11.1489L10.4521 10.0403ZM10.2056 10.205L9.35703 9.35654C9.17508 9.53853 9.03075 9.75457 8.93229 9.99234L10.041 10.4515L11.1497 10.9106C11.1276 10.964 11.0951 11.0125 11.0542 11.0534L10.2056 10.205ZM10.041 10.4515L8.93229 9.99234C8.83383 10.2301 8.78317 10.4849 8.78319 10.7423L9.98319 10.7422L11.1832 10.7421C11.1832 10.7999 11.1718 10.8571 11.1497 10.9106L10.041 10.4515ZM9.98319 10.7422L8.78319 10.7423C8.78322 10.9996 8.83393 11.2544 8.93243 11.4922L10.041 11.0329L11.1497 10.5735C11.1718 10.627 11.1832 10.6842 11.1832 10.7421L9.98319 10.7422ZM10.041 11.0329L8.93243 11.4922C9.03093 11.7299 9.1753 11.9459 9.35729 12.1279L10.2057 11.2793L11.0542 10.4307C11.0951 10.4716 11.1275 10.5201 11.1497 10.5735L10.041 11.0329ZM10.2057 11.2793L9.36046 12.1311L10.2529 13.0167L11.0981 12.1649L11.9434 11.3131L11.051 10.4275L10.2057 11.2793ZM11.0981 12.1649L10.253 13.0168C10.62 13.3809 11.1164 13.5848 11.6334 13.5838L11.6311 12.3838L11.6289 11.1838C11.7466 11.1836 11.8597 11.2301 11.9433 11.313L11.0981 12.1649ZM11.6311 12.3838L11.6334 13.5838C12.1512 13.5829 12.6466 13.3763 13.0117 13.0114L12.1633 12.1627L11.315 11.314C11.3977 11.2313 11.5103 11.1841 11.6289 11.1838L11.6311 12.3838ZM7.98234 13.8949L7.98233 15.0949C8.49952 15.0949 8.99564 14.8899 9.36202 14.5249L8.51507 13.6748L7.66812 12.8247C7.75157 12.7416 7.86455 12.6949 7.98234 12.6949L7.98234 13.8949ZM8.51507 13.6748L9.36202 14.5249C9.72841 14.1599 9.93521 13.6645 9.93713 13.1473L8.73714 13.1429L7.53714 13.1384C7.53758 13.0207 7.58468 12.9078 7.66812 12.8247L8.51507 13.6748ZM8.73714 13.1429L9.93713 13.1475L9.94193 11.8905L8.74194 11.8859L7.54194 11.8813L7.53714 13.1383L8.73714 13.1429ZM8.74194 11.8859H9.94194C9.94194 11.6286 9.89125 11.3737 9.79277 11.136L8.68411 11.5952L7.57546 12.0544C7.55333 12.001 7.54194 11.9437 7.54194 11.8859H8.74194ZM8.68411 11.5952L9.79277 11.136C9.69429 10.8982 9.54995 10.6822 9.36798 10.5002L8.51945 11.3488L7.67093 12.1973C7.63003 12.1564 7.59759 12.1079 7.57546 12.0544L8.68411 11.5952ZM8.51945 11.3488L9.36798 10.5002C9.18602 10.3183 8.96999 10.1739 8.73224 10.0755L8.27302 11.1841L7.8138 12.2928C7.76037 12.2706 7.71182 12.2382 7.67093 12.1973L8.51945 11.3488ZM8.27302 11.1841L8.73224 10.0755C8.49449 9.97698 8.23967 9.92629 7.98234 9.92629V11.1263V12.3263C7.9245 12.3263 7.86724 12.3149 7.8138 12.2928L8.27302 11.1841ZM7.98234 11.1263V9.92629C7.725 9.92629 7.47018 9.97698 7.23243 10.0755L7.69165 11.1841L8.15087 12.2928C8.09744 12.3149 8.04017 12.3263 7.98234 12.3263V11.1263ZM7.69165 11.1841L7.23243 10.0755C6.99468 10.1739 6.77866 10.3183 6.59669 10.5002L7.44522 11.3488L8.29375 12.1973C8.25285 12.2382 8.2043 12.2706 8.15087 12.2928L7.69165 11.1841ZM7.44522 11.3488L6.59669 10.5002C6.41472 10.6822 6.27038 10.8982 6.1719 11.136L7.28056 11.5952L8.38921 12.0544C8.36708 12.1079 8.33464 12.1564 8.29375 12.1973L7.44522 11.3488ZM7.28056 11.5952L6.1719 11.136C6.07342 11.3737 6.02274 11.6286 6.02274 11.8859H7.22274H8.42274C8.42274 11.9437 8.41135 12.001 8.38921 12.0544L7.28056 11.5952ZM7.22274 11.8859L6.02274 11.8905L6.02755 13.1477L7.22754 13.1431L8.42753 13.1385L8.42273 11.8813L7.22274 11.8859ZM7.22754 13.1431L6.02755 13.1479C6.0296 13.665 6.23646 14.1602 6.60283 14.5251L7.44967 13.6749L8.29651 12.8247C8.37995 12.9078 8.42706 13.0206 8.42753 13.1383L7.22754 13.1431ZM7.44967 13.6749L6.60283 14.5251C6.96921 14.89 7.46525 15.0949 7.98235 15.0949L7.98234 13.8949L7.98233 12.6949C8.10009 12.6949 8.21307 12.7416 8.29651 12.8247L7.44967 13.6749ZM3.80114 12.1629L2.95264 13.0115C3.31833 13.3771 3.81402 13.583 4.33117 13.5839L4.33342 12.3839L4.33568 11.1839C4.45345 11.1842 4.56635 11.2311 4.64963 11.3143L3.80114 12.1629ZM4.33342 12.3839L4.33117 13.5839C4.84832 13.5849 5.34478 13.3809 5.71184 13.0166L4.86654 12.1649L4.02123 11.3132C4.10483 11.2302 4.2179 11.1837 4.33568 11.1839L4.33342 12.3839ZM4.86654 12.1649L5.71172 13.0168L6.60412 12.1314L5.75894 11.2795L4.91376 10.4276L4.02136 11.313L4.86654 12.1649ZM5.75894 11.2795L6.60739 12.1281C6.78937 11.9461 6.93374 11.7301 7.03224 11.4924L5.92363 11.0331L4.81502 10.5737C4.83715 10.5203 4.86959 10.4718 4.91049 10.4309L5.75894 11.2795ZM5.92363 11.0331L7.03224 11.4924C7.13075 11.2546 7.18146 10.9998 7.18148 10.7425L5.98148 10.7424L4.78148 10.7423C4.78149 10.6844 4.79288 10.6272 4.81502 10.5737L5.92363 11.0331ZM5.98148 10.7424L7.18148 10.7425C7.1815 10.4851 7.13084 10.2303 7.03238 9.99254L5.92368 10.4517L4.81499 10.9108C4.79286 10.8573 4.78148 10.8001 4.78148 10.7423L5.98148 10.7424ZM5.92368 10.4517L7.03238 9.99254C6.93392 9.75477 6.7896 9.53873 6.60764 9.35674L5.75904 10.2052L4.91043 11.0536C4.86954 11.0127 4.83711 10.9642 4.81499 10.9108L5.92368 10.4517ZM5.75904 10.2052L6.60764 9.35674C6.42569 9.17476 6.20967 9.03039 5.97193 8.93189L5.5126 10.0405L5.05328 11.1491C4.99986 11.127 4.95132 11.0945 4.91043 11.0536L5.75904 10.2052ZM5.5126 10.0405L5.97193 8.93189C5.73418 8.83338 5.47936 8.78267 5.22202 8.78265L5.22191 9.98265L5.22179 11.1826C5.16397 11.1826 5.10671 11.1712 5.05328 11.1491L5.5126 10.0405ZM5.22191 9.98265L5.22202 8.78265C4.96468 8.78262 4.70985 8.83329 4.47208 8.93175L4.9312 10.0404L5.39031 11.1491C5.33688 11.1713 5.27962 11.1827 5.22179 11.1826L5.22191 9.98265ZM4.9312 10.0404L4.47208 8.93175C4.23431 9.03021 4.01827 9.17453 3.83629 9.35648L4.68474 10.2051L5.53319 11.0537C5.49229 11.0946 5.44375 11.127 5.39031 11.1491L4.9312 10.0404ZM4.68474 10.2051L3.83297 9.35981L2.94737 10.2522L3.79914 11.0975L4.6509 11.9428L5.5365 11.0504L4.68474 10.2051ZM3.79914 11.0975L2.9474 10.2522C2.58311 10.6193 2.37911 11.1157 2.38008 11.6329L3.58008 11.6306L4.78008 11.6284C4.7803 11.7461 4.73384 11.8592 4.65088 11.9428L3.79914 11.0975ZM3.58008 11.6306L2.38008 11.6329C2.38105 12.15 2.58691 12.6457 2.95258 13.0114L3.80114 12.1629L4.6497 11.3144C4.73298 11.3977 4.77986 11.5106 4.78008 11.6284L3.58008 11.6306ZM2.06954 7.98189L0.869536 7.98188C0.869532 8.49908 1.07449 8.99519 1.43952 9.36158L2.28962 8.51463L3.13972 7.66768C3.22286 7.75112 3.26954 7.86411 3.26954 7.9819L2.06954 7.98189ZM2.28962 8.51463L1.43952 9.36158C1.80455 9.72797 2.2999 9.93476 2.81708 9.93668L2.82154 8.73669L2.82599 7.5367C2.94377 7.53714 3.05659 7.58423 3.13972 7.66768L2.28962 8.51463ZM2.82154 8.73669L2.81695 9.93668L4.07395 9.94148L4.07854 8.74149L4.08312 7.5415L2.82612 7.5367L2.82154 8.73669ZM4.07854 8.74149V9.94149C4.59825 9.94149 5.09669 9.73503 5.46418 9.36754L4.61565 8.51901L3.76713 7.67048C3.84972 7.58789 3.96174 7.54149 4.07854 7.54149V8.74149ZM4.61565 8.51901L5.46418 9.36754C5.83168 9.00004 6.03814 8.50161 6.03814 7.98189H4.83814H3.63814C3.63814 7.86509 3.68453 7.75307 3.76713 7.67048L4.61565 8.51901ZM4.83814 7.98189H6.03814C6.03814 7.46217 5.83168 6.96374 5.46418 6.59625L4.61565 7.44477L3.76713 8.2933C3.68453 8.21071 3.63814 8.09869 3.63814 7.98189H4.83814ZM4.61565 7.44477L5.46418 6.59625C5.09669 6.22875 4.59825 6.02229 4.07854 6.02229V7.22229V8.42229C3.96174 8.42229 3.84972 8.37589 3.76713 8.2933L4.61565 7.44477ZM4.07854 7.22229L4.07395 6.0223L2.81675 6.0271L2.82134 7.22709L2.82592 8.42708L4.08312 8.42228L4.07854 7.22229ZM2.82134 7.22709L2.81688 6.0271C2.2997 6.02902 1.80435 6.23582 1.43932 6.60221L2.28942 7.44916L3.13952 8.2961C3.05639 8.37955 2.94357 8.42665 2.82579 8.42708L2.82134 7.22709ZM2.28942 7.44916L1.43932 6.60221C1.07371 6.96917 0.869532 7.46553 0.869536 7.9819L2.06954 7.98189L3.26954 7.98188C3.26954 8.09886 3.22323 8.21208 3.13952 8.2961L2.28942 7.44916ZM3.80134 3.80089L2.95278 2.9524C2.58711 3.31809 2.38125 3.81378 2.38028 4.33093L3.58028 4.33318L4.78028 4.33543C4.78006 4.45321 4.73318 4.5661 4.6499 4.64939L3.80134 3.80089ZM3.58028 4.33318L2.38028 4.33093C2.37931 4.84807 2.58331 5.34453 2.9476 5.7116L3.79934 4.86629L4.65108 4.02099C4.73404 4.10458 4.7805 4.21765 4.78028 4.33543L3.58028 4.33318ZM3.79934 4.86629L2.94747 5.71147L3.83287 6.60387L4.68474 5.75869L5.5366 4.91351L4.6512 4.02111L3.79934 4.86629ZM4.68474 5.75869L3.82923 6.60018C4.01064 6.78462 4.22678 6.9313 4.46517 7.03178L4.93124 5.92599L5.39732 4.8202C5.4509 4.84278 5.49947 4.87575 5.54024 4.9172L4.68474 5.75869ZM4.93124 5.92599L4.46517 7.03178C4.70356 7.13226 4.95948 7.18454 5.21818 7.18561L5.22313 5.98562L5.22809 4.78563C5.28623 4.78587 5.34375 4.79762 5.39732 4.8202L4.93124 5.92599ZM5.22313 5.98562L5.21818 7.18561C5.47688 7.18668 5.73323 7.13651 5.97244 7.03801L5.51551 5.9284L5.05858 4.8188C5.11234 4.79666 5.16995 4.78539 5.22809 4.78563L5.22313 5.98562ZM5.51551 5.9284L5.97244 7.03801C6.21165 6.9395 6.42899 6.7946 6.61192 6.61167L5.76339 5.76315L4.91486 4.91462C4.95597 4.87351 5.00482 4.84094 5.05858 4.8188L5.51551 5.9284ZM5.76339 5.76315L6.61192 6.61167C6.79485 6.42875 6.93974 6.21141 7.03825 5.97219L5.92865 5.51526L4.81905 5.05833C4.84119 5.00457 4.87375 4.95573 4.91486 4.91462L5.76339 5.76315ZM5.92865 5.51526L7.03825 5.97219C7.13676 5.73298 7.18692 5.47663 7.18585 5.21794L5.98586 5.22289L4.78587 5.22784C4.78563 5.16971 4.79691 5.1121 4.81905 5.05833L5.92865 5.51526ZM5.98586 5.22289L7.18585 5.21794C7.18479 4.95924 7.1325 4.70331 7.03203 4.46492L5.92624 4.931L4.82045 5.39708C4.79786 5.3435 4.78611 5.28598 4.78587 5.22784L5.98586 5.22289ZM5.92624 4.931L7.03203 4.46492C6.93155 4.22653 6.78486 4.0104 6.60043 3.82899L5.75894 4.68449L4.91744 5.54C4.876 5.49923 4.84303 5.45065 4.82045 5.39708L5.92624 4.931ZM5.75894 4.68449L6.60421 3.83272L5.71181 2.94712L4.86654 3.79889L4.02126 4.65066L4.91366 5.53626L5.75894 4.68449ZM4.86654 3.79889L5.71184 2.94715C5.34478 2.58286 4.84832 2.37887 4.33117 2.37984L4.33342 3.57984L4.33568 4.77984C4.2179 4.78006 4.10483 4.7336 4.02123 4.65063L4.86654 3.79889ZM4.33342 3.57984L4.33117 2.37984C3.81368 2.38081 3.31829 2.58691 2.95284 2.95233L3.80134 3.80089L4.64983 4.64945C4.56679 4.73249 4.45379 4.77961 4.33568 4.77984L4.33342 3.57984ZM7.98194 2.06929L7.98194 0.869292C7.46475 0.869288 6.96864 1.07424 6.60225 1.43927L7.4492 2.28938L8.29615 3.13948C8.21271 3.22262 8.09972 3.26929 7.98193 3.26929L7.98194 2.06929ZM7.4492 2.28938L6.60225 1.43927C6.23586 1.8043 6.02906 2.29965 6.02714 2.81684L7.22714 2.82129L8.42713 2.82574C8.42669 2.94353 8.37959 3.05635 8.29615 3.13948L7.4492 2.28938ZM7.22714 2.82129L6.02714 2.81671L6.02235 4.07371L7.22234 4.07829L8.42233 4.08287L8.42713 2.82587L7.22714 2.82129ZM7.22234 4.07829H6.02234C6.02234 4.59801 6.22879 5.09644 6.59629 5.46394L7.44482 4.61541L8.29335 3.76688C8.37594 3.84947 8.42234 3.96149 8.42234 4.07829H7.22234ZM7.44482 4.61541L6.59629 5.46394C6.96379 5.83143 7.46222 6.03789 7.98194 6.03789V4.83789V3.63789C8.09874 3.63789 8.21076 3.68429 8.29335 3.76688L7.44482 4.61541ZM7.98194 4.83789V6.03789C8.50166 6.03789 9.00009 5.83143 9.36758 5.46394L8.51905 4.61541L7.67053 3.76688C7.75311 3.68429 7.86513 3.63789 7.98194 3.63789V4.83789ZM8.51905 4.61541L9.36758 5.46394C9.73508 5.09644 9.94154 4.59801 9.94154 4.07829H8.74154H7.54154C7.54154 3.96149 7.58794 3.84947 7.67053 3.76688L8.51905 4.61541ZM8.74154 4.07829L9.94153 4.07371L9.93673 2.81651L8.73674 2.82109L7.53674 2.82567L7.54154 4.08287L8.74154 4.07829ZM8.73674 2.82109L9.93673 2.81664C9.93481 2.29945 9.72801 1.8041 9.36162 1.43907L8.51467 2.28918L7.66772 3.13928C7.58428 3.05615 7.53718 2.94333 7.53674 2.82554L8.73674 2.82109ZM8.51467 2.28918L9.36162 1.43907C8.99523 1.07405 8.49912 0.869088 7.98193 0.869092L7.98194 2.06909L7.98194 3.26909C7.86415 3.26909 7.75116 3.22241 7.66772 3.13928L8.51467 2.28918Z" fill="currentColor" mask="url(#path-1-inside-1_56_278)"/>
+<path d="M12.0231 4.72534L11.1375 5.61774L11.4215 5.89934L12.3071 5.00714L12.0231 4.72534ZM10.3461 4.82614L11.2385 3.94074L10.9567 3.65674L10.0643 4.54234L10.3461 4.82614ZM11.8851 7.42214L13.1423 7.42694L13.1439 7.02694L11.8867 7.02214L11.8851 7.42214ZM13.1423 8.53654L11.8851 8.54134L11.8867 8.94134L13.1439 8.93654L13.1423 8.53654ZM11.1377 10.3459L12.0233 11.2383L12.3073 10.9565L11.4217 10.0641L11.1377 10.3459ZM11.2387 12.0229L10.3463 11.1373L10.0645 11.4213L10.9569 12.3067L11.2387 12.0229ZM8.54174 11.8849L8.53674 13.1421L8.93694 13.1437L8.94174 11.8865L8.54174 11.8849ZM7.42734 13.1421L7.42254 11.8849L7.02254 11.8865L7.02734 13.1437L7.42734 13.1421ZM5.61794 11.1373L4.72554 12.0229L5.00734 12.3069L5.89974 11.4213L5.61794 11.1373ZM3.94094 11.2383L4.82634 10.3459L4.54234 10.0641L3.65694 10.9565L3.94094 11.2383ZM4.07894 8.54134L2.82194 8.53654L2.82034 8.93654L4.07754 8.94134L4.07894 8.54134ZM2.82194 7.42694L4.07914 7.42214L4.07754 7.02214L2.82034 7.02694L2.82194 7.42694ZM4.82674 5.61774L3.94114 4.72534L3.65714 5.00714L4.54274 5.89934L4.82674 5.61774ZM4.72574 3.94074L5.61814 4.82634L5.89994 4.54214L5.00754 3.65674L4.72574 3.94074ZM7.42254 4.07874L7.42734 2.82174L7.02734 2.82014L7.02254 4.07734L7.42254 4.07874ZM8.53694 2.82174L8.54174 4.07894L8.94174 4.07734L8.93694 2.82014L8.53694 2.82174ZM8.93694 2.82014C8.93593 2.56757 8.8349 2.32569 8.65595 2.14745C8.477 1.96921 8.23471 1.86914 7.98214 1.86914V2.26914C8.1289 2.26914 8.26969 2.32729 8.37367 2.43086C8.47765 2.53443 8.53636 2.67498 8.53694 2.82174L8.93694 2.82014ZM7.98214 5.04074C8.10846 5.04069 8.23353 5.01571 8.35018 4.96723C8.46683 4.91875 8.57276 4.84772 8.66191 4.75822C8.75106 4.66872 8.82166 4.56251 8.86968 4.44567C8.9177 4.32883 8.94219 4.20366 8.94174 4.07734L8.54174 4.07894C8.54198 4.1526 8.52768 4.22558 8.49967 4.2937C8.47166 4.36183 8.43048 4.42376 8.3785 4.47594C8.32652 4.52813 8.26475 4.56955 8.19674 4.59783C8.12872 4.62611 8.0558 4.64069 7.98214 4.64074V5.04074ZM7.42734 2.82174C7.42792 2.67498 7.48663 2.53443 7.59061 2.43086C7.6946 2.32729 7.83538 2.26914 7.98214 2.26914V1.86914C7.72957 1.86914 7.48729 1.96921 7.30834 2.14745C7.12938 2.32569 7.02835 2.56757 7.02734 2.82014L7.42734 2.82174ZM7.02254 4.07734C7.02209 4.20366 7.04658 4.32883 7.0946 4.44567C7.14262 4.56251 7.21323 4.66872 7.30237 4.75822C7.39152 4.84772 7.49745 4.91875 7.6141 4.96723C7.73075 5.01571 7.85582 5.04069 7.98214 5.04074V4.64074C7.90847 4.64069 7.83553 4.6261 7.7675 4.59781C7.69947 4.56952 7.6377 4.52808 7.58571 4.47587C7.53373 4.42366 7.49255 4.36171 7.46456 4.29357C7.43656 4.22542 7.42228 4.15242 7.42254 4.07874L7.02254 4.07734ZM5.00754 3.65674C4.82824 3.47879 4.58572 3.37914 4.3331 3.37963C4.08048 3.38012 3.83835 3.4807 3.65974 3.65934L3.94274 3.94214C4.04653 3.8384 4.1872 3.78001 4.33395 3.77974C4.4807 3.77948 4.62158 3.83737 4.72574 3.94074L5.00754 3.65674ZM5.90254 5.90214C5.99187 5.81278 6.06268 5.70667 6.11091 5.58989C6.15914 5.4731 6.18384 5.34795 6.1836 5.2216C6.18336 5.09525 6.15818 4.97019 6.1095 4.85359C6.06082 4.737 5.98961 4.63116 5.89994 4.54214L5.61794 4.82614C5.67022 4.87804 5.71174 4.93975 5.74013 5.00772C5.76852 5.0757 5.78322 5.1486 5.78338 5.22227C5.78355 5.29593 5.76918 5.3689 5.7411 5.43701C5.71302 5.50511 5.67178 5.567 5.61974 5.61914L5.90254 5.90214ZM3.94114 4.72534C3.83774 4.62114 3.77984 4.48021 3.78014 4.33341C3.78044 4.18661 3.83891 4.04592 3.94274 3.94214L3.65974 3.65934C3.48116 3.83795 3.38062 4.08003 3.38013 4.3326C3.37964 4.58517 3.47925 4.82785 3.65714 5.00714L3.94114 4.72534ZM4.54274 5.89934C4.63174 5.98899 4.73756 6.0602 4.85413 6.10887C4.9707 6.15755 5.09573 6.18274 5.22206 6.183C5.34839 6.18326 5.47352 6.15858 5.59029 6.11039C5.70706 6.06219 5.81317 5.99142 5.90254 5.90214L5.61974 5.61914C5.56763 5.67118 5.50557 5.71242 5.4375 5.74052C5.36943 5.76862 5.29649 5.78301 5.22285 5.78288C5.14921 5.78275 5.07632 5.7681 5.00835 5.73976C4.94038 5.71142 4.87866 5.66996 4.82674 5.61774L4.54274 5.89934ZM2.82034 7.02694C2.56777 7.02795 2.32569 7.12898 2.14745 7.30793C1.96921 7.48689 1.86914 7.72917 1.86914 7.98174H2.26914C2.26914 7.83498 2.32729 7.6942 2.43086 7.59021C2.53443 7.48623 2.67498 7.42752 2.82174 7.42694L2.82034 7.02694ZM5.04074 7.98174C5.04069 7.85542 5.01571 7.73035 4.96723 7.6137C4.91875 7.49705 4.84772 7.39112 4.75822 7.30197C4.66872 7.21283 4.56251 7.14222 4.44567 7.0942C4.32883 7.04618 4.20386 7.02169 4.07754 7.02214L4.07894 7.42214C4.1526 7.4219 4.22558 7.4362 4.2937 7.46421C4.36183 7.49222 4.42376 7.5334 4.47594 7.58538C4.52813 7.63736 4.56955 7.69913 4.59783 7.76714C4.62611 7.83516 4.64069 7.90808 4.64074 7.98174H5.04074ZM2.82174 8.53654C2.67498 8.53596 2.53443 8.47725 2.43086 8.37327C2.32729 8.26928 2.26914 8.1285 2.26914 7.98174H1.86914C1.86914 8.23431 1.96921 8.47659 2.14745 8.65555C2.32569 8.8345 2.56777 8.93553 2.82034 8.93654L2.82174 8.53654ZM4.07754 8.94134C4.20386 8.94179 4.32883 8.9173 4.44567 8.86928C4.56251 8.82126 4.66872 8.75065 4.75822 8.66151C4.84772 8.57236 4.91875 8.46643 4.96723 8.34978C5.01571 8.23313 5.04069 8.10806 5.04074 7.98174H4.64074C4.64074 8.29174 4.38894 8.54254 4.07894 8.54134L4.07754 8.94134ZM3.65694 10.9565C3.47905 11.1358 3.37924 11.3783 3.37973 11.6309C3.38022 11.8834 3.48076 12.1255 3.65934 12.3041L3.94214 12.0213C3.8384 11.9175 3.78001 11.7769 3.77974 11.6301C3.77948 11.4834 3.83737 11.3425 3.94074 11.2383L3.65694 10.9565ZM5.90214 10.0615C5.81278 9.97221 5.70667 9.9014 5.58989 9.85317C5.4731 9.80494 5.34795 9.78024 5.2216 9.78048C5.09525 9.78072 4.97019 9.8059 4.8536 9.85458C4.737 9.90326 4.63116 9.97447 4.54214 10.0641L4.82614 10.3459C4.87806 10.2937 4.93977 10.2522 5.00775 10.2238C5.07573 10.1954 5.14864 10.1807 5.22231 10.1806C5.29597 10.1805 5.36894 10.1948 5.43704 10.2229C5.50513 10.251 5.56702 10.2923 5.61914 10.3443L5.90214 10.0615ZM4.72534 12.0229C4.62114 12.1263 4.48021 12.1842 4.33341 12.1839C4.18661 12.1836 4.04592 12.1252 3.94214 12.0213L3.65934 12.3041C3.83793 12.4828 4.08004 12.5834 4.33266 12.584C4.58528 12.5845 4.82801 12.4849 5.00734 12.3069L4.72534 12.0229ZM5.89934 11.4213C5.98902 11.3323 6.06025 11.2265 6.10895 11.1099C6.15764 10.9933 6.18284 10.8683 6.1831 10.7419C6.18336 10.6156 6.15867 10.4904 6.11046 10.3736C6.06225 10.2568 5.99146 10.1509 5.90214 10.0615L5.61914 10.3443C5.67121 10.3965 5.71248 10.4583 5.74059 10.5264C5.76871 10.5945 5.78311 10.6675 5.78298 10.7411C5.78285 10.8148 5.76819 10.8877 5.73983 10.9557C5.71148 11.0237 5.66999 11.0854 5.61774 11.1373L5.89934 11.4213ZM7.02734 13.1437C7.02835 13.3963 7.12936 13.6381 7.30826 13.8164C7.48717 13.9946 7.7294 14.0947 7.98194 14.0947V13.6947C7.83518 13.6947 7.6944 13.6366 7.59041 13.533C7.48643 13.4295 7.42772 13.2889 7.42714 13.1421L7.02734 13.1437ZM7.98194 10.9231C7.85564 10.9232 7.73058 10.9482 7.61395 10.9966C7.49731 11.0451 7.39139 11.1161 7.30224 11.2056C7.2131 11.2951 7.14249 11.4013 7.09446 11.5181C7.04643 11.6349 7.02192 11.76 7.02234 11.8863L7.42254 11.8849C7.42228 11.8113 7.43636 11.7383 7.46436 11.6701C7.49235 11.602 7.53353 11.54 7.58551 11.4878C7.6375 11.4356 7.69927 11.3942 7.7673 11.3659C7.83532 11.3376 7.90827 11.323 7.98194 11.3229V10.9231ZM8.53674 13.1421C8.53616 13.2889 8.47745 13.4295 8.37347 13.533C8.26949 13.6366 8.1287 13.6947 7.98194 13.6947V14.0947C8.23451 14.0947 8.47679 13.9947 8.65575 13.8164C8.8347 13.6382 8.93593 13.3963 8.93694 13.1437L8.53674 13.1421ZM8.94154 11.8863C8.94196 11.76 8.91745 11.6349 8.86942 11.5181C8.82139 11.4013 8.75078 11.2951 8.66164 11.2056C8.57249 11.1161 8.46657 11.0451 8.34993 10.9966C8.2333 10.9482 8.10825 10.9232 7.98194 10.9231V11.3229C8.29194 11.3229 8.54294 11.5751 8.54174 11.8849L8.94154 11.8863ZM10.9569 12.3067C11.1362 12.4847 11.3786 12.5843 11.6312 12.5839C11.8838 12.5834 12.1259 12.4828 12.3045 12.3041L12.0215 12.0213C11.9178 12.1251 11.7771 12.1835 11.6304 12.1838C11.4836 12.1841 11.3429 12.1263 11.2387 12.0229L10.9569 12.3067ZM10.0621 10.0615C9.97284 10.1509 9.90206 10.257 9.85385 10.3738C9.80563 10.4905 9.78094 10.6157 9.78118 10.742C9.78142 10.8683 9.8066 10.9933 9.85525 11.1099C9.90391 11.2265 9.9751 11.3323 10.0647 11.4213L10.3463 11.1373C10.2941 11.0854 10.2528 11.0237 10.2244 10.9557C10.196 10.8877 10.1813 10.8148 10.1812 10.7412C10.1811 10.6675 10.1954 10.5945 10.2235 10.5264C10.2516 10.4583 10.2929 10.3965 10.3449 10.3443L10.0621 10.0615ZM12.0233 11.2383C12.1267 11.3425 12.1847 11.4834 12.1844 11.6302C12.1841 11.7769 12.1257 11.9176 12.0219 12.0213L12.3049 12.3041C12.4835 12.1255 12.5841 11.8834 12.5846 11.6309C12.585 11.3783 12.4852 11.1358 12.3073 10.9565L12.0233 11.2383ZM11.4217 10.0641C11.3327 9.9745 11.2271 9.90331 11.1105 9.85465C10.9939 9.806 10.8689 9.78082 10.7426 9.78058C10.6163 9.78034 10.4911 9.80503 10.3744 9.85325C10.2576 9.90146 10.1515 9.97224 10.0621 10.0615L10.3449 10.3443C10.3971 10.2923 10.4589 10.251 10.527 10.2229C10.5951 10.1948 10.6681 10.1805 10.7418 10.1806C10.8154 10.1807 10.8883 10.1954 10.9563 10.2238C11.0243 10.2522 11.0858 10.2937 11.1377 10.3459L11.4217 10.0641ZM13.1439 8.93654C13.3965 8.93559 13.6385 8.83457 13.8168 8.65562C13.995 8.47666 14.0951 8.23435 14.0951 7.98174H13.6951C13.6951 8.1285 13.637 8.26928 13.5334 8.37327C13.4299 8.47725 13.2891 8.53596 13.1423 8.53654L13.1439 8.93654ZM10.9235 7.98174C10.9236 8.10806 10.9486 8.23313 10.9971 8.34978C11.0455 8.46643 11.1166 8.57236 11.2061 8.66151C11.2956 8.75065 11.4018 8.82126 11.5186 8.86928C11.6355 8.9173 11.7604 8.94179 11.8867 8.94134L11.8851 8.54134C11.8115 8.5416 11.7387 8.52733 11.6705 8.49933C11.6024 8.47133 11.5404 8.43015 11.4882 8.37817C11.436 8.32618 11.3946 8.26441 11.3663 8.19638C11.338 8.12836 11.3234 8.05542 11.3233 7.98174H10.9235ZM13.1423 7.42694C13.2891 7.42752 13.4299 7.48623 13.5334 7.59021C13.637 7.6942 13.6951 7.83498 13.6951 7.98174H14.0951C14.0951 7.72917 13.9951 7.48689 13.8168 7.30793C13.6386 7.12898 13.3965 7.02795 13.1439 7.02694L13.1423 7.42694ZM11.8867 7.02214C11.7604 7.02169 11.6355 7.04618 11.5186 7.0942C11.4018 7.14222 11.2956 7.21283 11.2061 7.30197C11.1166 7.39112 11.0455 7.49705 10.9971 7.6137C10.9486 7.73035 10.9236 7.85542 10.9235 7.98174H11.3233C11.3233 7.67174 11.5753 7.42094 11.8851 7.42214L11.8867 7.02214ZM12.3045 3.65934C12.1259 3.48076 11.8838 3.38022 11.6313 3.37973C11.3787 3.37924 11.136 3.47885 10.9567 3.65674L11.2385 3.94074C11.3427 3.83737 11.4838 3.77948 11.6305 3.77974C11.7773 3.78001 11.9179 3.8384 12.0217 3.94214L12.3045 3.65934ZM12.3071 5.00714C12.4851 4.82781 12.5849 4.58528 12.5844 4.33266C12.5838 4.08004 12.4832 3.83793 12.3045 3.65934L12.0217 3.94214C12.1256 4.04592 12.184 4.18661 12.1843 4.33341C12.1846 4.48021 12.1265 4.62114 12.0231 4.72534L12.3071 5.00714ZM10.3447 5.61914C10.2927 5.56702 10.2514 5.50513 10.2233 5.43704C10.1952 5.36894 10.1809 5.29597 10.181 5.22231C10.1811 5.14864 10.1958 5.07573 10.2242 5.00775C10.2526 4.93977 10.2939 4.87806 10.3461 4.82614L10.0645 4.54214C9.97487 4.63116 9.90366 4.737 9.85498 4.85359C9.8063 4.97019 9.78112 5.09525 9.78088 5.2216C9.78064 5.34795 9.80534 5.4731 9.85357 5.58989C9.9018 5.70667 9.97261 5.81278 10.0619 5.90214L10.3447 5.61914ZM10.0619 5.90214C10.1513 5.99142 10.2574 6.06219 10.3742 6.11039C10.491 6.15858 10.6161 6.18326 10.7424 6.183C10.8687 6.18274 10.9938 6.15755 11.1104 6.10887C11.2269 6.0602 11.3327 5.98899 11.4217 5.89934L11.1375 5.61774C11.0856 5.66999 11.0241 5.71148 10.9561 5.73983C10.8881 5.76819 10.8152 5.78285 10.7415 5.78298C10.6679 5.78311 10.5949 5.76871 10.5268 5.74059C10.4587 5.71248 10.3969 5.67121 10.3447 5.61914L10.0619 5.90214Z" fill="currentColor"/>
+</svg></button>
+      <button class="action-btn" id="settingsBtn" aria-label="설정" title="설정"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.2578 8.35396L14.1618 9.15896C14.3287 9.29827 14.4403 9.49274 14.4762 9.70718C14.5122 9.92161 14.4702 10.1418 14.3578 10.328L13.2678 12.19C13.1832 12.3325 13.0625 12.4501 12.9178 12.531C12.7714 12.612 12.6071 12.6549 12.4398 12.656C12.336 12.6566 12.2328 12.6411 12.1338 12.61L10.9768 12.228C10.7741 12.358 10.5635 12.4743 10.3448 12.577L10.1018 13.75C10.0568 13.9657 9.9367 14.1585 9.76281 14.294C9.58671 14.4318 9.3684 14.5046 9.14481 14.5H6.88781C6.66422 14.5046 6.4459 14.4318 6.26981 14.294C6.09629 14.1584 5.97651 13.9656 5.93181 13.75L5.68781 12.577C5.47201 12.4729 5.26263 12.356 5.06081 12.227L3.89981 12.61C3.80081 12.6411 3.69758 12.6566 3.59381 12.656C3.42687 12.6548 3.26288 12.6118 3.11681 12.531C2.97225 12.4504 2.85151 12.3331 2.76681 12.191L1.63781 10.328C1.52044 10.1401 1.47559 9.91597 1.51167 9.69745C1.54775 9.47894 1.66229 9.28108 1.83381 9.14096L2.73681 7.99996V7.64596L1.83281 6.84096C1.66587 6.70166 1.55433 6.50718 1.51838 6.29275C1.48242 6.07832 1.52444 5.8581 1.63681 5.67196L2.76581 3.80996C2.85037 3.66743 2.97112 3.54979 3.11581 3.46896C3.26188 3.38813 3.42587 3.34516 3.59281 3.34396C3.69564 3.33748 3.79886 3.34692 3.89881 3.37196L5.03681 3.77196C5.24014 3.64196 5.45081 3.52563 5.66881 3.42296L5.91281 2.24996C5.95751 2.03433 6.07729 1.84156 6.25081 1.70596C6.4269 1.56811 6.64522 1.49534 6.86881 1.49996H9.10681C9.3304 1.49534 9.54872 1.56811 9.72481 1.70596C9.89981 1.84296 10.0198 2.03596 10.0628 2.24996L10.3068 3.42296C10.5235 3.5263 10.7325 3.64296 10.9338 3.77296L12.0958 3.39096C12.2248 3.34901 12.361 3.33428 12.496 3.34771C12.6309 3.36113 12.7616 3.40242 12.8798 3.46896C13.0248 3.55096 13.1448 3.66896 13.2298 3.80896L14.3578 5.67196C14.4768 5.85819 14.5239 6.08133 14.4904 6.29975C14.4569 6.51817 14.3451 6.71694 14.1758 6.85896L13.2578 7.64096V8.35396Z" stroke="currentColor"/>
+<path d="M10.5 8C10.5 8.66304 10.2366 9.29893 9.76777 9.76777C9.29893 10.2366 8.66304 10.5 8 10.5C7.33696 10.5 6.70107 10.2366 6.23223 9.76777C5.76339 9.29893 5.5 8.66304 5.5 8C5.5 7.33696 5.76339 6.70107 6.23223 6.23223C6.70107 5.76339 7.33696 5.5 8 5.5C8.66304 5.5 9.29893 5.76339 9.76777 6.23223C10.2366 6.70107 10.5 7.33696 10.5 8Z" stroke="currentColor"/>
+</svg></button>
+    </div>
+  </header>
+
+  <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
+
+  <main class="personal-workspace" aria-label="개인 일정">
+    <div class="personal-toolbar"><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
+        <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
+      </div><button class="date-step" id="toolbarNextBtn" aria-label="다음 기간">›</button></div><div class="personal-tools"><div id="personalQuickActions"></div>
+      <select class="view-select" id="viewSelect" aria-label="보기 선택">
+        <option value="day">일간</option>
+        <option value="week" selected>주간</option>
+        <option value="month">월간</option>
+      </select>
+      </div>
+    </div>
+  <section class="calendar-shell">
+    <button class="side-nav prev" id="prevBtn" aria-label="이전">‹</button>
+    <div class="calendar-card">
+      <div class="calendar-scroll" id="calendarScroll">
+        <div id="tableView"></div>
+        <div id="monthView" class="month-view" hidden></div>
+      </div>
+    </div>
+    <button class="side-nav next" id="nextBtn" aria-label="다음">›</button>
+  </section>
+
+  <section class="mobile-shell" id="mobileShell" aria-label="모바일 일정 보기">
+    <div class="mobile-card">
+      <div class="mobile-week-toolbar">
+        <button class="mobile-nav-btn" id="mobilePrevBtn" aria-label="이전">‹</button>
+        <div class="mobile-period" id="mobilePeriod">이번 주</div>
+        <button class="mobile-nav-btn" id="mobileNextBtn" aria-label="다음">›</button>
+      </div>
+
+      <div class="mobile-day-strip" id="mobileDayStrip" aria-label="주간 날짜">
+        <button class="mobile-day-btn"><span class="mdow">S</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">M</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">T</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">W</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">T</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">F</span><span class="mdate">—</span><span class="mholiday"></span></button>
+        <button class="mobile-day-btn"><span class="mdow">S</span><span class="mdate">—</span><span class="mholiday"></span></button>
+      </div>
+
+      <div class="mobile-month" id="mobileMonthPanel" hidden>
+        <div class="mobile-month-grid" id="mobileMonthGrid" aria-label="월간 달력"></div>
+      </div>
+
+      <div id="mobileDayPanel">
+        <div class="mobile-selected-label" id="mobileSelectedLabel">선택 날짜</div>
+        <div class="mobile-rows">
+          <div class="mobile-row">
+            <div class="mobile-row-label">트래커</div>
+            <div class="mobile-row-content selected"><div class="tracker-icons" id="mobileTrackerContent"><span class="mobile-empty">—</span></div></div>
+          </div>
+          <div class="mobile-row">
+            <div class="mobile-row-label">기상</div>
+            <div class="mobile-row-content selected"><button class="mobile-time-btn empty" id="mobileWakeBtn" type="button">—</button></div>
+          </div>
+          <div class="mobile-row" id="mobileMorningRow">
+            <div class="mobile-row-label">오전</div>
+            <div class="mobile-row-content selected"><div class="mobile-events" id="mobileMorningEvents"><div class="mobile-empty">일정 없음</div></div><button class="mobile-add" id="mobileMorningAdd" type="button">＋ 일정 추가</button></div>
+          </div>
+          <div class="mobile-row" id="mobileAfternoonRow">
+            <div class="mobile-row-label">오후</div>
+            <div class="mobile-row-content selected"><div class="mobile-events" id="mobileAfternoonEvents"><div class="mobile-empty">일정 없음</div></div><button class="mobile-add" id="mobileAfternoonAdd" type="button">＋ 일정 추가</button></div>
+          </div>
+          <div class="mobile-row" id="mobileEveningRow">
+            <div class="mobile-row-label">저녁</div>
+            <div class="mobile-row-content selected"><div class="mobile-events" id="mobileEveningEvents"><div class="mobile-empty">일정 없음</div></div><button class="mobile-add" id="mobileEveningAdd" type="button">＋ 일정 추가</button></div>
+          </div>
+          <div class="mobile-row">
+            <div class="mobile-row-label">취침</div>
+            <div class="mobile-row-content selected"><button class="mobile-time-btn empty" id="mobileBedBtn" type="button">—</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <noscript><div class="storage-warning show" style="margin-top:10px">이 미리보기에서는 JavaScript가 꺼져 있어 일정 값은 표시할 수 없지만 모바일 화면 구조는 그대로 확인할 수 있습니다.</div></noscript>
+  </section>
+  </main>
+</div>
+
+<!-- 일정 추가/수정 -->
+<div class="modal-backdrop" id="eventModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+    <div class="modal-head">
+      <div><h2 id="eventModalTitle">일정 추가</h2><p id="eventModalSub">선택한 날짜에 일정을 추가합니다.</p></div>
+      <button class="close-btn" data-close="eventModal" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="eventId">
+      <input type="hidden" id="eventOriginalDate">
+      <div class="grid-2">
+        <div class="field"><label for="eventCategory">카테고리</label><select class="select" id="eventCategory"></select></div>
+        <div class="field"><label for="eventDate">날짜</label><input class="input" id="eventDate" type="date"></div>
+      </div>
+      <div class="field"><label for="eventName">일정명</label><input class="input" id="eventName" maxlength="80" placeholder="일정을 입력해주세요."></div>
+      <div class="grid-2">
+        <div>
+          <div class="section-label">시작</div>
+          <div class="time-parts"><select class="select" id="eventStartHour"></select><div class="time-colon">:</div><select class="select" id="eventStartMinute"></select></div>
+        </div>
+        <div>
+          <div class="section-label">종료</div>
+          <div class="time-parts"><select class="select" id="eventEndHour"></select><div class="time-colon">:</div><select class="select" id="eventEndMinute"></select></div>
+        </div>
+      </div>
+      <div class="repeat-box">
+        <button class="repeat-toggle" type="button" id="repeatToggle"><span id="repeatSummary">반복 설정 ›</span><span>⌄</span></button>
+        <div class="repeat-content" id="repeatContent" hidden>
+          <div class="field">
+            <label for="repeatType">반복</label>
+            <select class="select" id="repeatType">
+              <option value="none">반복 안 함</option>
+              <option value="daily">매일 / N일마다</option>
+              <option value="weekly">매주 / N주마다</option>
+              <option value="monthly">매월 / N개월마다</option>
+            </select>
+          </div>
+          <div id="repeatOptions" hidden>
+            <div class="field"><label>반복 간격</label><div class="inline">매 <input class="input" id="repeatInterval" type="number" min="1" max="52" value="1" style="width:90px"> <span id="repeatUnit">주마다</span></div></div>
+            <div class="field" id="weekdayField"><label>요일</label><div class="segment" id="weekdayButtons"></div></div>
+            <div class="field">
+              <label>종료</label>
+              <div class="choice-list">
+                <label class="choice"><input type="radio" name="repeatEnd" value="never" checked> 종료 없음</label>
+                <label class="choice"><input type="radio" name="repeatEnd" value="date"> 날짜 지정 <input class="input" id="repeatEndDate" type="date" style="margin-left:auto;max-width:160px"></label>
+                <label class="choice"><input type="radio" name="repeatEnd" value="count"> 횟수 지정 <input class="input" id="repeatCount" type="number" min="1" max="999" value="10" style="margin-left:auto;max-width:95px"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px"><label for="eventNotes">메모</label><textarea class="textarea" id="eventNotes" maxlength="500" placeholder="선택 사항"></textarea></div>
+      <div class="hint" id="conflictHint" hidden></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn danger" id="deleteEventBtn" hidden>삭제</button>
+      <button class="btn" data-close="eventModal">취소</button>
+      <button class="btn primary" id="saveEventBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 반복 범위 -->
+<div class="modal-backdrop" id="scopeModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2 id="scopeTitle">반복 일정</h2><p>적용 범위를 선택해주세요.</p></div><button class="close-btn" data-close="scopeModal">×</button></div>
+    <div class="modal-body">
+      <div class="choice-list">
+        <label class="choice"><input type="radio" name="scopeChoice" value="one" checked> 이번 일정만</label>
+        <label class="choice"><input type="radio" name="scopeChoice" value="future"> 이번 일정 이후</label>
+        <label class="choice"><input type="radio" name="scopeChoice" value="all"> 모든 반복 일정</label>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="scopeModal">취소</button><button class="btn primary" id="confirmScopeBtn">확인</button></div>
+  </div>
+</div>
+
+<!-- 근무 상태 -->
+<div class="modal-backdrop" id="workModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2 id="workModalTitle">근무 상태</h2><p>선택한 날짜의 근무 상태를 변경합니다.</p></div><button class="close-btn" data-close="workModal">×</button></div>
+    <div class="modal-body">
+      <div class="choice-list">
+        <label class="choice"><input type="radio" name="workStatus" value="normal"> 정상근무</label>
+        <label class="choice"><input type="radio" name="workStatus" value="leave"> 연차</label>
+        <label class="choice"><input type="radio" name="workStatus" value="amleave"> 오전반차</label>
+        <label class="choice"><input type="radio" name="workStatus" value="pmleave"> 오후반차</label>
+        <label class="choice"><input type="radio" name="workStatus" value="holiday"> 휴일</label>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="workModal">취소</button><button class="btn primary" id="saveWorkStatusBtn">저장</button></div>
+  </div>
+</div>
+
+<!-- 회사 일정 수정 -->
+<div class="modal-backdrop" id="workEditorModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2>회사 일정 수정</h2><p id="workEditorSub">선택한 날짜의 해당 시간대에만 적용됩니다.</p></div><button class="close-btn" data-close="workEditorModal">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="workEditDate"><input type="hidden" id="workEditSlot">
+      <div class="field"><label for="workEditTitle">일정명</label><input class="input" id="workEditTitle" maxlength="60"></div>
+      <div class="grid-2">
+        <div class="field"><label>시작</label><div class="time-parts"><select class="select" id="workStartHour"></select><span class="time-colon">:</span><select class="select" id="workStartMinute"></select></div></div>
+        <div class="field"><label>종료</label><div class="time-parts"><select class="select" id="workEndHour"></select><span class="time-colon">:</span><select class="select" id="workEndMinute"></select></div></div>
+      </div>
+      <p class="hint">기본 근무시간 자체를 바꾸려면 설정 → 기본 근무에서 수정하세요.</p>
+    </div>
+    <div class="modal-foot"><button class="btn" id="restoreWorkBtn">기본 근무로 복원</button><button class="btn danger" id="deleteWorkBtn">삭제</button><button class="btn" data-close="workEditorModal">취소</button><button class="btn primary" id="saveWorkBtn">저장</button></div>
+  </div>
+</div>
+
+<!-- 기상/취침 -->
+<div class="modal-backdrop" id="sleepModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2 id="sleepModalTitle">기상 시간</h2><p id="sleepModalSub"></p></div><button class="close-btn" data-close="sleepModal">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="sleepType">
+      <input type="hidden" id="sleepDate">
+      <div class="time-parts">
+        <select class="select" id="sleepHour"></select><div class="time-colon">:</div><select class="select" id="sleepMinute"></select>
+      </div>
+      <div class="inline" style="margin-top:14px">
+        <button class="btn" id="sleepNowBtn">현재 시간</button>
+        <span class="hint" id="sleepSummary"></span>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn danger" id="clearSleepBtn">삭제</button><button class="btn" data-close="sleepModal">취소</button><button class="btn primary" id="saveSleepBtn">저장</button></div>
+  </div>
+</div>
+
+<!-- 이동 -->
+<div class="modal-backdrop" id="moveModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2>일정 이동</h2><p id="moveSub">이동할 날짜와 시간을 확인해주세요.</p></div><button class="close-btn" data-close="moveModal">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="moveEventId"><input type="hidden" id="moveOccurrenceDate">
+      <div class="grid-2">
+        <div class="field"><label for="moveDate">날짜</label><input class="input" id="moveDate" type="date"></div>
+        <div class="field"><label for="moveSlot">시간대</label><select class="select" id="moveSlot"><option value="morning">오전</option><option value="afternoon">오후</option><option value="evening">저녁</option></select></div>
+      </div>
+      <div class="grid-2">
+        <div><div class="section-label">시작</div><div class="time-parts"><select class="select" id="moveStartHour"></select><div class="time-colon">:</div><select class="select" id="moveStartMinute"></select></div></div>
+        <div><div class="section-label">종료</div><div class="time-parts"><select class="select" id="moveEndHour"></select><div class="time-colon">:</div><select class="select" id="moveEndMinute"></select></div></div>
+      </div>
+      <div id="moveRepeatScope" style="margin-top:16px" hidden>
+        <div class="section-label">반복 일정 적용 범위</div>
+        <div class="choice-list">
+          <label class="choice"><input type="radio" name="moveScope" value="one" checked> 이번 일정만</label>
+          <label class="choice"><input type="radio" name="moveScope" value="future"> 이번 일정 이후</label>
+          <label class="choice"><input type="radio" name="moveScope" value="all"> 모든 반복 일정</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="moveModal">취소</button><button class="btn primary" id="saveMoveBtn">이동</button></div>
+  </div>
+</div>
+
+<!-- 설정 -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal wide">
+    <div class="modal-head"><div><h2>설정</h2><p>저장 버튼을 눌러야 모든 변경사항이 적용됩니다.</p></div><button class="close-btn" data-close="settingsModal">×</button></div>
+    <div class="settings-layout">
+      <nav class="settings-nav">
+        <button data-settings-tab="work" class="active">기본 근무</button>
+        <button data-settings-tab="category">카테고리</button>
+        <button data-settings-tab="tracker">트래커 관리</button>
+        <button data-settings-tab="data">데이터</button>
+      </nav>
+      <div class="settings-pane">
+        <section data-settings-pane="work">
+          <div class="section-label">근무 요일</div><div class="segment" id="settingsWorkdays"></div>
+          <div class="grid-2" style="margin-top:16px">
+            <div class="field"><label for="settingsWorkStart">출근</label><input class="input" id="settingsWorkStart" type="time"></div>
+            <div class="field"><label for="settingsWorkEnd">퇴근</label><input class="input" id="settingsWorkEnd" type="time"></div>
+          </div>
+          <div class="field"><label for="settingsWorkLabel">표시명</label><input class="input" id="settingsWorkLabel" maxlength="20"></div>
+          <p class="hint">주간/일간에서는 오전·오후에만 표시합니다. 공휴일은 자동으로 회사 일정이 제외됩니다.</p>
+        </section>
+        <section data-settings-pane="category" hidden>
+          <div id="categoryList"></div>
+          <div class="settings-new"><input class="input" id="newCategoryName" maxlength="20" placeholder="새 카테고리"><button class="btn" id="addCategoryDraftBtn">추가</button></div>
+        </section>
+        <section data-settings-pane="tracker" hidden>
+          <p class="hint">트래커는 모두 체크형입니다. 횟수는 기록하지 않습니다.</p>
+          <div id="trackerList"></div>
+          <div class="settings-new">
+            <select class="select" id="newTrackerEmoji" style="width:90px"><option>☕</option><option>🧘</option><option>🔔</option><option>💊</option><option>💧</option><option>🏃</option><option>📚</option><option>🍺</option><option>✅</option><option>🌿</option></select>
+            <input class="input" id="newTrackerName" maxlength="20" placeholder="새 트래커">
+            <button class="btn" id="addTrackerDraftBtn">추가</button>
+          </div>
+        </section>
+        <section data-settings-pane="data" hidden>
+          <div class="data-actions"><button class="btn" id="exportBtn">JSON 내보내기</button><button class="btn" id="importBtn">JSON 불러오기</button><input class="file-input" id="importFile" type="file" accept="application/json"></div>
+          <p class="hint" style="margin-top:12px">브라우저 데이터 삭제에 대비해 필요할 때 JSON으로 백업할 수 있습니다.</p>
+        </section>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="settingsModal">취소</button><button class="btn primary" id="saveSettingsBtn">설정 저장</button></div>
+  </div>
+</div>
+
+<!-- Dirty -->
+<div class="modal-backdrop" id="dirtyModal">
+  <div class="modal">
+    <div class="modal-head"><div><h2>변경사항을 버릴까요?</h2><p>아직 저장하지 않은 내용이 있습니다.</p></div></div>
+    <div class="modal-body"><p class="hint">계속 편집하거나 변경사항을 버리고 닫을 수 있습니다.</p></div>
+    <div class="modal-foot"><button class="btn" id="continueEditingBtn">계속 편집</button><button class="btn danger" id="discardChangesBtn">변경사항 버리기</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMessage"></span><button id="toastAction" hidden>실행 취소</button></div>
+
+<script type="module">
+import {getHoliday} from "./planner-calendar.mjs";
+import {appStorage} from "./schedule-storage.mjs";
+import {createAccountData} from "./schedule-account.mjs";
+import {validateState} from "./schedule-sync-core.mjs";
+(() => {
+"use strict";
+const DOW=["S","M","T","W","T","F","S"], DOW_KO=["일","월","화","수","목","금","토"];
+const SLOT_LABELS={morning:"오전",afternoon:"오후",evening:"저녁"};
+const MINUTES=["00","10","20","30","40","50"];
+const pad=n=>String(n).padStart(2,"0");
+const fmtDate=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseDate=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);x.setHours(0,0,0,0);return x};
+const startOfWeek=d=>{const x=new Date(d);x.setHours(0,0,0,0);return addDays(x,-x.getDay())};
+const monthDiff=(a,b)=>(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+const daysBetween=(a,b)=>Math.round((b-a)/86400000);
+const uid=()=>`e_${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;
+const clone=o=>JSON.parse(JSON.stringify(o));
+function normalizeTrackerMeta(def){
+  if(!def) return def;
+  const d={...def};
+  if(d.emoji==="🚽") d.emoji="🔔";
+  if(d.id==="bowel"){ d.id="bell"; if(!d.name||d.name==="배변") d.name="알림"; }
+  return d;
+}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nowDate=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+function isPastDate(date){return fmtDate(date)<fmtDate(nowDate())}
+function isPastSlot(date,slot){
+  const today=fmtDate(nowDate()),ds=fmtDate(date);
+  if(ds<today)return true;if(ds>today)return false;
+  const n=new Date(),mins=n.getHours()*60+n.getMinutes();
+  if(slot==="morning")return mins>=12*60;
+  if(slot==="afternoon")return mins>=18*60;
+  return false;
+}
+
+// ---------- state / storage ----------
+const DEFAULT_CATEGORIES=[
+  {id:"personal",name:"개인"},{id:"exercise",name:"운동"},{id:"social",name:"약속·행사"},{id:"other",name:"기타"}
+];
+function defaultState(){
+  return {
+    version:5,
+    workConfig:{label:"회사",start:"09:00",end:"18:00",weekdays:[1,2,3,4,5]},
+    workExceptions:{},
+    workOverrides:{},
+    categories:clone(DEFAULT_CATEGORIES),
+    trackerDefs:[
+      {id:"coffee",name:"커피",emoji:"☕"},
+      {id:"yoga_tracker",name:"요가",emoji:"🧘"},
+      {id:"bell",name:"알림",emoji:"🔔"}
+    ],
+    trackerLogs:{
+      "2026-09-20":{"coffee":true,"yoga_tracker":true},
+      "2026-09-21":{"coffee":true},
+      "2026-09-22":{"bell":true},
+      "2026-09-23":{"coffee":true,"yoga_tracker":true}
+    },
+    sleepLogs:{
+      "2026-09-20":{"wake":"07:32","bed":"23:32"},
+      "2026-09-21":{"wake":"07:32","bed":"23:32"},
+      "2026-09-22":{"wake":"07:32","bed":"23:32"},
+      "2026-09-23":{"wake":"07:32","bed":"23:32"}
+    },
+    events:[
+      {id:uid(),title:"요가",startDate:"2026-09-20",startTime:"06:30",endTime:"09:00",category:"exercise",notes:"",active:true,recurrence:{type:"none"},exdates:[]},
+      {id:uid(),title:"야구",startDate:"2026-09-23",startTime:"17:00",endTime:"",category:"social",notes:"",active:true,recurrence:{type:"none"},exdates:[]}
+    ]
+  };
+}
+function normalizeLegacy(parsed){
+  const d=defaultState();
+  const defs=(parsed.trackerDefs||d.trackerDefs).map((t,i)=>normalizeTrackerMeta({id:t.id||`tracker_${i}`,name:t.name||"트래커",emoji:t.emoji||"✅"}));
+  const logs={};
+  Object.entries(parsed.trackerLogs||{}).forEach(([date,obj])=>{
+    logs[date]={};Object.entries(obj||{}).forEach(([id,val])=>{const key=id==="bowel"?"bell":id;logs[date][key]=typeof val==="number"?val>0:!!val});
+  });
+  return {
+    version:5,
+    workConfig:parsed.workConfig||d.workConfig,
+    workExceptions:parsed.workExceptions||{},
+    workOverrides:parsed.workOverrides||{},
+    categories:Array.isArray(parsed.categories)&&parsed.categories.length?parsed.categories:d.categories,
+    trackerDefs:defs,
+    trackerLogs:logs,
+    sleepLogs:parsed.sleepLogs||{},
+    events:Array.isArray(parsed.events)?parsed.events:d.events
+  };
+}
+function emptyState(){
+ const d=defaultState();d.events=[];d.trackerLogs={};d.sleepLogs={};d.workExceptions={};d.workOverrides={};d.workConfig.weekdays=[];return d;
+}
+const accounts=createAccountData({storage:appStorage,empty:emptyState,validate:v=>validateState(v?.version===5?v:normalizeLegacy(v))});
+let state=emptyState();
+let focusDate=nowDate(),viewMode="week";
+let eventFormSnapshot="",dirtyCloseTarget=null;
+let pendingAction=null,pendingEvent=null;
+let settingsDraft=null;
+let undoFn=null;
+let dragPayload=null;
+
+// ---------- helpers ----------
+function saveState(msg,undo){
+  if(!accounts.owner){state=emptyState();render();window.dispatchEvent(new Event("my-week-login-request"));return}
+  accounts.write(state);syncStorageWarning();render();
+  window.dispatchEvent(new Event('my-week-local-save'));
+  if(msg)toast(msg,undo);
+}
+function toast(msg,undo){
+  const el=document.getElementById("toast"),m=document.getElementById("toastMessage"),a=document.getElementById("toastAction");
+  m.textContent=msg;undoFn=typeof undo==="function"?undo:null;a.hidden=!undoFn;
+  el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>{el.classList.remove("show");undoFn=null},3200);
+}
+function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",!appStorage.persistent)}
+function openModal(id){if(!accounts.owner&&id!=="settingsModal"){window.dispatchEvent(new Event("my-week-login-request"));return}document.getElementById(id).classList.add("open")}
+function closeModal(id){document.getElementById(id).classList.remove("open")}
+function trackerIcon(t){
+ const kind=t.id==='coffee'||t.emoji==='☕'?'coffee':t.id==='yoga_tracker'||t.emoji==='🧘'?'meditation':['bell','bowel'].includes(t.id)||['🔔','🚽','💩'].includes(t.emoji)?'poo':null;
+ return kind?`<span class="tracker-svg tracker-${kind}" aria-hidden="true"></span>`:esc(t.emoji);
+}
+function selectedDateLabel(){
+  return `${focusDate.getMonth()+1}/${focusDate.getDate()} (${DOW_KO[focusDate.getDay()]})`;
+}
+function getSlot(time){
+  if(!time)return "morning";const [h,m]=time.split(":").map(Number),v=h*60+m;
+  return v<12*60?"morning":v<18*60?"afternoon":"evening";
+}
+function slotDefault(slot){return slot==="morning"?"09:00":slot==="afternoon"?"14:00":"19:00"}
+function addMinutes(time,mins){
+  const [h,m]=time.split(":").map(Number);let total=(h*60+m+mins)%(24*60);return `${pad(Math.floor(total/60))}:${pad(total%60)}`;
+}
+function timeFromParts(hId,mId){return `${document.getElementById(hId).value}:${document.getElementById(mId).value}`}
+function setTimeParts(hId,mId,time){
+  const [h,m]=(time||"09:00").split(":");document.getElementById(hId).value=h;document.getElementById(mId).value=MINUTES.includes(m)?m:MINUTES.reduce((a,b)=>Math.abs(Number(b)-Number(m))<Math.abs(Number(a)-Number(m))?b:a,"00");
+}
+function fillTimeSelects(){
+  ["eventStartHour","eventEndHour","sleepHour","moveStartHour","moveEndHour","workStartHour","workEndHour"].forEach(id=>{
+    const el=document.getElementById(id);el.innerHTML="";for(let h=0;h<24;h++)el.add(new Option(pad(h),pad(h)));
+  });
+  ["eventStartMinute","eventEndMinute","sleepMinute","moveStartMinute","moveEndMinute","workStartMinute","workEndMinute"].forEach(id=>{
+    const el=document.getElementById(id);el.innerHTML="";MINUTES.forEach(m=>el.add(new Option(m,m)));
+  });
+}
+function categoryName(id){return state.categories.find(c=>c.id===id)?.name||"미분류"}
+function recurrenceText(ev){
+  const r=ev.recurrence||{type:"none"};if(r.type==="none")return "반복 없음";
+  const iv=Number(r.interval)||1;
+  if(r.type==="daily")return iv===1?"매일":`${iv}일마다`;
+  if(r.type==="weekly"){const ds=(r.weekdays||[]).map(n=>DOW_KO[n]).join("·");return iv===1?`매주 ${ds}`:`${iv}주마다 ${ds}`}
+  if(r.type==="monthly")return iv===1?`매월 ${parseDate(ev.startDate).getDate()}일`:`${iv}개월마다 ${parseDate(ev.startDate).getDate()}일`;
+  return "반복";
+}
+function isBaseOccurrence(ev,date){
+  const start=parseDate(ev.startDate);if(date<start)return false;
+  const r=ev.recurrence||{type:"none"},iv=Math.max(1,Number(r.interval)||1);
+  if(r.type==="none")return fmtDate(date)===ev.startDate;
+  if(r.type==="daily")return daysBetween(start,date)%iv===0;
+  if(r.type==="weekly"){const gap=Math.floor(daysBetween(startOfWeek(start),startOfWeek(date))/7),days=(r.weekdays&&r.weekdays.length)?r.weekdays.map(Number):[start.getDay()];return gap>=0&&gap%iv===0&&days.includes(date.getDay())}
+  if(r.type==="monthly"){const md=monthDiff(start,date);return md>=0&&md%iv===0&&date.getDate()===start.getDate()}
+  return false;
+}
+function occurrenceIndex(ev,date){
+  let d=parseDate(ev.startDate),n=0,guard=0;while(d<=date&&guard++<5000){if(isBaseOccurrence(ev,d))n++;d=addDays(d,1)}return n;
+}
+function occursOn(ev,date){
+  if(ev.active===false)return false;const ds=fmtDate(date);if((ev.exdates||[]).includes(ds)||!isBaseOccurrence(ev,date))return false;
+  const r=ev.recurrence||{type:"none"};if(r.type==="none")return true;
+  if(r.endType==="date"&&r.endDate&&date>parseDate(r.endDate))return false;
+  if(r.endType==="count"&&r.count)return occurrenceIndex(ev,date)<=Number(r.count);
+  return true;
+}
+function occurrences(date){
+  return state.events.filter(ev=>occursOn(ev,date)).map(event=>({event,date:fmtDate(date)})).sort((a,b)=>(a.event.startTime||"99:99").localeCompare(b.event.startTime||"99:99"));
+}
+function getWorkStatus(date){
+  const ds=fmtDate(date);
+  if(Object.prototype.hasOwnProperty.call(state.workExceptions,ds))return state.workExceptions[ds];
+  if(getHoliday(date))return "holiday";
+  return state.workConfig.weekdays.map(Number).includes(date.getDay())?"normal":"holiday";
+}
+function workFor(date,slot){
+  const key=`${fmtDate(date)}/${slot}`;
+  if(Object.prototype.hasOwnProperty.call(state.workOverrides||{},key))return state.workOverrides[key];
+  if(slot==="evening")return null;
+  const s=getWorkStatus(date);
+  if(s==="holiday")return null;
+  if(s==="leave")return {title:"연차",cls:"leave",time:""};
+  if(s==="amleave"&&slot==="morning")return {title:"오전반차",cls:"leave",time:""};
+  if(s==="pmleave"&&slot==="afternoon")return {title:"오후반차",cls:"leave",time:""};
+  const start=slot==="morning"?state.workConfig.start:"13:00";
+  const end=slot==="morning"?"12:00":state.workConfig.end;
+  return {title:state.workConfig.label,cls:"work",time:`${start}~${end}`,start,end};
+}
+function getTrackerLog(date,id){return !!state.trackerLogs[fmtDate(date)]?.[id]}
+function toggleTracker(date,id){
+  const ds=fmtDate(date),prev=!!state.trackerLogs[ds]?.[id];
+  const snapshot=clone(state.trackerLogs[ds]||{});
+  state.trackerLogs[ds]||={};state.trackerLogs[ds][id]=!prev;
+  saveState(`${state.trackerDefs.find(t=>t.id===id)?.name||"트래커"} ${!prev?"체크":"해제"}했어요.`,()=>{state.trackerLogs[ds]=snapshot;saveState("실행 취소했어요.")});
+}
+function sleepValue(date,type){return state.sleepLogs[fmtDate(date)]?.[type]||""}
+function sleepDurationForWake(date){
+  const wake=sleepValue(date,"wake"),prevBed=sleepValue(addDays(date,-1),"bed");
+  if(!wake||!prevBed)return "";
+  let [bh,bm]=prevBed.split(":").map(Number),[wh,wm]=wake.split(":").map(Number);
+  let mins=(24*60-(bh*60+bm))+(wh*60+wm);
+  if(mins<0||mins>24*60)return "";
+  return `${Math.floor(mins/60)}시간 ${mins%60}분`;
+}
+function formatEventTime(ev){return ev.startTime?(ev.endTime?`${ev.startTime}~${ev.endTime}`:`${ev.startTime}~`):"시간 미정"}
+function conflictExists(id,date,start,end){
+  if(!start||!end)return false;const a=Number(start.slice(0,2))*60+Number(start.slice(3)),b=Number(end.slice(0,2))*60+Number(end.slice(3));
+  return occurrences(parseDate(date)).some(o=>{
+    if(o.event.id===id||!o.event.startTime||!o.event.endTime)return false;
+    const s=Number(o.event.startTime.slice(0,2))*60+Number(o.event.startTime.slice(3)),e=Number(o.event.endTime.slice(0,2))*60+Number(o.event.endTime.slice(3));
+    return Math.max(a,s)<Math.min(b,e);
+  });
+}
+
+// ---------- render ----------
+function render(){
+  document.getElementById("selectedDateLabel").textContent=selectedDateLabel();
+  document.getElementById("viewSelect").value=viewMode;
+  document.getElementById("tableView").hidden=viewMode==="month";
+  document.getElementById("monthView").hidden=viewMode!=="month";
+  if(viewMode==="month")renderMonth();else renderTable();
+  renderMobile();
+  syncStorageWarning();
+}
+
+function mobilePeriodLabel(){
+  if(viewMode==="day")return `${focusDate.getFullYear()}년 ${focusDate.getMonth()+1}월 ${focusDate.getDate()}일`;
+  if(viewMode==="month")return `${focusDate.getFullYear()}년 ${focusDate.getMonth()+1}월`;
+  const s=startOfWeek(focusDate),e=addDays(s,6);return `${s.getMonth()+1}.${s.getDate()} - ${e.getMonth()+1}.${e.getDate()}`;
+}
+function mobileScheduleCards(date,slot){
+  const ds=fmtDate(date),work=workFor(date,slot),evs=occurrences(date).filter(o=>getSlot(o.event.startTime)===slot);
+  let out="";
+  if(work)out+=`<button class="event-card ${work.cls}" data-mobile-work-date="${ds}" data-mobile-work-slot="${slot}"><div class="event-title">${esc(work.title)}</div>${work.time?`<div class="event-time">${esc(work.time)}</div>`:""}</button>`;
+  evs.forEach(o=>{const e=o.event,rep=e.recurrence&&e.recurrence.type!=="none";out+=`<button class="event-card ${esc(e.category||"personal")}" data-mobile-event-id="${esc(e.id)}" data-mobile-occurrence-date="${ds}">${rep?`<span class="repeat-mark">↻</span>`:""}<div class="event-title">${esc(e.title)}</div><div class="event-time">${esc(formatEventTime(e))}</div></button>`});
+  return out;
+}
+function renderMobileDayStrip(){
+  const strip=document.getElementById("mobileDayStrip");if(!strip)return;
+  if(viewMode!=="week"){strip.hidden=true;return}
+  strip.hidden=false;
+  const start=startOfWeek(focusDate),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
+  strip.innerHTML="";
+  for(let i=0;i<7;i++){
+    const d=addDays(start,i),ds=fmtDate(d),holiday=getHoliday(d),b=document.createElement("button");
+    b.type="button";b.className=`mobile-day-btn ${ds===sel?"selected":""} ${isPastDate(d)?"is-past":""}`;b.dataset.mobileDate=ds;
+    b.innerHTML=`<span class="mdow">${DOW[d.getDay()]}</span><span class="mdate ${ds===today?"today":""}">${d.getDate()}</span><span class="mholiday">${holiday?esc(holiday.names[0]):""}</span>`;
+    strip.appendChild(b);
+  }
+}
+function renderMobileMonthStatic(){
+  const panel=document.getElementById("mobileMonthPanel"),grid=document.getElementById("mobileMonthGrid");if(!panel||!grid)return;
+  if(viewMode!=="month"){panel.hidden=true;return}
+  panel.hidden=false;
+  const first=new Date(focusDate.getFullYear(),focusDate.getMonth(),1),start=startOfWeek(first),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
+  let h="";DOW_KO.forEach(d=>h+=`<div class="mobile-month-dow">${d}</div>`);
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i),ds=fmtDate(d),outside=d.getMonth()!==focusDate.getMonth(),holiday=getHoliday(d),flags=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,4).map(t=>trackerIcon(t)).join("");
+    h+=`<div class="mobile-month-cell ${outside?"outside":""} ${isPastDate(d)?"is-past":""} ${ds===sel?"selected":""}"><button class="mobile-month-date ${ds===today?"today":""}" data-mobile-date="${ds}" type="button">${d.getDate()}</button><div class="mobile-month-flags">${flags}</div>${holiday?`<div class="mobile-month-holiday">${esc(holiday.names[0])}</div>`:""}</div>`;
+  }
+  grid.innerHTML=h;
+}
+function fillMobileSelectedRows(date){
+  const ds=fmtDate(date),past=isPastDate(date),wake=sleepValue(date,"wake"),bed=sleepValue(date,"bed");
+  const label=document.getElementById("mobileSelectedLabel");if(label)label.textContent=`${date.getMonth()+1}월 ${date.getDate()}일 ${DOW_KO[date.getDay()]}요일`;
+  const tracker=document.getElementById("mobileTrackerContent");if(tracker)tracker.innerHTML=state.trackerDefs.length?state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(date,t.id)?"active":""}" data-mobile-tracker-date="${ds}" data-mobile-tracker-id="${esc(t.id)}" aria-pressed="${getTrackerLog(date,t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}" type="button">${trackerIcon(t)}</button>`).join(""):`<span class="mobile-empty">트래커 없음</span>`;
+  const wakeBtn=document.getElementById("mobileWakeBtn"),bedBtn=document.getElementById("mobileBedBtn");
+  if(wakeBtn){wakeBtn.textContent=wake||"+ 시간 입력";wakeBtn.classList.toggle("empty",!wake);wakeBtn.dataset.mobileSleep="wake";wakeBtn.dataset.mobileDate=ds}
+  if(bedBtn){bedBtn.textContent=bed||"+ 시간 입력";bedBtn.classList.toggle("empty",!bed);bedBtn.dataset.mobileSleep="bed";bedBtn.dataset.mobileDate=ds}
+  [["morning","mobileMorningRow","mobileMorningEvents","mobileMorningAdd"],["afternoon","mobileAfternoonRow","mobileAfternoonEvents","mobileAfternoonAdd"],["evening","mobileEveningRow","mobileEveningEvents","mobileEveningAdd"]].forEach(([slot,rowId,eventId,addId])=>{
+    const row=document.getElementById(rowId),events=document.getElementById(eventId),add=document.getElementById(addId),cards=mobileScheduleCards(date,slot),slotPast=!past&&isPastSlot(date,slot);
+    if(row)row.classList.toggle("is-past",past||slotPast);
+    if(events)events.innerHTML=cards||`<div class="mobile-empty">일정 없음</div>`;
+    if(add){add.dataset.mobileAddDate=ds;add.dataset.mobileAddSlot=slot}
+  });
+  const rows=document.querySelectorAll("#mobileDayPanel .mobile-row");rows.forEach(r=>{if(!r.id)r.classList.toggle("is-past",past)});
+}
+function renderMobile(){
+  const period=document.getElementById("mobilePeriod");if(period)period.textContent=mobilePeriodLabel();
+  renderMobileDayStrip();
+  renderMobileMonthStatic();
+  fillMobileSelectedRows(focusDate);
+  bindMobileEvents();
+}
+function bindMobileEvents(){
+  const prev=document.getElementById("mobilePrevBtn"),next=document.getElementById("mobileNextBtn");if(prev)prev.onclick=()=>navigate(-1);if(next)next.onclick=()=>navigate(1);
+  document.querySelectorAll("#mobileShell [data-mobile-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.mobileDate);render()});
+  document.querySelectorAll("#mobileShell [data-mobile-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.mobileTrackerDate),b.dataset.mobileTrackerId)});
+  document.querySelectorAll("#mobileShell [data-mobile-sleep]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.mobileDate),b.dataset.mobileSleep));
+  document.querySelectorAll("#mobileShell [data-mobile-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.mobileAddDate,slot:b.dataset.mobileAddSlot}));
+  document.querySelectorAll("#mobileShell [data-mobile-work-date]").forEach(card=>card.onclick=()=>openWorkEditor(parseDate(card.dataset.mobileWorkDate),card.dataset.mobileWorkSlot));
+  document.querySelectorAll("#mobileShell [data-mobile-event-id]").forEach(card=>{
+    card.onclick=()=>openEventForm({event:state.events.find(e=>e.id===card.dataset.mobileEventId),occurrenceDate:card.dataset.mobileOccurrenceDate});
+    let timer=null,startX=0,startY=0;
+    card.onpointerdown=e=>{if(e.pointerType==="mouse")return;startX=e.clientX;startY=e.clientY;timer=setTimeout(()=>{const ev=state.events.find(x=>x.id===card.dataset.mobileEventId);openMoveModal(card.dataset.mobileEventId,card.dataset.mobileOccurrenceDate,card.dataset.mobileOccurrenceDate,getSlot(ev?.startTime||""));timer=null},480)};
+    card.onpointermove=e=>{if(timer&&Math.hypot(e.clientX-startX,e.clientY-startY)>9){clearTimeout(timer);timer=null}};
+    card.onpointerup=card.onpointercancel=()=>{if(timer){clearTimeout(timer);timer=null}};
+  });
+}
+
+function renderTable(){
+  const host=document.getElementById("tableView");
+  const start=viewMode==="day"?new Date(focusDate):startOfWeek(focusDate);
+  const dates=viewMode==="day"?[new Date(focusDate)]:Array.from({length:7},(_,i)=>addDays(start,i));
+  const today=fmtDate(nowDate()),selected=fmtDate(focusDate);
+  let html=`<div class="${viewMode==="day"?"day-mode":""}"><table class="schedule-table"><thead><tr><th class="row-head">요일</th>`;
+  dates.forEach(d=>{
+    const ds=fmtDate(d),h=getHoliday(d),classes=["day-head",d.getDay()===0?"sunday":"",d.getDay()===6?"saturday":"",ds===selected?"selected":"",ds===today?"today-col":"",isPastDate(d)?"is-past":""].join(" ");
+    html+=`<th class="${classes}"><div class="dow">${DOW[d.getDay()]}</div><button class="day-number ${ds===today?"today":""}" data-select-date="${ds}">${d.getDate()}</button><div class="holiday-name">${h?esc(h.names.join(" · ")):""}</div></th>`;
+  });
+  html+=`</tr></thead><tbody>`;
+  html+=renderTrackerRow(dates,selected);
+  html+=renderSleepRow(dates,selected,"wake","기상");
+  ["morning","afternoon","evening"].forEach(slot=>html+=renderScheduleRow(dates,selected,slot));
+  html+=renderSleepRow(dates,selected,"bed","취침");
+  html+=`</tbody></table></div>`;
+  host.innerHTML=html;bindTableEvents();
+  if(window.innerWidth<700&&viewMode==="week"){
+    requestAnimationFrame(()=>{
+      const cell=host.querySelector(`[data-date-col="${selected}"]`); if(cell)cell.scrollIntoView({inline:"center",block:"nearest",behavior:"instant"});
+    });
+  }
+}
+function renderTrackerRow(dates,selected){
+  let s=`<tr class="tracker-row"><th class="row-head">트래커</th>`;
+  dates.forEach(d=>{
+    const ds=fmtDate(d),defs=viewMode==="day"?state.trackerDefs:state.trackerDefs.slice(0,5);
+    const icons=defs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}" aria-pressed="${getTrackerLog(d,t.id)}">${trackerIcon(t)}</button>`).join("");
+    const extra=state.trackerDefs.length>defs.length?`<span class="tracker-overflow">+${state.trackerDefs.length-defs.length}</span>`:"";
+    s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""}" data-date-col="${ds}"><div class="tracker-icons">${icons}${extra}</div></td>`;
+  });return s+`</tr>`;
+}
+function renderSleepRow(dates,selected,type,label){
+  let s=`<tr class="${type==="wake"?"wake-row":"bed-row"}"><th class="row-head">${label}</th>`;
+  dates.forEach(d=>{const ds=fmtDate(d),v=sleepValue(d,type);s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""}" data-date-col="${ds}"><button class="time-cell-btn ${v?"":"empty"}" data-sleep-open="${type}" data-date="${ds}">${v||"+"}</button></td>`});return s+`</tr>`;
+}
+function renderScheduleRow(dates,selected,slot){
+  let s=`<tr class="schedule-row"><th class="row-head">${SLOT_LABELS[slot]}</th>`;
+  dates.forEach(d=>{
+    const ds=fmtDate(d),work=workFor(d,slot),evs=occurrences(d).filter(o=>getSlot(o.event.startTime)===slot),limit=viewMode==="day"?8:3;
+    let cards="";
+    if(work)cards+=`<button class="event-card ${work.cls}" draggable="true" data-work-date="${ds}" data-work-slot="${slot}" title="클릭: 회사 일정 수정 · 드래그: 이동"><div class="event-title">${esc(work.title)}</div>${work.time?`<div class="event-time">${esc(work.time)}</div>`:""}</button>`;
+    evs.slice(0,limit).forEach(o=>{
+      const e=o.event,rep=e.recurrence&&e.recurrence.type!=="none";
+      cards+=`<button class="event-card ${esc(e.category||"personal")}" draggable="true" data-event-id="${esc(e.id)}" data-occurrence-date="${ds}" title="클릭: 수정 · 길게 누르기: 이동">
+        ${rep?`<span class="repeat-mark">↻</span>`:""}<div class="event-title">${esc(e.title)}</div><div class="event-time">${esc(formatEventTime(e))}</div></button>`;
+    });
+    if(evs.length>limit)cards+=`<button class="more-btn" data-more-date="${ds}">+${evs.length-limit}개</button>`;
+    s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""} ${!isPastDate(d)&&isPastSlot(d,slot)?"is-past-slot":""}" data-drop-date="${ds}" data-drop-slot="${slot}" data-date-col="${ds}"><div class="events">${cards}</div><button class="cell-add" data-add-date="${ds}" data-add-slot="${slot}">+ 일정</button></td>`;
+  });return s+`</tr>`;
+}
+function renderMonth(){
+  const host=document.getElementById("monthView");
+  const first=new Date(focusDate.getFullYear(),focusDate.getMonth(),1),start=startOfWeek(first),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
+  let html=`<div class="month-grid">`;
+  DOW_KO.forEach(d=>html+=`<div class="month-dow">${d}</div>`);
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i),ds=fmtDate(d),h=getHoliday(d),out=d.getMonth()!==focusDate.getMonth();
+    const activeTrackers=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,5);
+    const evs=occurrences(d);
+    html+=`<div class="month-cell ${out?"outside":""} ${ds===sel?"selected":""} ${isPastDate(d)?"is-past":""}">
+      <div class="month-top"><button class="month-date ${ds===today?"today":""}" data-month-date="${ds}">${d.getDate()}</button></div>
+      ${h?`<div class="month-holiday">${esc(h.names.join(" · "))}</div>`:""}
+      <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</span>`).join("")}</div>
+      ${evs.slice(0,2).map(o=>`<div class="month-event ${esc(o.event.category||"personal")}">${esc(o.event.title)}</div>`).join("")}
+      ${evs.length>2?`<button class="month-more" data-month-date="${ds}">+${evs.length-2}개</button>`:""}
+    </div>`;
+  }
+  html+=`</div>${renderMonthDetail()}`;
+  host.innerHTML=html;bindMonthEvents();
+}
+function renderMonthDetail(){
+  const d=new Date(focusDate),ds=fmtDate(d),h=getHoliday(d),evs=occurrences(d),work=getWorkStatus(d),dur=sleepDurationForWake(d);
+  const trackerBtns=state.trackerDefs.map(t=>`<button class="tracker-toggle ${getTrackerLog(d,t.id)?"active":""}" data-tracker-date="${ds}" data-tracker-id="${esc(t.id)}" title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</button>`).join("");
+  return `<div class="month-detail">
+    <div><h3>${d.getMonth()+1}월 ${d.getDate()}일 ${DOW_KO[d.getDay()]}요일</h3><div class="month-detail-sub">${h?esc(h.names.join(" · "))+" · ":""}${work==="holiday"?"휴일":work==="leave"?"연차":work==="amleave"?"오전반차":work==="pmleave"?"오후반차":"정상근무"}</div>
+      <div class="month-detail-trackers">${trackerBtns||'<span class="hint">등록된 트래커 없음</span>'}</div>
+      <div class="month-detail-times"><span>기상 ${sleepValue(d,"wake")||"—"}</span><span>취침 ${sleepValue(d,"bed")||"—"}</span>${dur?`<span>전날 수면 ${dur}</span>`:""}</div>
+    </div>
+    <div class="month-detail-events">${evs.length?evs.map(o=>`<button class="event-card ${esc(o.event.category||"personal")}" data-event-id="${esc(o.event.id)}" data-occurrence-date="${ds}"><div class="event-title">${esc(o.event.title)}</div><div class="event-time">${esc(formatEventTime(o.event))}</div></button>`).join(""):'<div class="hint">개인 일정이 없습니다.</div>'}</div>
+    <div class="month-detail-actions"><button class="small-btn primary" id="monthToDay">일간 보기</button><button class="small-btn" data-add-date="${ds}" data-add-slot="morning">+ 일정</button></div>
+  </div>`;
+}
+
+// ---------- bindings ----------
+function selectDate(ds){focusDate=parseDate(ds);render()}
+function bindTableEvents(){
+  document.querySelectorAll("[data-select-date]").forEach(b=>b.onclick=()=>selectDate(b.dataset.selectDate));
+  document.querySelectorAll("[data-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.trackerDate),b.dataset.trackerId)});
+  document.querySelectorAll("[data-sleep-open]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.date),b.dataset.sleepOpen));
+  document.querySelectorAll("[data-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.addDate,slot:b.dataset.addSlot}));
+  document.querySelectorAll("[data-more-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.moreDate);viewMode="day";render()});
+  bindEventCards();
+  bindWorkCards();
+  bindDropTargets();
+}
+function bindMonthEvents(){
+  document.querySelectorAll("[data-month-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.monthDate);render()});
+  document.querySelectorAll("#monthView [data-tracker-date]").forEach(b=>b.onclick=()=>toggleTracker(parseDate(b.dataset.trackerDate),b.dataset.trackerId));
+  document.querySelectorAll("#monthView [data-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.addDate,slot:b.dataset.addSlot}));
+  document.querySelectorAll("#monthView .event-card").forEach(b=>b.onclick=()=>openEventForm({event:state.events.find(e=>e.id===b.dataset.eventId),occurrenceDate:b.dataset.occurrenceDate}));
+  document.getElementById("monthToDay")?.addEventListener("click",()=>{viewMode="day";render()});
+}
+function bindEventCards(){
+  document.querySelectorAll(".event-card[data-event-id]").forEach(card=>{
+    card.onclick=()=>openEventForm({event:state.events.find(e=>e.id===card.dataset.eventId),occurrenceDate:card.dataset.occurrenceDate});
+    card.ondragstart=e=>{dragPayload={type:"event",eventId:card.dataset.eventId,occurrenceDate:card.dataset.occurrenceDate};card.classList.add("dragging");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",JSON.stringify(dragPayload))};
+    card.ondragend=()=>{card.classList.remove("dragging");document.querySelectorAll(".drop-ready").forEach(x=>x.classList.remove("drop-ready"))};
+    let timer,startX=0,startY=0;
+    card.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse")return;startX=e.clientX;startY=e.clientY;
+      timer=setTimeout(()=>{openMoveModal(card.dataset.eventId,card.dataset.occurrenceDate,card.dataset.occurrenceDate,getSlot(state.events.find(x=>x.id===card.dataset.eventId)?.startTime||""));timer=null},480);
+    });
+    card.addEventListener("pointermove",e=>{if(timer&&Math.hypot(e.clientX-startX,e.clientY-startY)>9){clearTimeout(timer);timer=null}});
+    ["pointerup","pointercancel"].forEach(type=>card.addEventListener(type,()=>{if(timer){clearTimeout(timer);timer=null}}));
+  });
+}
+function bindWorkCards(){
+  document.querySelectorAll(".event-card[data-work-date]").forEach(card=>{
+    const date=card.dataset.workDate,slot=card.dataset.workSlot;
+    card.onclick=()=>openWorkEditor(parseDate(date),slot);
+    card.ondragstart=e=>{
+      dragPayload={type:"work",workDate:date,workSlot:slot};
+      card.classList.add("dragging");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",JSON.stringify(dragPayload));
+    };
+    card.ondragend=()=>{card.classList.remove("dragging");document.querySelectorAll(".drop-ready").forEach(x=>x.classList.remove("drop-ready"))};
+    let timer,startX=0,startY=0;
+    card.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse")return;startX=e.clientX;startY=e.clientY;
+      timer=setTimeout(()=>{openWorkEditor(parseDate(date),slot);timer=null},480);
+    });
+    card.addEventListener("pointermove",e=>{if(timer&&Math.hypot(e.clientX-startX,e.clientY-startY)>9){clearTimeout(timer);timer=null}});
+    ["pointerup","pointercancel"].forEach(type=>card.addEventListener(type,()=>{if(timer){clearTimeout(timer);timer=null}}));
+  });
+}
+function bindDropTargets(){
+  document.querySelectorAll("[data-drop-date]").forEach(cell=>{
+    cell.ondragover=e=>{e.preventDefault();if(dragPayload)cell.classList.add("drop-ready")};
+    cell.ondragleave=()=>cell.classList.remove("drop-ready");
+    cell.ondrop=e=>{
+      e.preventDefault();cell.classList.remove("drop-ready");
+      let payload=dragPayload;
+      if(!payload){try{payload=JSON.parse(e.dataTransfer.getData("text/plain")||"null")}catch(_){payload=null}}
+      if(!payload)return;
+      if(payload.type==="work")moveWorkBlock(payload.workDate,payload.workSlot,cell.dataset.dropDate,cell.dataset.dropSlot);
+      else openMoveModal(payload.eventId,payload.occurrenceDate,cell.dataset.dropDate,cell.dataset.dropSlot);
+      dragPayload=null;
+    };
+  });
+}
+
+// ---------- event form ----------
+function populateCategories(){
+  const el=document.getElementById("eventCategory");el.innerHTML="";state.categories.forEach(c=>el.add(new Option(c.name,c.id)));
+}
+function openEventForm({date=fmtDate(focusDate),slot="morning",event=null,occurrenceDate=""}={}){
+  populateCategories();
+  document.getElementById("eventModalTitle").textContent=event?"일정 수정":"일정 추가";
+  document.getElementById("eventModalSub").textContent=event?`${occurrenceDate||event.startDate} · ${recurrenceText(event)}`:`${date} · ${SLOT_LABELS[slot]}`;
+  document.getElementById("eventId").value=event?.id||"";
+  document.getElementById("eventOriginalDate").value=occurrenceDate||event?.startDate||date;
+  document.getElementById("eventDate").value=event?(occurrenceDate||event.startDate):date;
+  document.getElementById("eventName").value=event?.title||"";
+  document.getElementById("eventCategory").value=event?.category||state.categories[0]?.id||"personal";
+  document.getElementById("eventNotes").value=event?.notes||"";
+  const start=event?.startTime||slotDefault(slot),end=event?.endTime||addMinutes(start,60);
+  setTimeParts("eventStartHour","eventStartMinute",start);setTimeParts("eventEndHour","eventEndMinute",end);
+  fillRecurrence(event?.recurrence||{type:"none"},parseDate(document.getElementById("eventDate").value));
+  document.getElementById("deleteEventBtn").hidden=!event;
+  document.getElementById("conflictHint").hidden=true;
+  openModal("eventModal");eventFormSnapshot=eventFormState();
+}
+function eventFormState(){
+  return JSON.stringify({
+    id:document.getElementById("eventId").value,date:document.getElementById("eventDate").value,name:document.getElementById("eventName").value,
+    cat:document.getElementById("eventCategory").value,sh:document.getElementById("eventStartHour").value,sm:document.getElementById("eventStartMinute").value,
+    eh:document.getElementById("eventEndHour").value,em:document.getElementById("eventEndMinute").value,notes:document.getElementById("eventNotes").value,
+    rep:collectRecurrence(document.getElementById("eventDate").value)
+  });
+}
+function fillRecurrence(r,date){
+  document.getElementById("repeatType").value=r.type||"none";document.getElementById("repeatInterval").value=r.interval||1;
+  document.getElementById("repeatEndDate").value=r.endDate||"";document.getElementById("repeatCount").value=r.count||10;
+  document.querySelectorAll('input[name="repeatEnd"]').forEach(x=>x.checked=x.value===(r.endType||"never"));
+  buildWeekdayButtons((r.weekdays&&r.weekdays.length)?r.weekdays.map(Number):[date.getDay()]);
+  updateRepeatUI(false);
+}
+function buildWeekdayButtons(active=[]){
+  const box=document.getElementById("weekdayButtons");box.innerHTML="";
+  ["월","화","수","목","금","토","일"].forEach((name,i)=>{const wd=i===6?0:i+1,b=document.createElement("button");b.type="button";b.className=`chip ${active.includes(wd)?"active":""}`;b.dataset.wd=wd;b.textContent=name;b.onclick=()=>b.classList.toggle("active");box.append(b)});
+}
+function updateRepeatUI(open=true){
+  const t=document.getElementById("repeatType").value;
+  if(open)document.getElementById("repeatContent").hidden=false;
+  document.getElementById("repeatOptions").hidden=t==="none";
+  document.getElementById("weekdayField").hidden=t!=="weekly";
+  document.getElementById("repeatUnit").textContent=t==="daily"?"일마다":t==="monthly"?"개월마다":"주마다";
+  document.getElementById("repeatSummary").textContent=t==="none"?"반복 설정 ›":t==="daily"?"매일 반복 ›":t==="weekly"?"매주 반복 ›":"매월 반복 ›";
+}
+function collectRecurrence(startDate){
+  const type=document.getElementById("repeatType").value;if(type==="none")return {type:"none"};
+  const endType=document.querySelector('input[name="repeatEnd"]:checked')?.value||"never";
+  const r={type,interval:Math.max(1,Number(document.getElementById("repeatInterval").value)||1),endType};
+  if(type==="weekly"){const w=[...document.querySelectorAll("#weekdayButtons .chip.active")].map(b=>Number(b.dataset.wd));r.weekdays=w.length?w:[parseDate(startDate).getDay()]}
+  if(endType==="date")r.endDate=document.getElementById("repeatEndDate").value||startDate;
+  if(endType==="count")r.count=Math.max(1,Number(document.getElementById("repeatCount").value)||1);
+  return r;
+}
+function saveEvent(){
+  const title=document.getElementById("eventName").value.trim(),date=document.getElementById("eventDate").value,id=document.getElementById("eventId").value;
+  if(!title||!date){toast("일정명과 날짜를 입력해주세요.");return}
+  const start=timeFromParts("eventStartHour","eventStartMinute"),end=timeFromParts("eventEndHour","eventEndMinute");
+  if(end<=start){toast("종료 시간은 시작 시간 이후여야 합니다.");return}
+  const conflict=conflictExists(id,date,start,end);
+  const hint=document.getElementById("conflictHint");
+  if(conflict&&!hint.dataset.confirmed){hint.hidden=false;hint.textContent="⚠ 같은 시간대에 겹치는 일정이 있습니다. 다시 저장하면 그대로 저장합니다.";hint.dataset.confirmed="1";return}
+  hint.dataset.confirmed="";
+  const newData={id:id||uid(),title,startDate:date,startTime:start,endTime:end,category:document.getElementById("eventCategory").value,notes:document.getElementById("eventNotes").value.trim(),active:true,recurrence:collectRecurrence(date),exdates:[]};
+  if(!id){state.events.push(newData);closeModal("eventModal");saveState("일정을 저장했어요.");return}
+  const ev=state.events.find(x=>x.id===id),occ=document.getElementById("eventOriginalDate").value;
+  if((ev.recurrence||{}).type!=="none"){pendingAction={type:"edit",data:newData,occurrenceDate:occ};pendingEvent=ev;closeModal("eventModal");document.getElementById("scopeTitle").textContent="반복 일정 수정";openModal("scopeModal");return}
+  const idx=state.events.findIndex(x=>x.id===id);newData.exdates=ev.exdates||[];state.events[idx]=newData;closeModal("eventModal");saveState("일정을 수정했어요.");
+}
+function deleteEvent(){
+  const id=document.getElementById("eventId").value;if(!id)return;const ev=state.events.find(x=>x.id===id),occ=document.getElementById("eventOriginalDate").value;
+  if((ev.recurrence||{}).type!=="none"){pendingAction={type:"delete",occurrenceDate:occ};pendingEvent=ev;closeModal("eventModal");document.getElementById("scopeTitle").textContent="반복 일정 삭제";openModal("scopeModal");return}
+  const snapshot=clone(ev);state.events=state.events.filter(x=>x.id!==id);closeModal("eventModal");saveState("일정을 삭제했어요.",()=>{state.events.push(snapshot);saveState("삭제를 취소했어요.")});
+}
+function applyScope(){
+  const scope=document.querySelector('input[name="scopeChoice"]:checked').value,ev=pendingEvent,a=pendingAction;closeModal("scopeModal");
+  if(!ev||!a)return;
+  if(a.type==="delete"){
+    const snapshot=clone(state.events);
+    if(scope==="one")ev.exdates=[...(ev.exdates||[]),a.occurrenceDate];
+    else if(scope==="future")ev.recurrence={...(ev.recurrence||{}),endType:"date",endDate:fmtDate(addDays(parseDate(a.occurrenceDate),-1))};
+    else state.events=state.events.filter(x=>x.id!==ev.id);
+    saveState("일정을 삭제했어요.",()=>{state.events=snapshot;saveState("삭제를 취소했어요.")});return;
+  }
+  if(a.type==="edit"){
+    const data=a.data,snapshot=clone(state.events);
+    if(scope==="one"){ev.exdates=[...(ev.exdates||[]),a.occurrenceDate];data.id=uid();data.startDate=a.occurrenceDate;data.recurrence={type:"none"};state.events.push(data)}
+    else if(scope==="future"){ev.recurrence={...(ev.recurrence||{}),endType:"date",endDate:fmtDate(addDays(parseDate(a.occurrenceDate),-1))};data.id=uid();data.startDate=a.occurrenceDate;state.events.push(data)}
+    else{data.exdates=ev.exdates||[];state.events[state.events.findIndex(x=>x.id===ev.id)]=data}
+    saveState("반복 일정을 수정했어요.",()=>{state.events=snapshot;saveState("수정을 취소했어요.")});
+  }
+}
+
+// ---------- work ----------
+function openWork(){
+  const s=getWorkStatus(focusDate);document.getElementById("workModalTitle").textContent=`${focusDate.getMonth()+1}월 ${focusDate.getDate()}일 근무 상태`;
+  document.querySelectorAll('input[name="workStatus"]').forEach(r=>r.checked=r.value===s);openModal("workModal");
+}
+function saveWorkStatus(){
+  const ds=fmtDate(focusDate),v=document.querySelector('input[name="workStatus"]:checked')?.value||"normal",beforeException=state.workExceptions[ds],beforeOverrides=clone(state.workOverrides||{});
+  state.workExceptions[ds]=v;
+  if(v==="normal")Object.keys(state.workOverrides||{}).filter(k=>k.startsWith(ds+"/")).forEach(k=>delete state.workOverrides[k]);
+  closeModal("workModal");saveState("근무 상태를 저장했어요.",()=>{if(beforeException===undefined)delete state.workExceptions[ds];else state.workExceptions[ds]=beforeException;state.workOverrides=beforeOverrides;saveState("근무 상태 변경을 취소했어요.")});
+}
+
+function workKey(date,slot){return `${fmtDate(date)}/${slot}`}
+function openWorkEditor(date,slot){
+  const wc=workFor(date,slot);if(!wc)return;
+  document.getElementById("workEditDate").value=fmtDate(date);document.getElementById("workEditSlot").value=slot;
+  document.getElementById("workEditorSub").textContent=`${date.getMonth()+1}월 ${date.getDate()}일 · ${SLOT_LABELS[slot]}`;
+  document.getElementById("workEditTitle").value=wc.title||state.workConfig.label;
+  const start=wc.start||(wc.time?wc.time.split("~")[0]:slot==="morning"?state.workConfig.start:"13:00");
+  const end=wc.end||(wc.time?wc.time.split("~")[1]:slot==="morning"?"12:00":state.workConfig.end);
+  setTimeParts("workStartHour","workStartMinute",start);setTimeParts("workEndHour","workEndMinute",end);
+  openModal("workEditorModal");
+}
+function saveWorkEdit(){
+  const ds=document.getElementById("workEditDate").value,slot=document.getElementById("workEditSlot").value,key=`${ds}/${slot}`;
+  const title=document.getElementById("workEditTitle").value.trim(),start=timeFromParts("workStartHour","workStartMinute"),end=timeFromParts("workEndHour","workEndMinute");
+  if(!title||end<=start){toast("일정명과 시작·종료 시간을 확인해 주세요.");return}
+  const before=clone(state.workOverrides||{});
+  state.workOverrides[key]={title,cls:"work",start,end,time:`${start}~${end}`};
+  closeModal("workEditorModal");saveState("회사 일정을 수정했어요.",()=>{state.workOverrides=before;saveState("수정을 취소했어요.")});
+}
+function deleteWorkEdit(){
+  const ds=document.getElementById("workEditDate").value,slot=document.getElementById("workEditSlot").value,key=`${ds}/${slot}`,before=clone(state.workOverrides||{});
+  state.workOverrides[key]=null;closeModal("workEditorModal");saveState("회사 일정을 삭제했어요.",()=>{state.workOverrides=before;saveState("삭제를 취소했어요.")});
+}
+function restoreWorkEdit(){
+  const ds=document.getElementById("workEditDate").value,slot=document.getElementById("workEditSlot").value,key=`${ds}/${slot}`,before=clone(state.workOverrides||{});
+  delete state.workOverrides[key];closeModal("workEditorModal");saveState("기본 근무로 복원했어요.",()=>{state.workOverrides=before;saveState("복원을 취소했어요.")});
+}
+function moveWorkBlock(sourceDate,sourceSlot,targetDate,targetSlot){
+  const srcDate=parseDate(sourceDate),wc=workFor(srcDate,sourceSlot);if(!wc)return;
+  if(sourceDate===targetDate&&sourceSlot===targetSlot)return;
+  const before=clone(state.workOverrides||{}),sourceKey=`${sourceDate}/${sourceSlot}`,targetKey=`${targetDate}/${targetSlot}`;
+  let start=wc.start||(wc.time?wc.time.split("~")[0]:slotDefault(sourceSlot));
+  let end=wc.end||(wc.time?wc.time.split("~")[1]:addMinutes(start,180));
+  if(sourceSlot!==targetSlot){
+    const [sh,sm]=start.split(":").map(Number),[eh,em]=end.split(":").map(Number);let duration=(eh*60+em)-(sh*60+sm);if(duration<=0)duration=180;
+    start=slotDefault(targetSlot);end=addMinutes(start,Math.min(duration,targetSlot==="evening"?240:360));
+  }
+  state.workOverrides[sourceKey]=null;
+  state.workOverrides[targetKey]={title:wc.title||state.workConfig.label,cls:"work",start,end,time:`${start}~${end}`};
+  focusDate=parseDate(targetDate);saveState("회사 일정을 이동했어요.",()=>{state.workOverrides=before;saveState("이동을 취소했어요.")});
+}
+
+// ---------- sleep ----------
+function openSleep(date,type){
+  const v=sleepValue(date,type)||"07:30";document.getElementById("sleepType").value=type;document.getElementById("sleepDate").value=fmtDate(date);
+  document.getElementById("sleepModalTitle").textContent=type==="wake"?"기상 시간":"취침 시간";
+  document.getElementById("sleepModalSub").textContent=`${date.getMonth()+1}월 ${date.getDate()}일 ${DOW_KO[date.getDay()]}요일`;
+  setTimeParts("sleepHour","sleepMinute",v);document.getElementById("sleepSummary").textContent=type==="wake"?(sleepDurationForWake(date)?`전날 취침부터 ${sleepDurationForWake(date)}`:""):"";
+  openModal("sleepModal");
+}
+function saveSleep(){
+  const ds=document.getElementById("sleepDate").value,type=document.getElementById("sleepType").value,v=timeFromParts("sleepHour","sleepMinute"),before=clone(state.sleepLogs[ds]||{});
+  state.sleepLogs[ds]||={};state.sleepLogs[ds][type]=v;closeModal("sleepModal");saveState(`${type==="wake"?"기상":"취침"} 시간을 저장했어요.`,()=>{state.sleepLogs[ds]=before;saveState("수면 기록 변경을 취소했어요.")});
+}
+function clearSleep(){
+  const ds=document.getElementById("sleepDate").value,type=document.getElementById("sleepType").value,before=clone(state.sleepLogs[ds]||{});
+  if(state.sleepLogs[ds])delete state.sleepLogs[ds][type];closeModal("sleepModal");saveState("시간 기록을 삭제했어요.",()=>{state.sleepLogs[ds]=before;saveState("삭제를 취소했어요.")});
+}
+
+// ---------- move ----------
+function openMoveModal(eventId,occurrenceDate,targetDate,targetSlot){
+  const ev=state.events.find(x=>x.id===eventId);if(!ev)return;
+  document.getElementById("moveEventId").value=eventId;document.getElementById("moveOccurrenceDate").value=occurrenceDate;
+  document.getElementById("moveDate").value=targetDate;document.getElementById("moveSlot").value=targetSlot;
+  let start=ev.startTime||slotDefault(targetSlot);
+  if(getSlot(start)!==targetSlot)start=slotDefault(targetSlot);
+  const duration=ev.startTime&&ev.endTime?(Number(ev.endTime.slice(0,2))*60+Number(ev.endTime.slice(3)))-(Number(ev.startTime.slice(0,2))*60+Number(ev.startTime.slice(3))):60;
+  setTimeParts("moveStartHour","moveStartMinute",start);setTimeParts("moveEndHour","moveEndMinute",addMinutes(start,Math.max(10,duration)));
+  document.getElementById("moveRepeatScope").hidden=(ev.recurrence||{}).type==="none";
+  document.getElementById("moveSub").textContent=`${ev.title} · ${occurrenceDate} → ${targetDate}`;
+  openModal("moveModal");
+}
+function saveMove(){
+  const id=document.getElementById("moveEventId").value,occ=document.getElementById("moveOccurrenceDate").value,ev=state.events.find(x=>x.id===id);
+  if(!ev)return;
+  const target=document.getElementById("moveDate").value,start=timeFromParts("moveStartHour","moveStartMinute"),end=timeFromParts("moveEndHour","moveEndMinute");
+  if(end<=start){toast("종료 시간은 시작 시간 이후여야 합니다.");return}
+  const snapshot=clone(state.events),scope=(ev.recurrence||{}).type==="none"?"all":document.querySelector('input[name="moveScope"]:checked')?.value||"one";
+  if((ev.recurrence||{}).type==="none"){ev.startDate=target;ev.startTime=start;ev.endTime=end}
+  else if(scope==="one"){ev.exdates=[...(ev.exdates||[]),occ];state.events.push({...clone(ev),id:uid(),startDate:target,startTime:start,endTime:end,recurrence:{type:"none"},exdates:[]})}
+  else if(scope==="future"){
+    ev.recurrence={...(ev.recurrence||{}),endType:"date",endDate:fmtDate(addDays(parseDate(occ),-1))};
+    state.events.push({...clone(ev),id:uid(),startDate:target,startTime:start,endTime:end,exdates:[]});
+  }else{ev.startDate=target;ev.startTime=start;ev.endTime=end}
+  closeModal("moveModal");focusDate=parseDate(target);saveState("일정을 이동했어요.",()=>{state.events=snapshot;saveState("이동을 취소했어요.")});
+}
+
+// ---------- settings ----------
+function openSettings(){
+  settingsDraft=clone({workConfig:state.workConfig,categories:state.categories,trackerDefs:state.trackerDefs});
+  document.querySelectorAll("[data-settings-tab]").forEach((b,i)=>b.classList.toggle("active",i===0));
+  document.querySelectorAll("[data-settings-pane]").forEach((p,i)=>p.hidden=i!==0);
+  renderSettingsDraft();openModal("settingsModal");
+}
+function renderSettingsDraft(){
+  document.getElementById("settingsWorkStart").value=settingsDraft.workConfig.start;
+  document.getElementById("settingsWorkEnd").value=settingsDraft.workConfig.end;
+  document.getElementById("settingsWorkLabel").value=settingsDraft.workConfig.label;
+  const wd=document.getElementById("settingsWorkdays");wd.innerHTML="";
+  ["월","화","수","목","금","토","일"].forEach((n,i)=>{const d=i===6?0:i+1,b=document.createElement("button");b.type="button";b.className=`chip ${settingsDraft.workConfig.weekdays.map(Number).includes(d)?"active":""}`;b.dataset.wd=d;b.textContent=n;b.onclick=()=>b.classList.toggle("active");wd.append(b)});
+  renderCategoryDraft();renderTrackerDraft();
+}
+function renderCategoryDraft(){
+  const box=document.getElementById("categoryList");box.innerHTML="";
+  settingsDraft.categories.forEach(c=>{
+    const row=document.createElement("div");row.className="category-row";row.innerHTML=`<input class="input" value="${esc(c.name)}" data-cat-id="${esc(c.id)}"><button class="btn danger" data-del-cat="${esc(c.id)}">삭제</button>`;
+    row.querySelector("input").oninput=e=>c.name=e.target.value;
+    row.querySelector("[data-del-cat]").onclick=()=>{if(settingsDraft.categories.length<=1){toast("카테고리는 최소 1개 필요합니다.");return}settingsDraft.categories=settingsDraft.categories.filter(x=>x.id!==c.id);renderCategoryDraft()};
+    box.append(row);
+  });
+}
+function renderTrackerDraft(){
+  const box=document.getElementById("trackerList");box.innerHTML="";
+  settingsDraft.trackerDefs.forEach((t,i)=>{
+    const row=document.createElement("div");row.className="tracker-manage-row";
+    row.innerHTML=`<div class="tracker-manage-icon">${trackerIcon(t)}</div><input class="input" value="${esc(t.name)}"><button class="order-btn" data-up="${i}" ${i===0?"disabled":""}>↑</button><button class="order-btn" data-down="${i}" ${i===settingsDraft.trackerDefs.length-1?"disabled":""}>↓</button><button class="btn danger">삭제</button>`;
+    row.querySelector("input").oninput=e=>t.name=e.target.value;
+    row.querySelector("[data-up]")?.addEventListener("click",()=>{[settingsDraft.trackerDefs[i-1],settingsDraft.trackerDefs[i]]=[settingsDraft.trackerDefs[i],settingsDraft.trackerDefs[i-1]];renderTrackerDraft()});
+    row.querySelector("[data-down]")?.addEventListener("click",()=>{[settingsDraft.trackerDefs[i+1],settingsDraft.trackerDefs[i]]=[settingsDraft.trackerDefs[i],settingsDraft.trackerDefs[i+1]];renderTrackerDraft()});
+    row.querySelector(".btn.danger").onclick=()=>{settingsDraft.trackerDefs=settingsDraft.trackerDefs.filter(x=>x.id!==t.id);renderTrackerDraft()};
+    box.append(row);
+  });
+}
+function saveSettings(){
+  const names=settingsDraft.categories.map(c=>c.name.trim()).filter(Boolean);if(!names.length){toast("카테고리는 최소 1개 필요합니다.");return}
+  if(settingsDraft.trackerDefs.some(t=>!t.name.trim())){toast("트래커 이름을 입력해주세요.");return}
+  settingsDraft.workConfig.start=document.getElementById("settingsWorkStart").value||"09:00";
+  settingsDraft.workConfig.end=document.getElementById("settingsWorkEnd").value||"18:00";
+  settingsDraft.workConfig.label=document.getElementById("settingsWorkLabel").value.trim()||"회사";
+  settingsDraft.workConfig.weekdays=[...document.querySelectorAll("#settingsWorkdays .chip.active")].map(b=>Number(b.dataset.wd));
+  state.workConfig=settingsDraft.workConfig;state.categories=settingsDraft.categories.map(c=>({...c,name:c.name.trim()}));state.trackerDefs=settingsDraft.trackerDefs.map(t=>normalizeTrackerMeta({...t,name:t.name.trim()}));
+  closeModal("settingsModal");saveState("설정을 저장했어요.");
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`my-week-v5-${fmtDate(new Date())}.json`;a.click();URL.revokeObjectURL(url);
+}
+function importData(file){
+  if(!accounts.owner){window.dispatchEvent(new Event("my-week-login-request"));return}
+  const importOwner=accounts.owner;const r=new FileReader();r.onload=()=>{if(accounts.owner!==importOwner)return;try{const raw=JSON.parse(r.result),p=validateState(raw?.version===5?raw:normalizeLegacy(raw));state=p;closeModal("settingsModal");saveState("백업을 불러왔어요.")}catch(e){toast("올바른 MY WEEK 백업 파일이 아닙니다.")}};r.readAsText(file);
+}
+
+// ---------- navigation / dirty ----------
+function navigate(delta){
+  if(viewMode==="day")focusDate=addDays(focusDate,delta);
+  else if(viewMode==="week")focusDate=addDays(focusDate,delta*7);
+  else focusDate=new Date(focusDate.getFullYear(),focusDate.getMonth()+delta,1);
+  render();
+}
+function eventDirty(){return document.getElementById("eventModal").classList.contains("open")&&eventFormSnapshot!==eventFormState()}
+function requestClose(id){
+  if(id==="eventModal"&&eventDirty()){dirtyCloseTarget=id;openModal("dirtyModal");return}
+  closeModal(id);
+}
+
+// ---------- listeners ----------
+fillTimeSelects();
+document.getElementById("viewSelect").onchange=e=>{viewMode=e.target.value;render()};
+document.getElementById("selectedDateLabel").onclick=()=>{focusDate=nowDate();render()};
+document.getElementById("toolbarPrevBtn").onclick=()=>navigate(-1);
+document.getElementById("toolbarNextBtn").onclick=()=>navigate(1);
+document.getElementById("prevBtn").onclick=()=>navigate(-1);
+document.getElementById("nextBtn").onclick=()=>navigate(1);
+document.getElementById("quickAddBtn").onclick=()=>openEventForm({date:fmtDate(focusDate),slot:"morning"});
+document.getElementById("workStatusBtn").onclick=openWork;
+document.getElementById("settingsBtn").onclick=openSettings;
+document.getElementById("repeatToggle").onclick=()=>{const c=document.getElementById("repeatContent");c.hidden=!c.hidden};
+document.getElementById("repeatType").onchange=()=>updateRepeatUI(true);
+document.getElementById("eventStartHour").onchange=document.getElementById("eventStartMinute").onchange=()=>{
+  const s=timeFromParts("eventStartHour","eventStartMinute");setTimeParts("eventEndHour","eventEndMinute",addMinutes(s,60));
+};
+document.getElementById("saveEventBtn").onclick=saveEvent;
+document.getElementById("deleteEventBtn").onclick=deleteEvent;
+document.getElementById("confirmScopeBtn").onclick=applyScope;
+document.getElementById("saveWorkStatusBtn").onclick=saveWorkStatus;
+document.getElementById("saveWorkBtn").onclick=saveWorkEdit;
+document.getElementById("deleteWorkBtn").onclick=deleteWorkEdit;
+document.getElementById("restoreWorkBtn").onclick=restoreWorkEdit;
+document.getElementById("sleepNowBtn").onclick=()=>{const n=new Date();setTimeParts("sleepHour","sleepMinute",`${pad(n.getHours())}:${MINUTES.reduce((a,b)=>Math.abs(Number(b)-n.getMinutes())<Math.abs(Number(a)-n.getMinutes())?b:a,"00")}`)};
+document.getElementById("saveSleepBtn").onclick=saveSleep;
+document.getElementById("clearSleepBtn").onclick=clearSleep;
+document.getElementById("saveMoveBtn").onclick=saveMove;
+document.getElementById("toastAction").onclick=()=>{const f=undoFn;undoFn=null;if(f)f()};
+
+document.querySelectorAll("[data-settings-tab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-settings-tab]").forEach(x=>x.classList.toggle("active",x===b));
+  document.querySelectorAll("[data-settings-pane]").forEach(p=>p.hidden=p.dataset.settingsPane!==b.dataset.settingsTab);
+});
+document.getElementById("addCategoryDraftBtn").onclick=()=>{
+  const input=document.getElementById("newCategoryName"),name=input.value.trim();if(!name)return;
+  settingsDraft.categories.push({id:`cat_${uid()}`,name});input.value="";renderCategoryDraft();
+};
+document.getElementById("addTrackerDraftBtn").onclick=()=>{
+  const input=document.getElementById("newTrackerName"),name=input.value.trim();if(!name)return;
+  settingsDraft.trackerDefs.push({id:`tracker_${uid()}`,name,emoji:document.getElementById("newTrackerEmoji").value});input.value="";renderTrackerDraft();
+};
+document.getElementById("saveSettingsBtn").onclick=saveSettings;
+document.getElementById("exportBtn").onclick=exportData;
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{if(e.target.files[0])importData(e.target.files[0])};
+
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>requestClose(b.dataset.close));
+document.querySelectorAll(".modal-backdrop").forEach(bg=>bg.addEventListener("click",e=>{if(e.target===bg)requestClose(bg.id)}));
+document.getElementById("continueEditingBtn").onclick=()=>closeModal("dirtyModal");
+document.getElementById("discardChangesBtn").onclick=()=>{closeModal("dirtyModal");if(dirtyCloseTarget)closeModal(dirtyCloseTarget);dirtyCloseTarget=null};
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){const open=[...document.querySelectorAll(".modal-backdrop.open")].pop();if(open)requestClose(open.id)}
+});
+
+let swipeStart=null;
+document.getElementById("calendarScroll").addEventListener("touchstart",e=>{if(e.touches.length===1)swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY}}, {passive:true});
+document.getElementById("calendarScroll").addEventListener("touchend",e=>{
+  if(!swipeStart||!e.changedTouches[0])return;const dx=e.changedTouches[0].clientX-swipeStart.x,dy=e.changedTouches[0].clientY-swipeStart.y;swipeStart=null;
+  const scroller=document.getElementById("calendarScroll");
+  const weekNeedsHorizontalScroll=viewMode==="week" && scroller.scrollWidth>scroller.clientWidth+4;
+  if(!weekNeedsHorizontalScroll && Math.abs(dx)>85&&Math.abs(dx)>Math.abs(dy)*1.4)navigate(dx<0?1:-1);
+},{passive:true});
+
+function resetAccount(scope){
+ for(const modal of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal)'))modal.classList.remove('open');
+ for(const field of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal) input,.modal-backdrop:not(#syncCloudModal) textarea')){if(!['checkbox','radio'].includes(field.type))field.value='';}
+ clearTimeout(toast.t);document.getElementById('toast').classList.remove('show');undoFn=null;dragPayload=null;pendingAction=null;pendingEvent=null;settingsDraft=null;eventFormSnapshot='';dirtyCloseTarget=null;
+ state=emptyState();render();state=scope?accounts.activate(scope):accounts.deactivate();render();syncStorageWarning();
+}
+window.myWeekSyncBridge=Object.freeze({
+ read:()=>clone(state),originalCache:null,
+ setAccount:resetAccount,
+ hasLegacy:()=>accounts.hasLegacy(),
+ hasCache:()=>!!accounts.raw(),
+ importLegacy:()=>{state=accounts.importLegacy();render()},
+ backupKeys:()=>accounts.backupKeys(),
+ get storageKey(){return accounts.storageKey},
+ validate:validateState,
+ isPristine:()=>!accounts.raw(),
+ export:()=>exportData(),
+ download:(text,name)=>{const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},
+ busy:()=>!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
+ apply:incoming=>{
+  const next=validateState(incoming),previous=state;
+  try{state=next;render()}catch(error){state=previous;render();throw error}
+  accounts.write(state);syncStorageWarning();
+ }
+});
+window.addEventListener('my-week-storage-limited',syncStorageWarning);
+window.dispatchEvent(new Event('my-week-ready'));
+render();
+})();
+</script>
+<script>
+// Keep existing action IDs and handlers while placing shortcuts beside view selection.
+(()=>{
+ const quick=document.getElementById('personalQuickActions');
+ ['workStatusBtn','quickAddBtn'].forEach(id=>quick.append(document.getElementById(id)));
+ document.getElementById('quickAddBtn').insertAdjacentHTML('afterbegin','<span>추가</span>');
+ document.getElementById('workStatusBtn').insertAdjacentHTML('afterbegin','<span>근무</span>');
+ document.getElementById('settingsBtn').innerHTML='<span aria-hidden="true">⋯</span>';
+})();
+</script><script type="module" src="./schedule-sync.js?v=work-integration-1"></script></body>
+</html>

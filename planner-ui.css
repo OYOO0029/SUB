@@ -28,3 +28,6 @@
 @media(max-width:1100px){.new-header .header-inner{margin-inline:24px}#app>.main{margin-inline:24px}.new-workspace .workspace-nav{padding-inline:20px}}
 @media(max-width:720px){.new-header{height:72px}.new-header .header-inner{margin-inline:16px}#app>.main{margin:0 12px 16px}#app>.main>.new-workspace{border-radius:20px;min-height:calc(100dvh - 88px)}.new-workspace .workspace-nav{grid-template-columns:1fr auto;padding:12px;gap:8px}.new-workspace .workspace-nav>.date-navigation{grid-column:1;grid-row:1;justify-self:start}.new-workspace .workspace-actions{grid-column:2;grid-row:1}.new-workspace .workspace-nav>.view-tabs{grid-column:1 / -1;grid-row:2;justify-self:start}.new-workspace .workspace-content{padding:0 12px 16px}}
 @media(max-width:720px){.new-header .header-start{gap:10px}.new-header .leave-countdown{font-size:10px}.new-header .leave-countdown strong{font-size:12px;margin-left:6px}}
+/* The persistent shell owns the mode switch; embedded views retain their tools. */
+.planner-embedded .header .planner-switch,.planner-embedded .new-header .planner-switch{visibility:hidden;pointer-events:none}
+.planner-embedded .header,.planner-embedded .new-header{position:sticky;top:0;z-index:20;background:#191c23}
