@@ -88,3 +88,22 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .personal-date-nav .date-step::before{content:'';width:7px;height:7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(135deg)}
 .personal-date-nav .date-step:last-child::before{transform:rotate(-45deg)}
 @media(max-width:720px){.header{height:72px;min-height:72px;padding:0 16px}.personal-toolbar{height:auto;min-height:100px;grid-template-columns:1fr;padding:12px 0;gap:8px}.personal-date-nav{grid-column:1;grid-row:1;justify-self:center}.personal-tools{grid-column:1;grid-row:2;justify-self:end}.personal-date-nav .date-step{width:32px}}
+/* Personal toolbar: views at left, smaller date centered, settings/add at right. */
+.personal-toolbar{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.personal-view-tabs{grid-column:1;grid-row:1;display:flex;gap:6px;align-items:center}
+.personal-view-tabs button,.category-buttons button{border:0;border-radius:6px;padding:7px 10px;background:transparent;color:var(--muted);font:inherit;cursor:pointer}
+.personal-view-tabs button[aria-pressed=true],.category-buttons button[aria-pressed=true]{background:#8dccd014;color:#8dccd0}
+.personal-toolbar .selected-date-label{font-size:15px}
+.personal-date-nav,.personal-tools{grid-row:1}
+#viewSelect[hidden]{display:none}
+.category-buttons{display:flex;flex-wrap:wrap;gap:6px}
+.category-buttons button{border:1px solid var(--line);min-height:38px}
+.category-buttons button[aria-pressed=true]{border-color:#8dccd0}
+.modal select.select{appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4 3 3 3-3' fill='none' stroke='%239da5b4' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.time-parts .input{width:100%;min-width:0;text-align:center;font-variant-numeric:tabular-nums;appearance:textfield}
+.time-parts .input::-webkit-inner-spin-button,.time-parts .input::-webkit-outer-spin-button{appearance:none;margin:0}
+.inline-sleep-input{box-sizing:border-box;width:90px;max-width:100%;height:34px;text-align:center;border:1px solid #8dccd0;border-radius:6px;background:#2a2d35;color:#eceef2;font:inherit;font-variant-numeric:tabular-nums;outline:none}
+.inline-sleep-input[aria-invalid=true]{border-color:#ed9b9b}
+.event-context-menu{position:fixed;z-index:5000;padding:5px;width:145px;border:1px solid var(--line);border-radius:10px;background:#2a2d35;box-shadow:0 8px 24px #0006}
+.event-context-menu[hidden]{display:none}.event-context-menu button{width:100%;padding:10px;border:0;background:none;color:#ffb7ad;text-align:left;border-radius:6px;cursor:pointer}.event-context-menu button:hover,.event-context-menu button:focus-visible{background:#393e49}
+@media(max-width:720px){.personal-toolbar{grid-template-columns:minmax(0,1fr) auto;min-height:100px}.personal-date-nav{grid-column:1/-1;grid-row:1;justify-self:center}.personal-view-tabs{grid-column:1;grid-row:2;gap:2px}.personal-view-tabs button{padding:6px 8px}.personal-tools{grid-column:2;grid-row:2}}

@@ -404,7 +404,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
 <link rel="stylesheet" href="./planner-ui.css?v=20261016-shell-live">
-<link rel="stylesheet" href="./personal-ui.css?v=20261016-centered">
+<link rel="stylesheet" href="./personal-ui.css?v=20261016-direct-edit">
 <script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
 </head>
 <body>
@@ -416,7 +416,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
       <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.75 7H7M7 7H12.25M7 7V12.25M7 7V1.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></button>
-      <button class="action-btn" id="workStatusBtn" aria-label="근무상태" title="근무상태"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0.7 0.7 14.6 14.6" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <button class="action-btn" id="workStatusBtn" aria-label="일정 설정" title="일정 설정"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0.7 0.7 14.6 14.6" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="path-1-inside-1_56_278" fill="white">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M10.2055 4.68429C10.134 4.75461 10.0772 4.83839 10.0382 4.9308C9.99929 5.02321 9.97902 5.12241 9.97861 5.22269C9.97819 5.32297 9.99764 5.42234 10.0358 5.51506C10.074 5.60779 10.1302 5.69204 10.2011 5.76295C10.272 5.83385 10.3562 5.89002 10.449 5.9282C10.5417 5.96639 10.6411 5.98583 10.7413 5.98542C10.8416 5.98501 10.9408 5.96474 11.0332 5.92579C11.1256 5.88684 11.2094 5.82998 11.2797 5.75849L12.1653 4.86609C12.3069 4.72452 12.3864 4.53252 12.3864 4.33232C12.3864 4.13213 12.3068 3.94014 12.1652 3.79859C12.0951 3.72851 12.0119 3.67291 11.9203 3.63499C11.8287 3.59706 11.7306 3.57755 11.6315 3.57756C11.4313 3.57757 11.2393 3.65712 11.0977 3.79869L10.2055 4.68429ZM13.8951 7.98169C13.8951 7.78199 13.816 7.59043 13.6751 7.44896C13.5341 7.30748 13.3428 7.22763 13.1431 7.22689L11.8861 7.22209C11.6847 7.22209 11.4915 7.30212 11.349 7.44457C11.2066 7.58703 11.1265 7.78023 11.1265 7.98169C11.1265 8.18315 11.2066 8.37636 11.349 8.51881C11.4915 8.66126 11.6847 8.74129 11.8861 8.74129L13.1433 8.73649C13.343 8.7357 13.5342 8.65582 13.6751 8.51436C13.816 8.37289 13.8951 8.18136 13.8951 7.98169ZM12.1633 12.1627C12.3045 12.0215 12.384 11.8301 12.3844 11.6304C12.3848 11.4307 12.306 11.239 12.1653 11.0973L11.2799 10.2049C11.2094 10.1344 11.1256 10.0784 11.0335 10.0402C10.9413 10.0021 10.8425 9.98244 10.7428 9.98245C10.643 9.98246 10.5442 10.0021 10.4521 10.0403C10.3599 10.0785 10.2762 10.1344 10.2056 10.205C10.1351 10.2755 10.0792 10.3593 10.041 10.4515C10.0028 10.5436 9.98318 10.6424 9.98319 10.7422C9.9832 10.8419 10.0029 10.9407 10.041 11.0329C10.0792 11.125 10.1352 11.2088 10.2057 11.2793L11.0981 12.1649C11.2399 12.3055 11.4315 12.3842 11.6311 12.3838C11.8308 12.3835 12.0221 12.3038 12.1633 12.1627ZM7.98234 13.8949C8.18204 13.8949 8.3736 13.8158 8.51507 13.6748C8.65654 13.5339 8.73639 13.3426 8.73714 13.1429L8.74194 11.8859C8.74194 11.7861 8.72229 11.6874 8.68411 11.5952C8.64594 11.503 8.58999 11.4193 8.51945 11.3488C8.44892 11.2782 8.36518 11.2223 8.27302 11.1841C8.18086 11.1459 8.08209 11.1263 7.98234 11.1263C7.88258 11.1263 7.78381 11.1459 7.69165 11.1841C7.59949 11.2223 7.51575 11.2782 7.44522 11.3488C7.37468 11.4193 7.31873 11.503 7.28056 11.5952C7.24238 11.6874 7.22274 11.7861 7.22274 11.8859L7.22754 13.1431C7.22833 13.3428 7.3082 13.534 7.44967 13.6749C7.59114 13.8158 7.78267 13.8949 7.98234 13.8949ZM3.80114 12.1629C3.94234 12.3041 4.13374 12.3836 4.33342 12.3839C4.53311 12.3843 4.7248 12.3056 4.86654 12.1649L5.75894 11.2795C5.82948 11.209 5.88545 11.1252 5.92363 11.0331C5.96181 10.9409 5.98147 10.8421 5.98148 10.7424C5.98149 10.6426 5.96185 10.5438 5.92368 10.4517C5.88552 10.3595 5.82957 10.2757 5.75904 10.2052C5.6885 10.1346 5.60477 10.0787 5.5126 10.0405C5.42044 10.0023 5.32166 9.98266 5.22191 9.98265C5.12215 9.98264 5.02337 10.0023 4.9312 10.0404C4.83903 10.0786 4.75528 10.1346 4.68474 10.2051L3.79914 11.0975C3.65847 11.2392 3.57971 11.4309 3.58008 11.6306C3.58046 11.8303 3.65994 12.0217 3.80114 12.1629ZM2.06954 7.98189C2.06953 8.18159 2.14867 8.37316 2.28962 8.51463C2.43057 8.6561 2.62184 8.73595 2.82154 8.73669L4.07854 8.74149C4.27999 8.74149 4.4732 8.66146 4.61565 8.51901C4.75811 8.37656 4.83814 8.18335 4.83814 7.98189C4.83814 7.78043 4.75811 7.58723 4.61565 7.44477C4.4732 7.30232 4.27999 7.22229 4.07854 7.22229L2.82134 7.22709C2.62164 7.22783 2.43037 7.30768 2.28942 7.44916C2.14847 7.59063 2.06953 7.78219 2.06954 7.98189ZM3.80134 3.80089C3.66014 3.9421 3.58066 4.13349 3.58028 4.33318C3.57991 4.53286 3.65867 4.72456 3.79934 4.86629L4.68474 5.75869C4.75506 5.83018 4.83884 5.88704 4.93124 5.92599C5.02365 5.96494 5.12286 5.98521 5.22313 5.98562C5.32341 5.98603 5.42278 5.96659 5.51551 5.9284C5.60823 5.89022 5.69248 5.83405 5.76339 5.76315C5.8343 5.69224 5.89046 5.60799 5.92865 5.51526C5.96683 5.42254 5.98628 5.32317 5.98586 5.22289C5.98545 5.12261 5.96518 5.02341 5.92624 4.931C5.88729 4.83859 5.83043 4.75481 5.75894 4.68449L4.86654 3.79889C4.7248 3.65823 4.53311 3.57946 4.33342 3.57984C4.13374 3.58021 3.94254 3.6597 3.80134 3.80089ZM7.98194 2.06929C7.78224 2.06929 7.59067 2.14843 7.4492 2.28938C7.30773 2.43032 7.22788 2.62159 7.22714 2.82129L7.22234 4.07829C7.22234 4.27975 7.30237 4.47296 7.44482 4.61541C7.58727 4.75786 7.78048 4.83789 7.98194 4.83789C8.18339 4.83789 8.3766 4.75786 8.51905 4.61541C8.66151 4.47296 8.74154 4.27975 8.74154 4.07829L8.73674 2.82109C8.73599 2.62139 8.65614 2.43012 8.51467 2.28918C8.3732 2.14823 8.18164 2.06909 7.98194 2.06909"/>
 </mask>
@@ -434,10 +434,10 @@ button:disabled{cursor:not-allowed;opacity:.45}
   <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
 
   <main class="personal-workspace" aria-label="개인 일정">
-    <div class="personal-toolbar"><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
+    <div class="personal-toolbar"><div class="personal-view-tabs" role="group" aria-label="보기 선택"><button type="button" data-personal-view="week">주간</button><button type="button" data-personal-view="month">월간</button><button type="button" data-personal-view="day">일간</button></div><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
         <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
       </div><button class="date-step" id="toolbarNextBtn" aria-label="다음 기간">›</button></div><div class="personal-tools"><div id="personalQuickActions"></div>
-      <select class="view-select" id="viewSelect" aria-label="보기 선택">
+      <select hidden class="view-select" id="viewSelect" aria-label="보기 선택">
         <option value="day">일간</option>
         <option value="week" selected>주간</option>
         <option value="month">월간</option>
@@ -523,18 +523,18 @@ button:disabled{cursor:not-allowed;opacity:.45}
       <input type="hidden" id="eventId">
       <input type="hidden" id="eventOriginalDate">
       <div class="grid-2">
-        <div class="field"><label for="eventCategory">카테고리</label><select class="select" id="eventCategory"></select></div>
+        <div class="field"><label id="eventCategoryLabel">카테고리</label><input type="hidden" id="eventCategory"><div id="eventCategoryButtons" class="category-buttons" role="group" aria-labelledby="eventCategoryLabel"></div></div>
         <div class="field"><label for="eventDate">날짜</label><input class="input" id="eventDate" type="date"></div>
       </div>
       <div class="field"><label for="eventName">일정명</label><input class="input" id="eventName" maxlength="80" placeholder="일정을 입력해주세요."></div>
       <div class="grid-2">
         <div>
           <div class="section-label">시작</div>
-          <div class="time-parts"><select class="select" id="eventStartHour"></select><div class="time-colon">:</div><select class="select" id="eventStartMinute"></select></div>
+          <div class="time-parts"><input class="input" id="eventStartHour" type="number" inputmode="numeric" min="0" max="23" step="1" aria-label="시작 시"><div class="time-colon">:</div><input class="input" id="eventStartMinute" type="number" inputmode="numeric" min="0" max="59" step="1" aria-label="시작 분"></div>
         </div>
         <div>
           <div class="section-label">종료</div>
-          <div class="time-parts"><select class="select" id="eventEndHour"></select><div class="time-colon">:</div><select class="select" id="eventEndMinute"></select></div>
+          <div class="time-parts"><input class="input" id="eventEndHour" type="number" inputmode="numeric" min="0" max="23" step="1" aria-label="종료 시"><div class="time-colon">:</div><input class="input" id="eventEndMinute" type="number" inputmode="numeric" min="0" max="59" step="1" aria-label="종료 분"></div>
         </div>
       </div>
       <div class="repeat-box">
@@ -857,16 +857,16 @@ function slotDefault(slot){return slot==="morning"?"09:00":slot==="afternoon"?"1
 function addMinutes(time,mins){
   const [h,m]=time.split(":").map(Number);let total=(h*60+m+mins)%(24*60);return `${pad(Math.floor(total/60))}:${pad(total%60)}`;
 }
-function timeFromParts(hId,mId){return `${document.getElementById(hId).value}:${document.getElementById(mId).value}`}
+function timeFromParts(hId,mId){const h=document.getElementById(hId),m=document.getElementById(mId);if(!h.value||!m.value||!h.checkValidity()||!m.checkValidity())return "";return `${pad(Number(h.value))}:${pad(Number(m.value))}`}
 function setTimeParts(hId,mId,time){
-  const [h,m]=(time||"09:00").split(":");document.getElementById(hId).value=h;document.getElementById(mId).value=MINUTES.includes(m)?m:MINUTES.reduce((a,b)=>Math.abs(Number(b)-Number(m))<Math.abs(Number(a)-Number(m))?b:a,"00");
+  const [h,m]=(time||"09:00").split(":");document.getElementById(hId).value=h;document.getElementById(mId).value=document.getElementById(mId).tagName==="INPUT"||MINUTES.includes(m)?m:MINUTES.reduce((a,b)=>Math.abs(Number(b)-Number(m))<Math.abs(Number(a)-Number(m))?b:a,"00");
 }
 function fillTimeSelects(){
   ["eventStartHour","eventEndHour","sleepHour","moveStartHour","moveEndHour","workStartHour","workEndHour"].forEach(id=>{
-    const el=document.getElementById(id);el.innerHTML="";for(let h=0;h<24;h++)el.add(new Option(pad(h),pad(h)));
+    const el=document.getElementById(id);if(el.tagName!=="SELECT")return;el.innerHTML="";for(let h=0;h<24;h++)el.add(new Option(pad(h),pad(h)));
   });
   ["eventStartMinute","eventEndMinute","sleepMinute","moveStartMinute","moveEndMinute","workStartMinute","workEndMinute"].forEach(id=>{
-    const el=document.getElementById(id);el.innerHTML="";MINUTES.forEach(m=>el.add(new Option(m,m)));
+    const el=document.getElementById(id);if(el.tagName!=="SELECT")return;el.innerHTML="";MINUTES.forEach(m=>el.add(new Option(m,m)));
   });
 }
 function categoryName(id){return state.categories.find(c=>c.id===id)?.name||"미분류"}
@@ -949,6 +949,7 @@ function conflictExists(id,date,start,end){
 function render(){
   document.getElementById("selectedDateLabel").textContent=selectedDateLabel();
   document.getElementById("viewSelect").value=viewMode;
+  document.querySelectorAll("[data-personal-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.personalView===viewMode)));
   document.getElementById("tableView").hidden=viewMode==="month";
   document.getElementById("monthView").hidden=viewMode!=="month";
   if(viewMode==="month")renderMonth();else renderTable();
@@ -1019,7 +1020,7 @@ function bindMobileEvents(){
   const prev=document.getElementById("mobilePrevBtn"),next=document.getElementById("mobileNextBtn");if(prev)prev.onclick=()=>navigate(-1);if(next)next.onclick=()=>navigate(1);
   document.querySelectorAll("#mobileShell [data-mobile-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.mobileDate);render()});
   document.querySelectorAll("#mobileShell [data-mobile-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.mobileTrackerDate),b.dataset.mobileTrackerId)});
-  document.querySelectorAll("#mobileShell [data-mobile-sleep]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.mobileDate),b.dataset.mobileSleep));
+  document.querySelectorAll("#mobileShell [data-mobile-sleep]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.mobileDate),b.dataset.mobileSleep,b));
   document.querySelectorAll("#mobileShell [data-mobile-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.mobileAddDate,slot:b.dataset.mobileAddSlot}));
   document.querySelectorAll("#mobileShell [data-mobile-work-date]").forEach(card=>card.onclick=()=>openWorkEditor(parseDate(card.dataset.mobileWorkDate),card.dataset.mobileWorkSlot));
   document.querySelectorAll("#mobileShell [data-mobile-event-id]").forEach(card=>{
@@ -1120,7 +1121,7 @@ function selectDate(ds){focusDate=parseDate(ds);render()}
 function bindTableEvents(){
   document.querySelectorAll("[data-select-date]").forEach(b=>b.onclick=()=>selectDate(b.dataset.selectDate));
   document.querySelectorAll("[data-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.trackerDate),b.dataset.trackerId)});
-  document.querySelectorAll("[data-sleep-open]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.date),b.dataset.sleepOpen));
+  document.querySelectorAll("[data-sleep-open]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.date),b.dataset.sleepOpen,b));
   document.querySelectorAll("[data-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.addDate,slot:b.dataset.addSlot}));
   document.querySelectorAll("[data-more-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.moreDate);viewMode="day";render()});
   bindEventCards();
@@ -1184,7 +1185,9 @@ function bindDropTargets(){
 
 // ---------- event form ----------
 function populateCategories(){
-  const el=document.getElementById("eventCategory");el.innerHTML="";state.categories.forEach(c=>el.add(new Option(c.name,c.id)));
+ const selected=document.getElementById('eventCategory').value;
+ document.getElementById('eventCategoryButtons').innerHTML=state.categories.map(c=>'<button type="button" data-category="'+esc(c.id)+'" aria-pressed="'+(c.id===selected)+'">'+esc(c.name)+'</button>').join('');
+ document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{document.getElementById('eventCategory').value=b.dataset.category;populateCategories()});
 }
 function openEventForm({date=fmtDate(focusDate),slot="morning",event=null,occurrenceDate=""}={}){
   populateCategories();
@@ -1194,7 +1197,7 @@ function openEventForm({date=fmtDate(focusDate),slot="morning",event=null,occurr
   document.getElementById("eventOriginalDate").value=occurrenceDate||event?.startDate||date;
   document.getElementById("eventDate").value=event?(occurrenceDate||event.startDate):date;
   document.getElementById("eventName").value=event?.title||"";
-  document.getElementById("eventCategory").value=event?.category||state.categories[0]?.id||"personal";
+  document.getElementById("eventCategory").value=event?.category||state.categories[0]?.id||"personal";populateCategories();
   document.getElementById("eventNotes").value=event?.notes||"";
   const start=event?.startTime||slotDefault(slot),end=event?.endTime||addMinutes(start,60);
   setTimeParts("eventStartHour","eventStartMinute",start);setTimeParts("eventEndHour","eventEndMinute",end);
@@ -1243,6 +1246,7 @@ function saveEvent(){
   const title=document.getElementById("eventName").value.trim(),date=document.getElementById("eventDate").value,id=document.getElementById("eventId").value;
   if(!title||!date){toast("일정명과 날짜를 입력해주세요.");return}
   const start=timeFromParts("eventStartHour","eventStartMinute"),end=timeFromParts("eventEndHour","eventEndMinute");
+  if(!start||!end){toast("시간은 0~23시, 0~59분으로 입력해주세요.");return}
   if(end<=start){toast("종료 시간은 시작 시간 이후여야 합니다.");return}
   const conflict=conflictExists(id,date,start,end);
   const hint=document.getElementById("conflictHint");
@@ -1333,12 +1337,31 @@ function moveWorkBlock(sourceDate,sourceSlot,targetDate,targetSlot){
 }
 
 // ---------- sleep ----------
-function openSleep(date,type){
-  const v=sleepValue(date,type)||"07:30";document.getElementById("sleepType").value=type;document.getElementById("sleepDate").value=fmtDate(date);
-  document.getElementById("sleepModalTitle").textContent=type==="wake"?"기상 시간":"취침 시간";
-  document.getElementById("sleepModalSub").textContent=`${date.getMonth()+1}월 ${date.getDate()}일 ${DOW_KO[date.getDay()]}요일`;
-  setTimeParts("sleepHour","sleepMinute",v);document.getElementById("sleepSummary").textContent=type==="wake"?(sleepDurationForWake(date)?`전날 취침부터 ${sleepDurationForWake(date)}`:""):"";
-  openModal("sleepModal");
+function openSleep(date,type,button){
+ if(!accounts.owner){window.dispatchEvent(new Event('my-week-login-request'));return}
+ if(!button)return;
+ const ds=fmtDate(date),original=sleepValue(date,type)||'',input=document.createElement('input');
+ input.className='inline-sleep-input';input.type='text';input.inputMode='numeric';input.placeholder='HH:MM';input.maxLength=5;input.value=original;
+ input.setAttribute('aria-label',ds+' '+(type==='wake'?'기상 시간':'취침 시간'));
+ let done=false;
+ function finish(cancel=false){
+  if(done)return;
+  const raw=input.value.trim(),match=raw.match(/^(\d{1,2}):?(\d{2})$/);
+  if(!cancel&&raw&&(!match||Number(match[1])>23||Number(match[2])>59)){
+   input.setAttribute('aria-invalid','true');toast('시간을 07:30 또는 0730처럼 입력해주세요.');return;
+  }
+  done=true;
+  if(cancel){input.replaceWith(button);button.focus();return}
+  const value=raw?pad(Number(match[1]))+':'+pad(Number(match[2])):'';
+  if(value===original){input.replaceWith(button);return}
+  const before=clone(state.sleepLogs[ds]||{});state.sleepLogs[ds]||={};
+  if(value)state.sleepLogs[ds][type]=value;else delete state.sleepLogs[ds][type];
+  input.replaceWith(button);
+  saveState('시간을 저장했어요.',()=>{state.sleepLogs[ds]=before;saveState('변경을 취소했어요.')});
+ }
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finish()}if(e.key==='Escape'){e.preventDefault();finish(true)}});
+ input.addEventListener('blur',()=>finish());input.addEventListener('input',()=>input.removeAttribute('aria-invalid'));
+ button.replaceWith(input);input.focus();input.select();
 }
 function saveSleep(){
   const ds=document.getElementById("sleepDate").value,type=document.getElementById("sleepType").value,v=timeFromParts("sleepHour","sleepMinute"),before=clone(state.sleepLogs[ds]||{});
@@ -1444,8 +1467,28 @@ function requestClose(id){
   closeModal(id);
 }
 
+// A context menu reuses the same deletion/recurrence/undo flow as the editor.
+const eventMenu=document.createElement('div');eventMenu.className='event-context-menu';eventMenu.hidden=true;eventMenu.setAttribute('role','menu');
+eventMenu.innerHTML='<button type="button" role="menuitem">일정 삭제</button>';document.body.append(eventMenu);
+let contextCard=null;
+function closeEventMenu(){eventMenu.hidden=true}
+document.addEventListener('contextmenu',e=>{
+ const card=e.target.closest('.event-card[data-event-id],[data-mobile-event-id]');if(!card)return;
+ e.preventDefault();contextCard=card;eventMenu.hidden=false;
+ eventMenu.style.left=Math.max(8,Math.min(e.clientX,innerWidth-160))+'px';eventMenu.style.top=Math.max(8,Math.min(e.clientY,innerHeight-60))+'px';eventMenu.querySelector('button').focus();
+});
+eventMenu.querySelector('button').onclick=()=>{
+ const card=contextCard;closeEventMenu();if(!card)return;
+ const id=card.dataset.eventId||card.dataset.mobileEventId;if(!state.events.some(e=>e.id===id))return;
+ document.getElementById('eventId').value=id;document.getElementById('eventOriginalDate').value=card.dataset.occurrenceDate||card.dataset.mobileOccurrenceDate;deleteEvent();
+};
+document.addEventListener('pointerdown',e=>{if(!eventMenu.contains(e.target))closeEventMenu()});
+document.addEventListener('keydown',e=>{if(!eventMenu.hidden&&e.key==='Escape'){closeEventMenu();contextCard?.focus()}});
+window.addEventListener('resize',closeEventMenu);window.addEventListener('scroll',closeEventMenu,true);
+
 // ---------- listeners ----------
 fillTimeSelects();
+document.querySelectorAll("[data-personal-view]").forEach(b=>b.onclick=()=>{viewMode=b.dataset.personalView;render()});
 document.getElementById("viewSelect").onchange=e=>{viewMode=e.target.value;render()};
 document.getElementById("selectedDateLabel").onclick=()=>{focusDate=nowDate();render()};
 document.getElementById("toolbarPrevBtn").onclick=()=>navigate(-1);
@@ -1453,12 +1496,12 @@ document.getElementById("toolbarNextBtn").onclick=()=>navigate(1);
 document.getElementById("prevBtn").onclick=()=>navigate(-1);
 document.getElementById("nextBtn").onclick=()=>navigate(1);
 document.getElementById("quickAddBtn").onclick=()=>openEventForm({date:fmtDate(focusDate),slot:"morning"});
-document.getElementById("workStatusBtn").onclick=openWork;
+document.getElementById("workStatusBtn").onclick=openSettings;
 document.getElementById("settingsBtn").onclick=openSettings;
 document.getElementById("repeatToggle").onclick=()=>{const c=document.getElementById("repeatContent");c.hidden=!c.hidden};
 document.getElementById("repeatType").onchange=()=>updateRepeatUI(true);
 document.getElementById("eventStartHour").onchange=document.getElementById("eventStartMinute").onchange=()=>{
-  const s=timeFromParts("eventStartHour","eventStartMinute");setTimeParts("eventEndHour","eventEndMinute",addMinutes(s,60));
+  const s=timeFromParts("eventStartHour","eventStartMinute");if(s)setTimeParts("eventEndHour","eventEndMinute",addMinutes(s,60));
 };
 document.getElementById("saveEventBtn").onclick=saveEvent;
 document.getElementById("deleteEventBtn").onclick=deleteEvent;
@@ -1526,7 +1569,7 @@ window.myWeekSyncBridge=Object.freeze({
  isPristine:()=>!accounts.raw(),
  export:()=>exportData(),
  download:(text,name)=>{const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},
- busy:()=>!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
+ busy:()=>!!document.querySelector('.inline-sleep-input')||!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
  apply:incoming=>{
   const next=validateState(incoming),previous=state;
   try{state=next;render()}catch(error){state=previous;render();throw error}
@@ -1544,7 +1587,7 @@ render();
  const quick=document.getElementById('personalQuickActions');
  ['workStatusBtn','quickAddBtn'].forEach(id=>quick.append(document.getElementById(id)));
  document.getElementById('quickAddBtn').insertAdjacentHTML('afterbegin','<span>추가</span>');
- document.getElementById('workStatusBtn').insertAdjacentHTML('afterbegin','<span>근무</span>');
+ document.getElementById('workStatusBtn').innerHTML='<span>설정</span><svg class="header-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7h7m4 0h7M3 17h3m4 0h11"/><circle cx="12" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>';
  document.getElementById('settingsBtn').innerHTML='<span aria-hidden="true">⋯</span>';
 })();
 </script><script type="module" src="./schedule-sync.js?v=20261016-persistent-auth"></script></body>
