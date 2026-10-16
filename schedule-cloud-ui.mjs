@@ -220,6 +220,11 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(document,'visibilitychange',()=>{if(!document.hidden)recover();});
  listen(window,'focus',recover);
  listen(window,'storage',event=>{
+  if(event.key===emailKey){
+   const email=storage.getItem(emailKey)||'';
+   loginForm.elements.rememberEmail.checked=!!email;
+   if(document.activeElement!==loginForm.elements.email)loginForm.elements.email.value=email;
+  }
   if(event.key===bridge.storageKey){
    if(engine?.meta?.pending){engine.meta.conflict=true;engine.checkpoint();status('conflict','다른 창에서도 수정했습니다. 기록을 선택해 주세요.');}
    else engine?.reconcile();
