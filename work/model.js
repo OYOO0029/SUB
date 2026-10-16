@@ -6,7 +6,7 @@ export const weekDays=date=>{const n=new Date(date+'T12:00:00Z').getUTCDay();con
 export const monthDays=date=>{const start=date.slice(0,8)+'01';const first=weekDays(start)[0];return Array.from({length:42},(_,i)=>addDays(first,i));};
 export const uid=()=>globalThis.crypto.randomUUID();
 export function isPlanned(task,date){return task.plans.some(p=>p.state==='active'&&p.start<=date&&p.end>=date);}
-export function isCarried(task,date){return task.plans.some(p=>p.state==='active'&&p.end<date);}
+export function isCarried(task,date){const plans=task.plans.filter(p=>p.state==='active');return plans.some(p=>p.end<date)&&!plans.some(p=>p.end>=date);}
 export function isDuePast(task,date,now=new Date()){
   if(!task.due)return false;
   if(task.due<date)return true;
@@ -16,9 +16,9 @@ export function isDuePast(task,date,now=new Date()){
 export function isVisible(task,date,includeCompleted=false){
   if(task.deletedAt||task.status==='cancelled')return false;
   if(task.status==='done')return includeCompleted&&(task.completedAt?.slice(0,10)===date||isPlanned(task,date));
-  return isPlanned(task,date)||isDuePast(task,date);
+  return isPlanned(task,date)||isDuePast(task,date)||isCarried(task,date)||task.due===date;
 }
-export function reminderTasks(state,date){return state.tasks.filter(t=>!t.deletedAt&&t.status!=='done'&&t.status!=='cancelled'&&t.reminderAcknowledgedOn!==date&&!isVisible(t,date)&&((t.remindFrom&&t.remindFrom<=date)||t.due===date||isCarried(t,date)));}
+export function reminderTasks(state,date){return state.tasks.filter(t=>!t.deletedAt&&t.status!=='done'&&t.status!=='cancelled'&&t.reminderAcknowledgedOn!==date&&!!t.remindFrom&&t.remindFrom<=date);}
 export function planFor(task,date){return task.plans.find(p=>p.state==='active'&&p.start<=date&&p.end>=date);}
 export function planToday(task,date){
   const existing=planFor(task,date);if(existing)return existing;

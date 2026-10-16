@@ -1,4 +1,4 @@
-import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js';
+import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261016-flow';
 
 export function automaticOrder(tasks,date){
   const start=t=>t.blocks.filter(b=>b.date===date).map(b=>b.start).sort()[0];
@@ -18,7 +18,7 @@ export function orderedTasks(state,tasks,date){
 }
 export function taskSections(state,date,includeCompleted=false){
   const visible=state.tasks.filter(t=>isVisible(t,date,includeCompleted));
-  const planned=visible.filter(t=>isPlanned(t,date)||t.status==='done');
+  const planned=visible.filter(t=>isPlanned(t,date)||t.status==='done'||!isDuePast(t,date));
   return {planned:orderedTasks(state,planned,date),overdue:automaticOrder(visible.filter(t=>!planned.includes(t)&&isDuePast(t,date)),date)};
 }
 export function moveToDay(state,date,id,beforeId=null){

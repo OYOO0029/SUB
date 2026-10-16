@@ -28,10 +28,10 @@ test('manual opening prevents automatic repetition and blocked storage works for
 test('reminders use actual day eligibility; acknowledgment and today planning preserve original tasks',()=>{
  const make=(id,extra={})=>({id,title:id,status:'todo',due:'2030-10-16',remindFrom:'2030-10-14',plans:[],blocks:[],checks:[],...extra});
  const data={tasks:[make('later'),make('due',{due:'2030-10-14'}),make('done',{status:'done'}),make('cancelled',{status:'cancelled'}),make('deleted',{deletedAt:'date'}),make('future',{remindFrom:'2030-10-15'}),make('planned',{plans:[{id:'p',start:visit.date,end:visit.date,state:'active'}]})]};
- assert.deepEqual(todayReminders(data,visit.date).map(t=>t.id),['due','later']);
+ assert.deepEqual(todayReminders(data,visit.date).map(t=>t.id),['due','later','planned']);
  const later=data.tasks[0];later.reminderAcknowledgedOn=visit.date;
- assert.deepEqual(todayReminders(data,visit.date).map(t=>t.id),['due']);
+ assert.deepEqual(todayReminders(data,visit.date).map(t=>t.id),['due','planned']);
  assert.ok(todayReminders(data,'2030-10-15').includes(later));assert.equal(later.status,'todo');assert.equal(later.deletedAt,undefined);
  const due=data.tasks[1];planToday(due,visit.date);planToday(due,visit.date);
- assert.equal(due.due,visit.date);assert.equal(due.plans.length,1);assert.equal(data.tasks.length,7);assert.deepEqual(todayReminders(data,visit.date),[]);
+ assert.equal(due.due,visit.date);assert.equal(due.plans.length,1);assert.equal(data.tasks.length,7);assert.deepEqual(todayReminders(data,visit.date).map(t=>t.id),['due','planned']);
 });
