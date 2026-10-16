@@ -1,0 +1,22 @@
+.reminder-bell{position:relative;flex-shrink:0}
+.reminder-bell[aria-expanded="true"]{background:#30353e;color:#e4e8ef}
+.reminder-count{position:absolute;top:-3px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#8dd5d8;color:#182326;font-size:10px;font-weight:600;line-height:16px;text-align:center;border:2px solid #191c23;box-sizing:content-box}
+.reminder-count[hidden],.reminder-popover[hidden]{display:none}
+.reminder-popover{position:fixed;z-index:100;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box;background:#272c35;border:1px solid #424955;border-radius:12px;box-shadow:0 16px 48px #0006;color:#e4e8ef}
+.reminder-popover-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-shrink:0;padding:16px 16px 12px;border-bottom:1px solid #373e49}
+.reminder-popover-header h2{font-size:15px;font-weight:600;margin:0;line-height:1.5}
+.reminder-popover-header h2 span{margin-left:8px;color:#9ca6b6;font-size:12px;font-weight:400}
+.reminder-popover .icon-button{width:32px;height:32px;flex-shrink:0}
+.reminder-items{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px;scrollbar-width:thin;scrollbar-color:#515a68 transparent}
+.reminder-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #373e49}
+.reminder-item:last-child{border-bottom:0}
+.reminder-item-open{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;padding:0;text-align:left;color:inherit;cursor:pointer}
+.reminder-item-open strong{font-size:14px;line-height:1.55;font-weight:500;overflow-wrap:anywhere}
+.reminder-item-context,.reminder-item-due{font-size:12px;line-height:1.5;color:#9ca6b6;overflow-wrap:anywhere}
+.reminder-item-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.reminder-today{padding:6px 8px;min-height:32px;border:0;border-radius:6px;background:transparent;color:#b5c0cf;font-size:12px;cursor:pointer}
+.reminder-today:hover,.reminder-item-open:hover{color:#fff}
+.reminder-today:hover{background:#343b47}
+.reminder-empty{margin:0;padding:28px 8px;color:#9ca6b6;font-size:13px;line-height:1.6;text-align:center}
+.reminder-popover button:focus-visible{outline:1px solid #aab4c3;outline-offset:3px;border-radius:4px}
+@media(max-width:600px){.reminder-popover-header{padding:12px 12px 10px}.reminder-items{padding:2px 12px}.reminder-item{gap:8px}.new-header .header-actions{gap:4px}.reminder-item-open strong{font-size:13px}}

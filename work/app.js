@@ -1,7 +1,8 @@
+import {createReminderCenter} from './reminders.js?v=20261016-bell';
 import {createDetailUI} from './detail-ui.js?v=work-integration-1';
 import {activeChecks} from './editing.js?v=work-integration-1';
-import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,reminderTasks,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js';
-import {startWorkCloud} from './integration.js?v=work-integration-1';
+import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js';
+import {startWorkCloud} from './integration.js?v=20261016-bell';
 import {loadState,saveState,validate,workAccount} from './repository.js?v=work-integration-1';
 import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js';
 import {installTaskDrag} from './task-drag.js';
@@ -9,9 +10,7 @@ import {installSurfaceInteractions} from './surface-interactions.js';
 import {workCalendarDays,calendarWeeks} from './calendar-layout.js';
 
 const loaded=loadState();let data=loaded.state;
-const reminderViewKey='what-to-do:isolated-preview:v1:reminders-collapsed';
-let remindersCollapsed=false;try{remindersCollapsed=localStorage.getItem(reminderViewKey)==='true';}catch{}
-const ui={remindersCollapsed,mode:'work',tab:'tasks',view:'list',date:today(),completed:false,search:'',searchOpen:false,searchScope:'all',project:'',work:'',status:'active',group:'none',tools:false,detail:null,saveWarning:loaded.warning};
+const ui={mode:'work',tab:'tasks',view:'list',date:today(),completed:false,search:'',searchOpen:false,searchScope:'all',project:'',work:'',status:'active',group:'none',tools:false,detail:null,saveWarning:loaded.warning};
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const paths={check:'m5 12 4 4L19 6',plus:'M12 5v14M5 12h14',chevron:'m9 5 7 7-7 7',left:'m15 5-7 7 7 7',close:'m6 6 12 12M6 18 18 6',clock:'M12 8v4l3 2',search:'m21 21-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',folder:'M3 7V5h6l2 2h10v13H3Z',briefcase:'M8 6V3h8v3M3 7h18v13H3ZM3 12h18M10 12v3h4v-3',home:'m3 10 9-7 9 7v11h-6v-7H9v7H3Z',settings:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2',list:'M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1',calendar:'M4 5h16v16H4ZM4 10h16M8 2v6M16 2v6',bell:'M18 8a6 6 0 0 0-12 0v6l-2 3h16l-2-3ZM10 21h4',arrow:'M4 12h16m-6-6 6 6-6 6',edit:'m15 4 5 5M4 20l5-1L21 7l-5-5L4 14Z',tag:'M3 3h8l10 10-8 8L3 11ZM7 7h.01',note:'M5 3h14v13l-5 5H5ZM14 21v-6h5M8 7h8M8 11h6',users:'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M2 21v-3a6 6 0 0 1 12 0v3M16 4a4 4 0 0 1 0 7M17 14a5 5 0 0 1 5 5v2',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1 1M18 18l1 1M5 19l1-1M18 6l1-1',moon:'M20 14A9 9 0 0 1 10 3a9 9 0 1 0 10 11',leaf:'M20 3C8 1 2 8 5 15c5 8 16 1 15-12ZM5 20 16 8',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',undo:'M8 4 3 9l5 5M3 9h11a6 6 0 0 1 0 12',info:'M12 11v6M12 7h.01'};
 paths.week='M4 5h16v14H4ZM9 5v14M15 5v14';paths.more='M5 12h.01M12 12h.01M19 12h.01';
@@ -52,11 +51,6 @@ function projectGroups(items,renderItem,className='task-list',projectFor=item=>t
   }
   return [...groups.values()].map(({project,items})=>`<section class="project-task-group"><h3 class="project-group-heading">${project?button(icon('folder')+'<span>'+esc(project.title)+'</span>','detail',`data-type="project" data-id="${esc(project.id)}"`,'project-group-link'):icon('briefcase')+'<span>프로젝트 없는 일</span>'}</h3><div class="${className}">${items.map(renderItem).join('')}</div></section>`).join('');
 }
-function reminderPanel(){
-  const tasks=automaticOrder(reminderTasks(data,ui.date).filter(passes),ui.date);if(!tasks.length)return '';
-  return `<section class="reminder-section" aria-label="리마인드">${button('리마인드 '+icon('chevron'),'toggle-reminders',`aria-expanded="${!ui.remindersCollapsed}" aria-controls="reminder-cards" title="리마인드 ${ui.remindersCollapsed?'펼치기':'접기'}"`,'reminder-toggle')}
-    <div id="reminder-cards" class="reminder-cards" data-reminder-scroll tabindex="0" aria-label="리마인드 목록, 드래그 또는 방향키로 넘기기" ${ui.remindersCollapsed?'hidden':''}>${tasks.map(t=>{const {project}=taskContext(data,t);const meta=[project?.title?'['+project.title+']':'',t.due?'~'+short(t.due):''].filter(Boolean).join(' ');return `<article class="reminder-tile"><button class="reminder-open" data-action="detail" data-type="task" data-id="${esc(t.id)}" title="${esc(t.title)} 상세 보기">${meta?`<span class="reminder-context">${esc(meta)}</span>`:''}<strong>${esc(t.title)}</strong></button>${button(icon('close'),'acknowledge',`data-id="${esc(t.id)}" aria-label="${esc(t.title)} 리마인드 숨기기" title="이 날짜에서 숨기기 · 원본 유지"`,'reminder-dismiss')}</article>`;}).join('')}</div></section>`;
-}
 function groupedTasks(tasks){
   const card=t=>taskCard(t,{listMode:true,movable:true});
   if(ui.group==='project')return projectGroups(tasks,card);
@@ -69,7 +63,7 @@ function groupedTasks(tasks){
 function taskScreen(){
   const sections=taskSections(data,ui.date,ui.completed),planned=sections.planned.filter(passes),overdue=sections.overdue.filter(passes);
   const overdueSection=overdue.length?`<section class="list-section overdue-section" aria-label="지연된 일정"><div class="section-heading"><h2>지연된 일정</h2></div><div class="task-list">${groupedTasks(overdue)}</div></section>`:'';
-  return ['week','month'].includes(ui.view)?calendarView():`<div class="task-stack">${reminderPanel()}${ui.view==='timeline'?`${timeline(planned)}${button(icon('plus'),'quick-add','aria-label="할 일 추가" title="할 일 추가"','quick-add')}${overdueSection}`:`<section class="list-section today-section" data-day-drop aria-label="${ui.date===today()?'오늘':short(ui.date)} 일정"><div class="task-list">${groupedTasks(planned)||'<p class="list-empty">할 일을 추가하거나 지연된 일정을 여기로 옮기세요.</p>'}</div>${button(icon('plus'),'quick-add','aria-label="할 일 추가" title="할 일 추가"','quick-add')}</section>${overdueSection}`}</div>`;
+  return ['week','month'].includes(ui.view)?calendarView():`<div class="task-stack">${ui.view==='timeline'?`${timeline(planned)}${button(icon('plus'),'quick-add','aria-label="할 일 추가" title="할 일 추가"','quick-add')}${overdueSection}`:`<section class="list-section today-section" data-day-drop aria-label="${ui.date===today()?'오늘':short(ui.date)} 일정"><div class="task-list">${groupedTasks(planned)||'<p class="list-empty">할 일을 추가하거나 지연된 일정을 여기로 옮기세요.</p>'}</div>${button(icon('plus'),'quick-add','aria-label="할 일 추가" title="할 일 추가"','quick-add')}</section>${overdueSection}`}</div>`;
 }
 function timelineTask(task){
   const done=task.status==='done';
@@ -141,8 +135,8 @@ function updateCountdown(){const el=$('#leave-count');if(el)el.textContent=count
 function render({keepMenus=false}={}){
   const menus=keepMenus?[...document.querySelectorAll('[data-menu-panel]:not([hidden])')].map(el=>el.id):[];
   const filtered=ui.project||ui.work||ui.status!=='active'||ui.group!=='none';
-  $('#app').innerHTML=`<header class="app-header new-header ${ui.searchOpen&&ui.mode==='work'?'search-expanded':''}"><div class="header-inner"><div class="header-start"><div class="mode-switch" role="group" aria-label="개인 업무 전환">${button(icon('home'),'mode',`data-value="personal" aria-label="개인" title="개인" aria-pressed="${ui.mode==='personal'}"`,'mode'+(ui.mode==='personal'?' active':''))}${button(icon('briefcase'),'mode',`data-value="work" aria-label="업무" title="업무" aria-pressed="${ui.mode==='work'}"`,'mode'+(ui.mode==='work'?' active':''))}</div>${ui.mode==='work'&&ui.date===today()?`<span class="leave-countdown">퇴근까지 <strong id="leave-count">${countdown()}</strong></span>`:''}</div><div class="date-navigation">${button(icon('left'),'prev','aria-label="이전 날짜"','icon-button')}<label class="date-label" title="${fmt(ui.date,{year:'numeric',month:'long',day:'numeric',weekday:'short'})}">${short(ui.date)}<input id="date-picker" type="date" value="${ui.date}" aria-label="기준 날짜 선택"></label>${button(icon('chevron'),'next','aria-label="다음 날짜"','icon-button')}${ui.date!==today()?button('오늘','today','','today-button'):''}</div><div class="header-actions">${ui.mode==='work'?searchPanel():''}${button(icon('users'),'cloud-open','aria-label="계정 · 동기화" title="계정 · 동기화"','icon-button')}${button(icon('more'),'settings','aria-label="설정" title="설정"','icon-button')}</div></div></header><main class="main"><div id="work-account-notice"></div>${ui.saveWarning?`<div class="save-warning" role="alert">${esc(ui.saveWarning)} ${button('내보내기','export','','text-button')}</div>`:''}<div class="workspace new-workspace">${ui.mode==='work'?`<nav class="workspace-nav" aria-label="업무 메뉴">${ui.tab==='tasks'?viewButtons():'<span></span>'}${workspaceActions()}</nav>`:''}<div class="workspace-content">${bodyScreen()}</div></div></main>`;
-  if(menus.length)surfaces.restore(menus);window.dispatchEvent(new Event('my-week-render'));
+  $('#app').innerHTML=`<header class="app-header new-header ${ui.searchOpen&&ui.mode==='work'?'search-expanded':''}"><div class="header-inner"><div class="header-start"><div class="mode-switch" role="group" aria-label="개인 업무 전환">${button(icon('home'),'mode',`data-value="personal" aria-label="개인" title="개인" aria-pressed="${ui.mode==='personal'}"`,'mode'+(ui.mode==='personal'?' active':''))}${button(icon('briefcase'),'mode',`data-value="work" aria-label="업무" title="업무" aria-pressed="${ui.mode==='work'}"`,'mode'+(ui.mode==='work'?' active':''))}</div>${ui.mode==='work'&&ui.date===today()?`<span class="leave-countdown">퇴근까지 <strong id="leave-count">${countdown()}</strong></span>`:''}</div><div class="date-navigation">${button(icon('left'),'prev','aria-label="이전 날짜"','icon-button')}<label class="date-label" title="${fmt(ui.date,{year:'numeric',month:'long',day:'numeric',weekday:'short'})}">${short(ui.date)}<input id="date-picker" type="date" value="${ui.date}" aria-label="기준 날짜 선택"></label>${button(icon('chevron'),'next','aria-label="다음 날짜"','icon-button')}${ui.date!==today()?button('오늘','today','','today-button'):''}</div><div class="header-actions">${ui.mode==='work'?searchPanel()+`<button type="button" class="icon-button reminder-bell" data-reminder-bell aria-label="리마인드" title="리마인드" aria-haspopup="dialog" aria-controls="reminder-popover" aria-expanded="false">${icon('bell')}<span class="reminder-count" data-reminder-count hidden></span></button>`:''}${button(icon('users'),'cloud-open','aria-label="계정 · 동기화" title="계정 · 동기화"','icon-button')}${button(icon('more'),'settings','aria-label="설정" title="설정"','icon-button')}</div></div></header><main class="main"><div id="work-account-notice"></div>${ui.saveWarning?`<div class="save-warning" role="alert">${esc(ui.saveWarning)} ${button('내보내기','export','','text-button')}</div>`:''}<div class="workspace new-workspace">${ui.mode==='work'?`<nav class="workspace-nav" aria-label="업무 메뉴">${ui.tab==='tasks'?viewButtons():'<span></span>'}${workspaceActions()}</nav>`:''}<div class="workspace-content">${bodyScreen()}</div></div></main>`;
+  if(menus.length)surfaces.restore(menus);reminders.refresh();window.dispatchEvent(new Event('my-week-render'));
 }
 function property(label,i,value){return `<div class="property-row"><dt>${icon(i)}${label}</dt><dd>${value||'<span class="muted">미정</span>'}</dd></div>`;}
 function openDetail(type,id){detailUI.open(type,id);}
@@ -175,14 +169,12 @@ document.addEventListener('click',event=>{
   else if(a==='toggle-tools'){ui.tools=!ui.tools;render();}
   else if(a==='toggle-search'){ui.searchOpen=!ui.searchOpen;if(!ui.searchOpen)ui.search='';render();if(ui.searchOpen)$('#search').focus();}
   else if(a==='close-search'){ui.searchOpen=false;ui.search='';render();$('[data-action="toggle-search"]')?.focus();}
-  else if(a==='toggle-reminders'){ui.remindersCollapsed=!ui.remindersCollapsed;try{localStorage.setItem(reminderViewKey,String(ui.remindersCollapsed));}catch{}const list=$('#reminder-cards');list.hidden=ui.remindersCollapsed;el.setAttribute('aria-expanded',String(!ui.remindersCollapsed));el.title='리마인드 '+(ui.remindersCollapsed?'펼치기':'접기');}
   else if(a==='clear-search'){if(ui.search){ui.search='';render();$('#search').focus();}else{ui.searchOpen=false;render();$('[data-action="toggle-search"]')?.focus();}}
   else if(a==='focus-search')$('#search').focus();
   else if(a==='select-screen'){ui.tab=el.dataset.value;ui.search='';render();$('[aria-controls="screen-menu"]')?.focus();}
   else if(a==='apply-filter'){const key=el.dataset.filter;ui[key]=el.dataset.value;if(key==='project')ui.work='';if(key==='status')ui.completed=['all','done'].includes(ui.status);render({keepMenus:true});$(`#filter-${key}-menu [aria-checked="true"]`)?.focus();}
   else if(a==='search-scope'){ui.searchScope=el.dataset.value;render();$('#search').focus();}
   else if(a==='clear-filters'){ui.project='';ui.work='';ui.status='active';ui.group='none';ui.completed=false;render({keepMenus:true});$('[data-action="clear-filters"]')?.focus();}
-  else if(a==='acknowledge'){const task=findTask(id),previous=task.reminderAcknowledgedOn;task.reminderAcknowledgedOn=ui.date;persist('이 날짜의 리마인드를 숨겼습니다.',()=>{task.reminderAcknowledgedOn=previous;persist('리마인드를 다시 표시합니다.');});}
   else if(a==='auto-sort'){if(data.dailyOrder)delete data.dailyOrder[ui.date];persist('시간 → 마감순으로 정렬했습니다.',null,true);$('[aria-controls="filter-menu"]')?.focus();}
   else if(a==='drag-handle')moveMenu(el.dataset.dragTask);
   else if(a==='detail')openDetail(el.dataset.type,id);
@@ -233,10 +225,19 @@ function moveMenu(id){
 document.addEventListener('submit',event=>{if(!event.target.matches('[data-move-form]'))return;event.preventDefault();const form=event.target;$('#editor').close();moveTask(form.dataset.moveForm,new FormData(form).get('before')||null);});
 installTaskDrag(moveTask);
 const surfaces=installSurfaceInteractions();
+let reminderAccountReady=false;
+const reminders=createReminderCenter({getData:()=>data,getScope:()=>workAccount.owner,isReady:()=>reminderAccountReady,esc,icon,
+ onOpen:id=>openDetail('task',id),
+ onAcknowledge(task,date){const previous=task.reminderAcknowledgedOn;task.reminderAcknowledgedOn=date;saveReminderChange('오늘 리마인드를 확인했습니다.',()=>{const current=findTask(task.id);if(!current)return;current.reminderAcknowledgedOn=previous;saveReminderChange('리마인드를 다시 표시합니다.');});},
+ onPlan(task,date){const before=structuredClone(task);planToday(task,date);persist('오늘 일정에 추가했습니다.',()=>{const current=findTask(task.id);if(!current)return;current.plans=before.plans;persist('이전 계획으로 되돌렸어요.');});}
+});
+function saveReminderChange(message,undo){const ok=saveState(data);if(!ok){ui.saveWarning='기기에 저장하지 못했습니다. 내보내기로 현재 내용을 보관해 주세요.';render();}reminders.refresh({auto:false});toast(ok?message:'저장하지 못했습니다. 현재 창에 내용은 유지됩니다.',undo);}
+
 render();
 window.addEventListener('click',event=>{if(!workAccount.owner&&event.target.closest('.workspace-content')){event.preventDefault();event.stopImmediatePropagation();window.dispatchEvent(new Event('my-week-login-request'));}},true);
 const workCloud=startWorkCloud({getData:()=>data,replaceData:value=>{data=value;ui.saveWarning='';render();},notify:toast,
- resetEditors(){clearTimeout(toastTimer);undoFn=null;ui.detail=null;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';document.querySelectorAll('dialog[open]:not(#cloud-dialog)').forEach(dialog=>{dialog.dataset.skipCloseSave='true';dialog.close();});document.body.classList.remove('task-dragging','dragging-reminders');},
+ onStatus(kind){if(workAccount.owner&&['online','error','offline','conflict'].includes(kind))reminderAccountReady=true;reminders.refresh();},
+ resetEditors(){reminderAccountReady=false;reminders.close();clearTimeout(toastTimer);undoFn=null;ui.detail=null;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';document.querySelectorAll('dialog[open]:not(#cloud-dialog)').forEach(dialog=>{dialog.dataset.skipCloseSave='true';dialog.close();});document.body.classList.remove('task-dragging','dragging-reminders');},
  download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 });
-setInterval(()=>{updateCountdown();if(ui.mode==='work'&&ui.tab==='tasks'&&!ui.search&&!document.querySelector('dialog[open]')&&!document.body.classList.contains('task-dragging')&&!document.body.classList.contains('dragging-reminders')&&!document.querySelector('[data-menu-panel]:not([hidden]),[data-quick-task],[data-check-form]:not([hidden])')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))render();},60000);
+setInterval(()=>{updateCountdown();reminders.refresh();if(!reminders.isOpen()&&ui.mode==='work'&&ui.tab==='tasks'&&!ui.search&&!document.querySelector('dialog[open]')&&!document.body.classList.contains('task-dragging')&&!document.body.classList.contains('dragging-reminders')&&!document.querySelector('[data-menu-panel]:not([hidden]),[data-quick-task],[data-check-form]:not([hidden])')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))render();},60000);

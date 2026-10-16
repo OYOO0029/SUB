@@ -1,9 +1,9 @@
-import {startCloud} from '../schedule-cloud-ui.mjs?v=work-integration-1';
+import {startCloud} from '../schedule-cloud-ui.mjs?v=20261016-bell';
 import {appStorage} from '../schedule-storage.mjs';
 import {workAccount,validate} from './repository.js?v=work-integration-1';
 import {mergeWorkData} from './work-account.mjs';
 
-export function startWorkCloud({getData,replaceData,resetEditors,notify,download}){
+export function startWorkCloud({getData,replaceData,resetEditors,notify,download,onStatus=()=>{}}){
  let importing=false,message='',cloud;
  const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='application/json,.json';fileInput.dataset.workFile='';fileInput.hidden=true;document.body.append(fileInput);
  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -17,6 +17,7 @@ export function startWorkCloud({getData,replaceData,resetEditors,notify,download
   export:()=>download(JSON.stringify(getData(),null,2),'what-to-do-work-backup.json'),download
  };
  function paint(){
+  if(cloud)onStatus(cloud.status);
   const box=document.getElementById('work-account-notice');if(!box)return;
   let staged;try{staged=workAccount.staged();}catch{message='가져올 파일을 읽지 못했습니다. 백업 파일을 다시 선택해 주세요.';}
   const account=cloud?.account,available=staged&&(!staged.owner||staged.owner===workAccount.owner);
