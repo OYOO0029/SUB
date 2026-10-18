@@ -160,3 +160,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .day-timeline-scroll{scrollbar-color:#191c23 #282b34;scrollbar-width:thin}
 .schedule-table tbody tr:last-child th,.schedule-table tbody tr:last-child td{border-bottom:1px solid #383b42}
 .schedule-table tr:not(.weekday-row)>:last-child{border-right:1px solid #383b42}
+
+.data-cell .cell-add.is-empty{inset:10px;width:auto;height:auto;min-height:0}
+.data-cell .cell-add.has-events{position:static}
+.weekday-row th:first-child{width:8%}
