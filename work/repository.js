@@ -25,7 +25,7 @@ export function validate(data){
     if(t.dueTime&&!time(t.dueTime)||t.completedAt&&typeof t.completedAt!=='string'||t.workId&&!id(t.workId))throw new Error('할 일 날짜 정보가 올바르지 않습니다.');
   }
   for(const w of data.works)if(w.projectId&&!data.projects.some(p=>p.id===w.projectId)||!strings(w.tags)||typeof w.notes!=='string'||typeof w.stage!=='string'||!date(w.due))throw new Error('업무 연결이 올바르지 않습니다.');
-  for(const p of data.projects)if(!strings(p.stages)||!strings(p.tags)||typeof p.notes!=='string'||typeof p.stage!=='string'||p.stage&&!p.stages.includes(p.stage)||!date(p.start)||!date(p.end)||!!p.start!==!!p.end||p.start&&p.end<p.start)throw new Error('프로젝트 형식이 올바르지 않습니다.');
+  for(const p of data.projects)if(p.lifecycle!==undefined&&!['active','done','paused','cancelled'].includes(p.lifecycle)||!strings(p.stages)||!strings(p.tags)||typeof p.notes!=='string'||typeof p.stage!=='string'||p.stage&&!p.stages.includes(p.stage)||!date(p.start)||!date(p.end)||!!p.start!==!!p.end||p.start&&p.end<p.start)throw new Error('프로젝트 형식이 올바르지 않습니다.');
   for(const e of data.personal)if(!date(e.date)||!e.date||!['am','pm','eve'].includes(e.period)||typeof e.time!=='string')throw new Error('개인 일정 형식이 올바르지 않습니다.');
   for(const [key,value] of Object.entries(data.tracker))if(!/^\d{4}-\d{2}-\d{2}-[012]$/.test(key)||typeof value!=='boolean')throw new Error('트래커 형식이 올바르지 않습니다.');
   return data;

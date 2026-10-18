@@ -1,5 +1,5 @@
 import {uid,planToday,today} from './model.js';
-import {validate} from './repository.js?v=20261015-detail-choices';
+import {validate} from './repository.js?v=20261018-projects';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261015-detail-choices';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
@@ -23,12 +23,12 @@ export function createItem(data,type,title,{date=today(),workId=null,projectId=n
   const common={id:uid(),title,tags:[],people:[],notes:'',deletedAt:null};let item;
   if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};planToday(item,date);}
   else if(type==='work')item={...common,projectId,stage:'',due:null};
-  else item={...common,subtitle:'',start:null,end:null,stage:'',stages:[...BASE_STAGES],budget:''};
+  else item={...common,lifecycle:'active',subtitle:'',start:null,end:null,stage:'',stages:[...BASE_STAGES],budget:''};
   const draft=structuredClone(data);draft[collection(type)].push(item);validate(draft);data[collection(type)].push(item);return item;
 }
 
 export function updateItem(data,type,id,patch){
-  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom'],work:['title','notes','tags','people','projectId','stage','due'],project:['title','notes','tags','people','budget','stage','stages','start','end']}[type];
+  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom'],work:['title','notes','tags','people','projectId','stage','due'],project:['lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
   Object.assign(item,patch);

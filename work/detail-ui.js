@@ -1,5 +1,6 @@
+import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js';
-import {getItem,createItem,updateItem,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=work-integration-1';
+import {getItem,createItem,updateItem,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261018-projects';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261015-detail-choices';
 import {deadlineConflict} from './work-view.js';
 import {createDatePicker,dateLabel} from './date-picker.js';
@@ -41,7 +42,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       body=`<section class="detail-section"><div class="section-heading"><h3>할 일 <span class="count">${tasks.filter(t=>t.status==='done').length}/${tasks.length}</span></h3>${button(icon('plus')+'추가','add',`data-work-id="${id}"`,'quiet-link')}</div><div class="task-list">${tasks.map(t=>taskCard(t,{compact:true,listMode:true})).join('')}</div></section>`;
     }else{
       const works=data.works.filter(w=>w.projectId===id&&!w.deletedAt);
-      props=property('진행 단계','briefcase',choiceField('stage',e.stage,stageOptions(data,type,e),'프로젝트 진행 단계'))+dateProperty('사업 기간','period',e.start?`${e.start} – ${e.end}`:'')+property('사업비','note',textField('budget',e.budget,'사업비'));
+      props=property('프로젝트 상태','folder',`<fieldset class="inline-choices"><legend class="sr-only">프로젝트 상태</legend>${PROJECT_STATES.map(([v,l])=>`<label class="choice-option"><input type="radio" name="project-lifecycle" data-project-lifecycle value="${v}" ${projectState(e)===v?'checked':''}><span>${l}</span></label>`).join('')}</fieldset>`)+property('진행 단계','briefcase',choiceField('stage',e.stage,stageOptions(data,type,e),'프로젝트 진행 단계'))+dateProperty('사업 기간','period',e.start?`${e.start} – ${e.end}`:'')+property('사업비','note',textField('budget',e.budget,'사업비'));
       body=`<section class="detail-section"><div class="section-heading"><h3>업무 <span class="count">${works.length}</span></h3>${button(icon('plus')+'추가','add-work',`data-project-id="${id}"`,'quiet-link')}</div><div class="task-list">${works.map(workCard).join('')}</div></section>`;
     }
     $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${property('관련 인원','users',chipsField(e,'people'))}${property('태그','tag',chipsField(e))}${property('메모','note',textField('notes',e.notes,'메모',true))}${type==='task'?checks(e):''}</dl>${body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!isPlanned(e,ui.date)&&e.status!=='done'?button('오늘','plan',`data-id="${id}"`,'small-button'):''}${button('닫기','close-detail','','small-button')}</footer>`;
@@ -157,7 +158,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function focusChip(field){$(`[data-action="chip-picker"][data-field="${field}"]`)?.focus();}
   function closeChoiceForm(form){form.hidden=true;form.reset();form.querySelector('.property-error').textContent='';const trigger=form.parentElement.querySelector('[data-action="add-choice"]');trigger.setAttribute('aria-expanded','false');trigger.focus();}
   document.addEventListener('change',event=>{
-    const el=event.target;if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
+    const el=event.target;if(el.matches('[data-project-lifecycle]')){event.stopImmediatePropagation();try{updateItem(getData(),'project',ui.detail.id,{lifecycle:el.value});persist(false);}catch(err){error(err);}return;}if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
     try{selectDetailOption(getData(),ui.detail.type,ui.detail.id,el.value);if(el.dataset.choiceField==='status')$('.detail-complete').checked=item().status==='done';persist(false);if(!ui.saveWarning)$('#inline-error').textContent='';}
     catch(err){error(err);document.querySelectorAll('[data-choice-field]').forEach(r=>r.checked=r.value===item()[r.dataset.choiceField]);}
   },true);
