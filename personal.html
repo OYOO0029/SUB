@@ -403,8 +403,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261018-day-detail-2">
-<link rel="stylesheet" href="./personal-ui.css?v=20261018-day-detail-2">
+<link rel="stylesheet" href="./planner-ui.css?v=20261018-month-alignment">
+<link rel="stylesheet" href="./personal-ui.css?v=20261018-month-alignment">
 <script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
 </head>
 <body>
@@ -848,6 +848,7 @@ function trackerIcon(t){
  return kind?`<span class="tracker-svg tracker-${kind}" aria-hidden="true"></span>`:esc(t.emoji);
 }
 function selectedDateLabel(){
+  if(viewMode==="month")return `${focusDate.getFullYear()}년 ${focusDate.getMonth()+1}월`;
   return `${focusDate.getMonth()+1}/${focusDate.getDate()} (${DOW_KO[focusDate.getDay()]})`;
 }
 function getSlot(time){
@@ -1097,7 +1098,7 @@ function renderMonth(){
     html+=`<div class="month-cell ${out?"outside":""} ${ds===sel?"selected":""} ${isPastDate(d)?"is-past":""}">
       <div class="month-top"><button class="month-date ${ds===today?"today":""}" data-month-date="${ds}">${d.getDate()}</button>
       <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</span>`).join("")}</div>
-      ${h?`<div class="month-holiday" title="${esc(h.names.join(" · "))}">${esc(h.names.join(" · "))}</div>`:""}</div>
+      ${h?`<div class="month-holiday" title="${esc(h.names.join(" · "))}">${esc(h.names.join(" · "))}</div>`:""}
       ${evs.slice(0,2).map(o=>`<div class="month-event ${esc(o.event.category||"personal")}">${esc(o.event.title)}</div>`).join("")}
       ${evs.length>2?`<button class="month-more" data-month-date="${ds}">+${evs.length-2}개</button>`:""}
     </div>`;

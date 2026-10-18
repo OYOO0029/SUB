@@ -164,3 +164,17 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .data-cell .cell-add.is-empty{inset:10px;width:auto;height:auto;min-height:0}
 .data-cell .cell-add.has-events{position:static}
 .weekday-row th:first-child{width:8%}
+
+/* Stable month metadata and masthead alignment. */
+.header .header-actions{align-items:center}
+.header #syncCloudBtn,.header #settingsBtn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-width:36px;padding:0;line-height:1;margin:0}
+.header #syncCloudBtn>*{display:none}
+.header #syncCloudBtn::before,.header #settingsBtn .settings-filled-icon{flex:none;width:20px;height:20px}
+.personal-view-tabs button:focus:not(:focus-visible){outline:none;box-shadow:none}
+.personal-view-tabs button:focus-visible{outline:2px solid #bdc2ce;outline-offset:2px}
+.month-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.month-top .month-trackers{margin-left:auto;flex:0 1 auto}
+.month-cell>.month-holiday{margin:4px 0 0;padding-left:6px;text-align:left;line-height:1.4}
+.mobile-month-cell{display:grid;grid-template-columns:auto minmax(0,1fr);align-content:start;align-items:center}
+.mobile-month-flags{margin:0;text-align:right;overflow:hidden}
+.mobile-month-holiday{grid-column:1/-1;text-align:left}
