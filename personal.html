@@ -1097,7 +1097,7 @@ function renderMonth(){
     const evs=occurrences(d);
     html+=`<div class="month-cell ${out?"outside":""} ${ds===sel?"selected":""} ${isPastDate(d)?"is-past":""}">
       <div class="month-top"><button class="month-date ${ds===today?"today":""}" data-month-date="${ds}">${d.getDate()}</button>
-      <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</span>`).join("")}</div>
+      <div class="month-trackers">${activeTrackers.map(t=>`<span title="${esc(t.name)}" aria-label="${esc(t.name)}">${trackerIcon(t)}</span>`).join("")}</div></div>
       ${h?`<div class="month-holiday" title="${esc(h.names.join(" · "))}">${esc(h.names.join(" · "))}</div>`:""}
       ${evs.slice(0,2).map(o=>`<div class="month-event ${esc(o.event.category||"personal")}">${esc(o.event.title)}</div>`).join("")}
       ${evs.length>2?`<button class="month-more" data-month-date="${ds}">+${evs.length-2}개</button>`:""}
