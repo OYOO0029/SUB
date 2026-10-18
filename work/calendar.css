@@ -67,4 +67,6 @@
  .new-header .header-actions{align-self:flex-start;margin-top:14px}
 }
 
+#app>.main{width:calc(100% - 48px);max-width:768px;margin:24px auto 16px}
 #app>.main>.new-workspace{min-height:0}
+@media(max-width:720px){#app>.main{width:calc(100% - 24px)}}
