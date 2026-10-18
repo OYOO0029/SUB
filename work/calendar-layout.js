@@ -46,3 +46,5 @@ export function calendarWeeks(tasks,days,maxVisible=Infinity){
   }
   return weeks;
 }
+
+export function monthLaneCapacity(height,weekCount){return Math.max(0,Math.min(3,Math.floor(((height-34)/weekCount-56)/24)));}

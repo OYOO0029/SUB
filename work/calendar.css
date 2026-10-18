@@ -1,5 +1,5 @@
 /* Shared compact period bars for the work week and month views. */
-.work-calendar.connected-calendar{display:block;min-width:560px;border:1px solid #3b424e;border-radius:8px}
+.work-calendar.connected-calendar{display:block;min-width:0;border:1px solid #3b424e;border-radius:8px}
 .connected-calendar .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .connected-calendar .calendar-weekday{padding:8px 0;border-bottom:1px solid #3b424e}
 .connected-calendar .calendar-weekday:last-child{border-right:0}
@@ -37,3 +37,34 @@
 .calendar-day-event.is-done{color:#939ba8;text-decoration:line-through}
 @media(max-width:580px){.calendar-month-toolbar{margin-bottom:12px}.calendar-month-toolbar h2{font-size:16px}.connected-calendar .calendar-day-heading{padding-inline:6px}}
 @media(hover:none){.connected-calendar .day-add{opacity:1;pointer-events:auto}}
+
+/* Month overview fits the viewport; excess entries remain in date details. */
+#app:has(.connected-calendar.monthly){height:100dvh;min-height:0}
+#app:has(.connected-calendar.monthly)>.main{min-height:0;margin-bottom:16px}
+#app:has(.connected-calendar.monthly)>.main>.new-workspace{min-height:0}
+.new-workspace:has(.connected-calendar.monthly)>.workspace-content{display:flex;flex-direction:column;min-height:0;padding-bottom:16px}
+.workspace-content:has(.connected-calendar.monthly)>.calendar-scroll{flex:1;min-height:0;overflow:visible}
+.work-calendar.connected-calendar.monthly{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:32px repeat(var(--weeks,6),minmax(0,1fr));height:100%;min-width:0}
+.connected-calendar.monthly .calendar-week{min-height:0;grid-template-rows:30px repeat(var(--lanes),24px) minmax(0,1fr)}
+.connected-calendar.monthly .calendar-day-heading{height:30px}
+.connected-calendar.monthly .day-add{top:calc(30px + var(--day-event-rows,0)*24px + 1px)}
+@media(max-width:580px){.connected-calendar.monthly .calendar-day-heading{padding:2px}.connected-calendar.monthly .day-number small{display:none}.connected-calendar.monthly .calendar-event{margin-inline:1px;padding-inline:3px}.connected-calendar.monthly .calendar-event .deadline{display:none}.connected-calendar.monthly .calendar-more{width:16px;flex-basis:16px;height:20px;padding:0}}
+
+.workspace-content:has(.connected-calendar.monthly)>.calendar-help{flex:none;min-height:24px;margin:0 0 8px;gap:16px}
+
+@media(max-width:720px){
+ .new-workspace .workspace-nav{grid-template-columns:minmax(0,1fr) auto}
+ .new-workspace .workspace-nav>.date-navigation{grid-column:1/-1;grid-row:1;justify-self:center}
+ .new-workspace .workspace-nav>.view-tabs{grid-column:1;grid-row:2}
+ .new-workspace .workspace-actions{grid-column:2;grid-row:2}
+ .connected-calendar .calendar-day-heading{padding-inline:2px}
+ .connected-calendar .day-number small{display:none}
+}
+@media(max-width:480px){
+ .planner-embedded .new-header:has(.leave-countdown){height:76px;min-height:76px}
+ .new-header .header-inner{position:relative}
+ .new-header .header-start .leave-countdown{position:absolute;left:0;top:51px;width:auto}
+ .new-header .header-actions{align-self:flex-start;margin-top:14px}
+}
+
+#app>.main>.new-workspace{min-height:0}
