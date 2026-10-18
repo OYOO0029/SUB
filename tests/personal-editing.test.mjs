@@ -46,9 +46,13 @@ test('date detail edits trackers and exact sleep time, adds an hourly event and 
   const dateButton=d.querySelector('[data-select-date]'),ds=dateButton.dataset.selectDate;dateButton.click();
   assert.equal(d.querySelector('#dayDetail').classList.contains('open'),true);
   assert.equal(d.querySelector('[data-personal-view=day]'),null);
+  assert.equal(d.querySelector('[data-day-clear=wake]').hidden,true);
+  assert.equal(d.querySelector('[data-day-clear=bed]').hidden,true);
   const input=d.querySelector('#day-wake');input.value='0732';input.dispatchEvent(new w.Event('change'));
   assert.equal(w.myWeekSyncBridge.read().sleepLogs[ds].wake,'07:32');
+  assert.equal(d.querySelector('[data-day-clear=wake]').hidden,false);
   d.querySelector('[data-day-delete=sleep]').click();assert.equal(w.myWeekSyncBridge.read().sleepLogs[ds].wake,undefined);
+  assert.equal(d.querySelector('[data-day-clear=wake]').hidden,true);
   const tracker=d.querySelector('[data-day-tracker]');if(tracker){const id=tracker.dataset.dayTracker;tracker.click();assert.equal(w.myWeekSyncBridge.read().trackerLogs[ds][id],true);}
   d.querySelector('[data-day-add="10"]').click();d.querySelector('#eventName').value='상세 일정';d.querySelector('#saveEventBtn').click();
   assert.equal(w.myWeekSyncBridge.read().events[0].startTime,'10:00');

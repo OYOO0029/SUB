@@ -20,7 +20,7 @@ function showMode(next) {
     frame.title = mode === 'personal' ? '개인 일정' : '업무 일정';
     const url = new URL(mode === 'personal' ? './personal.html' : './work/index.html', location.href);
     url.searchParams.set('embedded','1');
-    url.searchParams.set('v','20261018-workdays');
+    url.searchParams.set('v','20261018-alignment-review');
     frame.src = url.href;
     const frameMode = mode;
     frame.addEventListener('load', () => {
@@ -37,6 +37,7 @@ function showMode(next) {
     frame.contentWindow.postMessage({type:'planner-active',active:key === mode},location.origin);
   }
   loading.hidden = frames.get(mode).dataset.loaded === 'true';
+  document.querySelector('.shell-header').hidden=frames.get(mode).dataset.modal==='true';
   document.title = `WHAT TO DO · ${mode === 'personal' ? '개인' : '업무'}`;
 }
 
@@ -54,6 +55,10 @@ document.querySelector('.planner-switch').addEventListener('keydown', event => {
 });
 window.addEventListener('message', event => {
   if(event.origin !== location.origin || ![...frames.values()].some(frame => frame.contentWindow === event.source)) return;
+  if(event.data?.type==='planner-modal'){
+    const frame=[...frames.values()].find(frame=>frame.contentWindow===event.source);frame.dataset.modal=String(!!event.data.open);
+    if(frame===frames.get(mode))document.querySelector('.shell-header').hidden=!!event.data.open;
+  }
   if(event.data?.type === 'planner-mode') showMode(event.data.mode);
 });
 const requested = new URLSearchParams(location.search).get('mode');

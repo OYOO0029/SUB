@@ -43,5 +43,9 @@ test('switching preserves existing views and the header, isolates hidden frames 
   assert.equal(buttons[1].getAttribute("aria-pressed"),"true");
   assert.equal(w.document.querySelectorAll("iframe").length,2);
   assert.equal(w.document.querySelectorAll("iframe")[1],work);
+  w.dispatchEvent(new w.MessageEvent('message',{origin:'https://example.test',data:{type:'planner-modal',open:true},source:work.contentWindow}));
+  assert.equal(w.document.querySelector('.shell-header').hidden,true);
+  w.dispatchEvent(new w.MessageEvent('message',{origin:'https://example.test',data:{type:'planner-modal',open:false},source:work.contentWindow}));
+  assert.equal(w.document.querySelector('.shell-header').hidden,false);
   dom.window.close();
 });

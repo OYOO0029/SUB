@@ -403,9 +403,9 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261018-workdays">
-<link rel="stylesheet" href="./personal-ui.css?v=20261018-workdays">
-<script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
+<link rel="stylesheet" href="./planner-ui.css?v=20261018-alignment-review">
+<link rel="stylesheet" href="./personal-ui.css?v=20261018-alignment-review">
+<script defer src="./planner-navigation.js?v=20261018-alignment-review"></script>
 </head>
 <body>
 <div class="app">
@@ -1499,7 +1499,7 @@ window.addEventListener('resize',closeEventMenu);window.addEventListener('scroll
 
 // ---------- day detail ----------
 const dayDetail=document.createElement('div');dayDetail.id='dayDetail';dayDetail.className='modal-backdrop day-detail-backdrop';
-dayDetail.innerHTML='<section class="day-detail-dialog" role="dialog" aria-modal="true" aria-label="일자 상세"><header class="day-detail-header"><label><span id="dayDetailTitle"></span><input type="date" id="dayDetailDate" aria-label="상세 날짜 선택"></label><button type="button" data-day-close aria-label="일자 상세 닫기">×</button></header><div class="day-detail-meta"></div><div class="day-timeline-scroll"><div class="day-timeline"></div></div><footer><button type="button" data-day-close>닫기</button><button type="button" id="dayDetailSave">저장</button></footer></section>';
+dayDetail.innerHTML='<section class="day-detail-dialog" role="dialog" aria-modal="true" aria-label="일자 상세"><header class="day-detail-header"><label><span id="dayDetailTitle"></span><input type="date" id="dayDetailDate" aria-label="상세 날짜 선택"></label><button type="button" data-day-close aria-label="일자 상세 닫기"><span aria-hidden="true" class="close-mark"></span></button></header><div class="day-detail-meta"></div><div class="day-timeline-scroll"><div class="day-timeline"></div></div><footer><button type="button" data-day-close>닫기</button><button type="button" id="dayDetailSave">저장</button></footer></section>';
 document.getElementById('eventModal').before(dayDetail);
 let dayReturnFocus=null;
 function openDayDetail(ds){
@@ -1521,7 +1521,7 @@ function renderDayDetail(){
  const ds=dayDetailDate,date=parseDate(ds),scroll=host.querySelector('.day-timeline-scroll').scrollTop;
  document.getElementById('dayDetailTitle').textContent=`${date.getMonth()+1}/${date.getDate()}/${DOW_KO[date.getDay()]}`;
  document.getElementById('dayDetailDate').value=ds;
- host.querySelector('.day-detail-meta').innerHTML=`<div><span>트래커</span><div>${state.trackerDefs.map(t=>`<button type="button" class="tracker-toggle ${getTrackerLog(date,t.id)?'active':''}" data-day-tracker="${esc(t.id)}" aria-label="${esc(t.name)}" aria-pressed="${getTrackerLog(date,t.id)}">${trackerIcon(t)}</button>`).join('')}</div></div>`+['wake','bed'].map(type=>`<div><label for="day-${type}">${type==='wake'?'기상':'취침'}</label><input id="day-${type}" data-day-sleep="${type}" aria-label="상세 ${type==='wake'?'기상':'취침'} 시간" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${esc(sleepValue(date,type))}"><button type="button" class="day-delete" data-day-clear="${type}" aria-label="${type==='wake'?'기상':'취침'} 시간 삭제">−</button></div>`).join('');
+ host.querySelector('.day-detail-meta').innerHTML=`<div><span>트래커</span><div>${state.trackerDefs.map(t=>`<button type="button" class="tracker-toggle ${getTrackerLog(date,t.id)?'active':''}" data-day-tracker="${esc(t.id)}" aria-label="${esc(t.name)}" aria-pressed="${getTrackerLog(date,t.id)}">${trackerIcon(t)}</button>`).join('')}</div></div>`+['wake','bed'].map(type=>`<div><label for="day-${type}">${type==='wake'?'기상':'취침'}</label><input id="day-${type}" data-day-sleep="${type}" aria-label="상세 ${type==='wake'?'기상':'취침'} 시간" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${esc(sleepValue(date,type))}"><button type="button" class="day-delete" ${sleepValue(date,type)?"":"hidden"} data-day-clear="${type}" aria-label="${type==='wake'?'기상':'취침'} 시간 삭제">−</button></div>`).join('');
  const minutes=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
  const entries=occurrences(date).map(o=>({kind:'event',id:o.event.id,title:o.event.title,start:o.event.startTime||'00:00',end:o.event.endTime||addMinutes(o.event.startTime||'00:00',30)}));
  for(const slot of ['morning','afternoon','evening']){const work=workFor(date,slot);if(work){const times=(work.time||'09:00~18:00').split('~');entries.push({kind:'work',id:slot,title:work.title,start:work.start||times[0],end:work.end||times[1]});}}
