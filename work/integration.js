@@ -1,6 +1,6 @@
 import {startCloud} from '../schedule-cloud-ui.mjs?v=20261016-persistent-auth';
 import {appStorage} from '../schedule-storage.mjs';
-import {workAccount,validate} from './repository.js?v=20261018-projects';
+import {workAccount,validate} from './repository.js?v=20261018-workflow';
 import {mergeWorkData} from './work-account.mjs';
 
 export function startWorkCloud({getData,replaceData,resetEditors,notify,download,onStatus=()=>{}}){

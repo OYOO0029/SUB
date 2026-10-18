@@ -1,5 +1,5 @@
 export const BASE_STATUSES=[['waiting','대기'],['todo','진행중'],['done','완료'],['cancelled','취소']];
-export const BASE_STAGES=BASE_STATUSES.map(([,label])=>label);
+export const BASE_STAGES=['기획','준비','실행','검토'];
 export const LEGACY_STATUS=['paused','보류'];
 
 export function statusOptions(data){

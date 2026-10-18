@@ -1,4 +1,4 @@
-import {addDays,isPlanned} from './model.js';
+import {addDays,isPlanned} from './model.js?v=20261018-workflow';
 
 // Work calendars start Sunday; personal calendar defaults stay independent.
 export function workCalendarDays(date,monthly=false){
@@ -9,22 +9,22 @@ export function workCalendarDays(date,monthly=false){
 
 // Allocate one lane to each continuous period, split only at week boundaries.
 // A deadline outside a plan is a separate marker and never extends that plan.
-export function calendarWeeks(tasks,days,maxVisible=Infinity){
+export function calendarWeeks(tasks,days,maxVisible=Infinity,{plans=true,due=true}={}){
   const weeks=[];
   for(let offset=0;offset<days.length;offset+=7){
     const dates=days.slice(offset,offset+7),segments=[];
     for(const task of tasks){
       for(let day=0;day<dates.length;day++){
-        if(!isPlanned(task,dates[day]))continue;
+        if(!plans||!isPlanned(task,dates[day]))continue;
         const start=day;
         while(day+1<dates.length&&isPlanned(task,dates[day+1]))day++;
         segments.push({task,start,end:day,kind:'plan',
           continuesBefore:isPlanned(task,addDays(dates[start],-1)),
           continuesAfter:isPlanned(task,addDays(dates[day],1)),
-          due:task.due>=dates[start]&&task.due<=dates[day]?task.due:null});
+          due:due&&task.due>=dates[start]&&task.due<=dates[day]?task.due:null});
       }
       const dueIndex=dates.indexOf(task.due);
-      if(dueIndex>=0&&!isPlanned(task,task.due))segments.push({task,start:dueIndex,end:dueIndex,kind:'deadline',due:task.due});
+      if(due&&dueIndex>=0&&(!plans||!isPlanned(task,task.due)))segments.push({task,start:dueIndex,end:dueIndex,kind:'deadline',due:task.due});
     }
     segments.sort((a,b)=>a.start-b.start||(b.end-b.start)-(a.end-a.start)||a.task.title.localeCompare(b.task.title,'ko')||a.task.id.localeCompare(b.task.id));
     const lanes=[],dayTasks=dates.map(()=>[]),hidden=dates.map(()=>[]);
@@ -47,4 +47,4 @@ export function calendarWeeks(tasks,days,maxVisible=Infinity){
   return weeks;
 }
 
-export function monthLaneCapacity(height,weekCount){return Math.max(0,Math.min(3,Math.floor(((height-34)/weekCount-56)/24)));}
+export function monthLaneCapacity(height,weekCount){return Math.max(0,Math.min(3,Math.floor(((height-34)/weekCount-40)/24)));}

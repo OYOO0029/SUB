@@ -1,6 +1,6 @@
-import {uid,planToday,today} from './model.js';
-import {validate} from './repository.js?v=20261018-projects';
-import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261015-detail-choices';
+import {uid,planToday,today} from './model.js?v=20261018-workflow';
+import {validate} from './repository.js?v=20261018-workflow';
+import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
 export const getItem=(data,type,id)=>data[collection(type)]?.find(x=>x.id===id);
@@ -21,14 +21,14 @@ export function conflicts(data,taskId,date,start,end){return data.tasks.filter(t
 export function createItem(data,type,title,{date=today(),workId=null,projectId=null}={}){
   title=title.trim();if(!title||title.length>160)throw new Error('이름을 1~160자로 입력해 주세요.');
   const common={id:uid(),title,tags:[],people:[],notes:'',deletedAt:null};let item;
-  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};planToday(item,date);}
+  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};if(date)planToday(item,date);}
   else if(type==='work')item={...common,projectId,stage:'',due:null};
   else item={...common,lifecycle:'active',subtitle:'',start:null,end:null,stage:'',stages:[...BASE_STAGES],budget:''};
   const draft=structuredClone(data);draft[collection(type)].push(item);validate(draft);data[collection(type)].push(item);return item;
 }
 
 export function updateItem(data,type,id,patch){
-  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom'],work:['title','notes','tags','people','projectId','stage','due'],project:['lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
+  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom'],work:['title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
   Object.assign(item,patch);
@@ -88,6 +88,7 @@ export function updatePlan(data,id,start,end){
   if(!!start!==!!end||end<start)throw new Error('작업 시작일과 종료일을 확인해 주세요.');
   const draft=structuredClone(data),t=getItem(draft,'task',id);
   if(t.blocks.some(b=>!start||b.date<start||b.date>end))throw new Error('배치된 시간을 포함하는 기간을 선택하거나, 먼저 시간을 해제해 주세요.');
+  if(start&&t.excludedDates)t.excludedDates=t.excludedDates.filter(d=>d<start||d>end);
   t.plans.forEach(p=>p.state='superseded');if(start)t.plans.push({id:uid(),start,end,state:'active'});
   validate(draft);Object.assign(getItem(data,'task',id),t);
 }

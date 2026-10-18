@@ -9,9 +9,10 @@
  }
  document.documentElement.classList.add('planner-embedded');
  let lastModal;
- const reportModal=()=>{const open=!!document.querySelector('.modal-backdrop.open,dialog[open]');if(open!==lastModal){lastModal=open;parent.postMessage({type:'planner-modal',open},location.origin)}};
+ const reportModal=()=>{const open=!!document.querySelector('.modal-backdrop.open,dialog[open]:not(.flow-drawer)')||(window.innerWidth<=580&&!!document.querySelector('dialog.flow-drawer[open]'));if(open!==lastModal){lastModal=open;parent.postMessage({type:'planner-modal',open},location.origin)}};
  new MutationObserver(reportModal).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','open']});
  reportModal();
+ window.addEventListener('resize',reportModal);
  window.plannerInactive=window.frameElement?.hidden ?? false;
  document.addEventListener('click', event => {
   const control = event.target.closest('.planner-mode, a[href$="schedule.html"]');
