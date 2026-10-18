@@ -56,3 +56,20 @@ test('date detail edits trackers and exact sleep time, adds an hourly event and 
   d.querySelector('[data-day-close]').click();assert.equal(d.querySelector('#dayDetail').classList.contains('open'),false);
  }finally{close()}
 });
+
+test('default work appears only on weekdays, keeps explicit overrides and stays off the month grid',async()=>{
+ const {w,d,close}=await setup();try{
+  d.querySelector('[data-select-date]').click();
+  const show=date=>{const input=d.querySelector('#dayDetailDate');input.value=date;input.dispatchEvent(new w.Event('change'));return d.querySelectorAll('[data-day-edit=work]').length};
+  assert.equal(show('2026-10-19'),2);
+  assert.equal(show('2026-10-18'),0);
+  assert.equal(show('2026-10-17'),0);
+  assert.equal(show('2026-10-05'),0);
+  const state=w.myWeekSyncBridge.read();state.workExceptions['2026-10-18']='normal';w.myWeekSyncBridge.apply(state);
+  assert.equal(show('2026-10-18'),2);
+  state.workConfig.weekdays=[];state.workConfig.weekdaysConfigured=true;w.myWeekSyncBridge.apply(state);
+  assert.equal(show('2026-10-19'),0);
+  d.querySelector('[data-day-close]').click();d.querySelector('[data-personal-view=month]').click();
+  assert.equal(d.querySelectorAll('#monthView .event-card.work').length,0);
+ }finally{close()}
+});

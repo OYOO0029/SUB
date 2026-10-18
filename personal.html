@@ -403,8 +403,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261018-calendar-fit">
-<link rel="stylesheet" href="./personal-ui.css?v=20261018-calendar-fit">
+<link rel="stylesheet" href="./planner-ui.css?v=20261018-workdays">
+<link rel="stylesheet" href="./personal-ui.css?v=20261018-workdays">
 <script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
 </head>
 <body>
@@ -902,13 +902,17 @@ function occursOn(ev,date){
 function occurrences(date){
   return state.events.filter(ev=>occursOn(ev,date)).map(event=>({event,date:fmtDate(date)})).sort((a,b)=>(a.event.startTime||"99:99").localeCompare(b.event.startTime||"99:99"));
 }
+function configuredWorkdays(config=state.workConfig){
+  return config.weekdays?.length||config.weekdaysConfigured?config.weekdays||[]:[1,2,3,4,5];
+}
 function getWorkStatus(date){
   const ds=fmtDate(date);
   if(Object.prototype.hasOwnProperty.call(state.workExceptions,ds))return state.workExceptions[ds];
-  if(getHoliday(date))return "holiday";
-  return state.workConfig.weekdays.map(Number).includes(date.getDay())?"normal":"holiday";
+  if(getHoliday(date)||date.getDay()===0||date.getDay()===6)return "holiday";
+  return configuredWorkdays().map(Number).includes(date.getDay())?"normal":"holiday";
 }
 function workFor(date,slot){
+  if(!accounts.owner)return null;
   const key=`${fmtDate(date)}/${slot}`;
   if(Object.prototype.hasOwnProperty.call(state.workOverrides||{},key))return state.workOverrides[key];
   if(slot==="evening")return null;
@@ -1418,7 +1422,7 @@ function renderSettingsDraft(){
   document.getElementById("settingsWorkEnd").value=settingsDraft.workConfig.end;
   document.getElementById("settingsWorkLabel").value=settingsDraft.workConfig.label;
   const wd=document.getElementById("settingsWorkdays");wd.innerHTML="";
-  ["월","화","수","목","금","토","일"].forEach((n,i)=>{const d=i===6?0:i+1,b=document.createElement("button");b.type="button";b.className=`chip ${settingsDraft.workConfig.weekdays.map(Number).includes(d)?"active":""}`;b.dataset.wd=d;b.textContent=n;b.onclick=()=>b.classList.toggle("active");wd.append(b)});
+  ["월","화","수","목","금","토","일"].forEach((n,i)=>{const d=i===6?0:i+1,b=document.createElement("button");b.type="button";b.className=`chip ${configuredWorkdays(settingsDraft.workConfig).map(Number).includes(d)?"active":""}`;b.dataset.wd=d;b.textContent=n;b.onclick=()=>b.classList.toggle("active");wd.append(b)});
   renderCategoryDraft();renderTrackerDraft();
 }
 function renderCategoryDraft(){
@@ -1449,6 +1453,7 @@ function saveSettings(){
   settingsDraft.workConfig.end=document.getElementById("settingsWorkEnd").value||"18:00";
   settingsDraft.workConfig.label=document.getElementById("settingsWorkLabel").value.trim()||"회사";
   settingsDraft.workConfig.weekdays=[...document.querySelectorAll("#settingsWorkdays .chip.active")].map(b=>Number(b.dataset.wd));
+  settingsDraft.workConfig.weekdaysConfigured=true;
   state.workConfig=settingsDraft.workConfig;state.categories=settingsDraft.categories.map(c=>({...c,name:c.name.trim()}));state.trackerDefs=settingsDraft.trackerDefs.map(t=>normalizeTrackerMeta({...t,name:t.name.trim()}));
   closeModal("settingsModal");saveState("설정을 저장했어요.");
 }
