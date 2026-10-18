@@ -1,4 +1,4 @@
-import {createWorkflowUI} from './workflow-ui.js?v=20261018-workflow';
+import {createWorkflowUI} from './workflow-ui.js?v=20261018-workflow-3';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
 import {createItem} from './editing.js?v=20261018-workflow';
 import {PROJECT_STATES,projectState,projectList} from './project-view.js';
