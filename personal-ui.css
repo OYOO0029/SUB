@@ -178,3 +178,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFo
 .mobile-month-cell{display:grid;grid-template-columns:auto minmax(0,1fr);align-content:start;align-items:center}
 .mobile-month-flags{margin:0;text-align:right;overflow:hidden}
 .mobile-month-holiday{grid-column:1/-1;text-align:left}
+
+/* Fit an empty week and the entire month to the available viewport. */
+.app{padding:0;min-height:100dvh}
+.personal-workspace{min-height:0;padding-bottom:16px;--calendar-height:calc(100dvh - 147px)}
+.schedule-row .events:empty::before{height:clamp(18px,calc((100dvh - 474px)/3),82px)}
+.month-grid{height:var(--calendar-height);grid-template-rows:36px repeat(var(--month-weeks,6),minmax(0,1fr))}
+.month-dow,.month-cell{min-height:0}
+.month-cell{padding:6px 8px}
+.personal-workspace[data-view=month] #mobileDayPanel,.personal-workspace[data-view=month] .mobile-day-strip{display:none}
+.mobile-month-grid{height:var(--calendar-height);grid-template-rows:30px repeat(var(--month-weeks,6),minmax(0,1fr))}
+.mobile-month-cell{min-height:0;overflow:hidden}
+@media(max-width:720px){.personal-workspace{--calendar-height:calc(100dvh - 187px)}.mobile-month{padding:0}}

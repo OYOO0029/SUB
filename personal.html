@@ -403,8 +403,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261018-month-alignment">
-<link rel="stylesheet" href="./personal-ui.css?v=20261018-month-alignment">
+<link rel="stylesheet" href="./planner-ui.css?v=20261018-calendar-fit">
+<link rel="stylesheet" href="./personal-ui.css?v=20261018-calendar-fit">
 <script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
 </head>
 <body>
@@ -949,6 +949,7 @@ function conflictExists(id,date,start,end){
 
 // ---------- render ----------
 function render(){
+  document.querySelector(".personal-workspace").dataset.view=viewMode;
   document.getElementById("selectedDateLabel").textContent=selectedDateLabel();
   document.getElementById("viewSelect").value=viewMode;
   document.querySelectorAll("[data-personal-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.personalView===viewMode)));
@@ -990,8 +991,9 @@ function renderMobileMonthStatic(){
   if(viewMode!=="month"){panel.hidden=true;return}
   panel.hidden=false;
   const first=new Date(focusDate.getFullYear(),focusDate.getMonth(),1),start=startOfWeek(first),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
+  const weeks=Math.ceil((first.getDay()+new Date(first.getFullYear(),first.getMonth()+1,0).getDate())/7);grid.style.setProperty("--month-weeks",weeks);
   let h="";DOW_KO.forEach(d=>h+=`<div class="mobile-month-dow">${d}</div>`);
-  for(let i=0;i<42;i++){
+  for(let i=0;i<weeks*7;i++){
     const d=addDays(start,i),ds=fmtDate(d),outside=d.getMonth()!==focusDate.getMonth(),holiday=getHoliday(d),flags=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,4).map(t=>trackerIcon(t)).join("");
     h+=`<div class="mobile-month-cell ${outside?"outside":""} ${isPastDate(d)?"is-past":""} ${ds===sel?"selected":""}"><button class="mobile-month-date ${ds===today?"today":""}" data-mobile-date="${ds}" type="button">${d.getDate()}</button><div class="mobile-month-flags">${flags}</div>${holiday?`<div class="mobile-month-holiday">${esc(holiday.names[0])}</div>`:""}</div>`;
   }
@@ -1089,9 +1091,10 @@ function renderScheduleRow(dates,selected,slot){
 function renderMonth(){
   const host=document.getElementById("monthView");
   const first=new Date(focusDate.getFullYear(),focusDate.getMonth(),1),start=startOfWeek(first),today=fmtDate(nowDate()),sel=fmtDate(focusDate);
-  let html=`<div class="month-grid">`;
+  const weeks=Math.ceil((first.getDay()+new Date(first.getFullYear(),first.getMonth()+1,0).getDate())/7);
+  let html=`<div class="month-grid" style="--month-weeks:${weeks}">`;
   DOW_KO.forEach(d=>html+=`<div class="month-dow">${d}</div>`);
-  for(let i=0;i<42;i++){
+  for(let i=0;i<weeks*7;i++){
     const d=addDays(start,i),ds=fmtDate(d),h=getHoliday(d),out=d.getMonth()!==focusDate.getMonth();
     const activeTrackers=state.trackerDefs.filter(t=>getTrackerLog(d,t.id)).slice(0,5);
     const evs=occurrences(d);
