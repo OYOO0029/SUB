@@ -241,3 +241,5 @@ const workCloud=startWorkCloud({getData:()=>data,replaceData:value=>{data=value;
  download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 });
 setInterval(()=>{updateCountdown();reminders.refresh();if(!reminders.isOpen()&&ui.mode==='work'&&ui.tab==='tasks'&&!ui.search&&!document.querySelector('dialog[open]')&&!document.body.classList.contains('task-dragging')&&!document.body.classList.contains('dragging-reminders')&&!document.querySelector('[data-menu-panel]:not([hidden]),[data-quick-task],[data-check-form]:not([hidden])')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))render();},60000);
+
+window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='planner-home')return;Object.assign(ui,{mode:'work',tab:'tasks',view:'list',date:today(),completed:false,search:'',searchOpen:false,project:'',work:'',status:'active',group:'none',tools:false});document.querySelectorAll('dialog[open]').forEach(d=>d.close());render();});

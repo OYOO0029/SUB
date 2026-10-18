@@ -38,5 +38,10 @@ test('switching preserves existing views and the header, isolates hidden frames 
   assert.equal(w.document.activeElement,buttons[1]);
   w.dispatchEvent(new w.MessageEvent('message',{origin:'https://evil.test',data:{type:'planner-mode',mode:'personal'},source:personal.contentWindow}));
   assert.equal(buttons[1].getAttribute('aria-pressed'),'true');
+  buttons[0].click();
+  w.document.getElementById("planner-home").click();
+  assert.equal(buttons[1].getAttribute("aria-pressed"),"true");
+  assert.equal(w.document.querySelectorAll("iframe").length,2);
+  assert.equal(w.document.querySelectorAll("iframe")[1],work);
   dom.window.close();
 });

@@ -31,3 +31,10 @@
 /* The persistent shell owns the mode switch; embedded views retain their tools. */
 .planner-embedded .header .planner-switch,.planner-embedded .new-header .planner-switch{visibility:hidden;pointer-events:none}
 .planner-embedded .header,.planner-embedded .new-header{position:sticky;top:0;z-index:20;background:#191c23}
+/* Supplied filled account/settings icons and aligned shared masthead. */
+.planner-embedded .header,.planner-embedded .new-header{height:55px;min-height:55px;border-bottom:1px solid #2c3037}
+.new-header .header-start{padding-left:100px}
+.new-header [data-action="cloud-open"] .icon,.new-header [data-action="settings"] .icon{display:none}
+.new-header [data-action="cloud-open"]::before,.new-header [data-action="settings"]::before,.settings-filled-icon{content:'';display:block;width:20px;height:20px;background:currentColor;mask:center/contain no-repeat}
+.new-header [data-action="cloud-open"]::before{mask-image:url('./assets/account-filled.svg')}
+.new-header [data-action="settings"]::before,.settings-filled-icon{mask-image:url('./assets/settings-filled.svg')}

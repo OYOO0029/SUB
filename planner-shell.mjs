@@ -5,6 +5,7 @@ const loading = document.getElementById('planner-loading');
 const controls = [...document.querySelectorAll('.planner-mode')];
 const frames = new Map();
 let mode;
+let homePending=false;
 
 function showMode(next) {
   if (!['personal','work'].includes(next)) return;
@@ -19,13 +20,13 @@ function showMode(next) {
     frame.title = mode === 'personal' ? '개인 일정' : '업무 일정';
     const url = new URL(mode === 'personal' ? './personal.html' : './work/index.html', location.href);
     url.searchParams.set('embedded','1');
-    url.searchParams.set('v','20261017-month-meta');
+    url.searchParams.set('v','20261018-day-detail');
     frame.src = url.href;
     const frameMode = mode;
     frame.addEventListener('load', () => {
       frame.dataset.loaded = 'true';
       frame.contentWindow.postMessage({type:'planner-active',active:mode === frameMode}, location.origin);
-      if(mode === frameMode) loading.hidden = true;
+      if(mode === frameMode){loading.hidden = true;if(homePending){frame.contentWindow.postMessage({type:"planner-home"},location.origin);homePending=false;}}
     });
     frames.set(mode,frame);
     views.append(frame);
@@ -39,6 +40,10 @@ function showMode(next) {
   document.title = `WHAT TO DO · ${mode === 'personal' ? '개인' : '업무'}`;
 }
 
+document.getElementById('planner-home').addEventListener('click',()=>{
+ homePending=true;showMode(defaultPlannerMode());const frame=frames.get(mode);
+ if(frame.dataset.loaded==='true'){frame.contentWindow.postMessage({type:'planner-home'},location.origin);homePending=false;}
+});
 controls.forEach(button => button.addEventListener('click', () => showMode(button.dataset.value)));
 document.querySelector('.planner-switch').addEventListener('keydown', event => {
   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;

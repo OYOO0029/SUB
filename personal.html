@@ -403,8 +403,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 .header.actions-collapsed .header-actions .action-btn::after{content:attr(aria-label);font-size:12px;color:inherit;white-space:nowrap}
 .planner-mode-switch{display:flex;align-items:center;gap:14px}.planner-mode-switch nav{display:flex;gap:4px;font-size:13px}.planner-mode-switch nav a,.planner-mode-switch nav span{padding:5px 9px;border-radius:6px;text-decoration:none;color:var(--muted,#9198a5)}.planner-mode-switch nav span{background:#343a44;color:#e7eaf0}.planner-mode-switch nav a:hover{background:#343a44;color:#e7eaf0}
 </style>
-<link rel="stylesheet" href="./planner-ui.css?v=20261016-shell-live">
-<link rel="stylesheet" href="./personal-ui.css?v=20261017-month-meta">
+<link rel="stylesheet" href="./planner-ui.css?v=20261018-day-detail">
+<link rel="stylesheet" href="./personal-ui.css?v=20261018-day-detail">
 <script defer src="./planner-navigation.js?v=20261016-shell-live"></script>
 </head>
 <body>
@@ -434,7 +434,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
   <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
 
   <main class="personal-workspace" aria-label="개인 일정">
-    <div class="personal-toolbar"><div class="personal-view-tabs" role="group" aria-label="보기 선택"><button type="button" data-personal-view="week">주간</button><button type="button" data-personal-view="month">월간</button><button type="button" data-personal-view="day">일간</button></div><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
+    <div class="personal-toolbar"><div class="personal-view-tabs" role="group" aria-label="보기 선택"><button type="button" data-personal-view="week">주간</button><button type="button" data-personal-view="month">월간</button></div><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
         <button type="button" class="selected-date-label" id="selectedDateLabel" title="오늘로 이동">9월 20일 일요일</button>
       </div><button class="date-step" id="toolbarNextBtn" aria-label="다음 기간">›</button></div><div class="personal-tools"><div id="personalQuickActions"></div>
       <select hidden class="view-select" id="viewSelect" aria-label="보기 선택">
@@ -825,6 +825,7 @@ let eventFormSnapshot="",dirtyCloseTarget=null;
 let pendingAction=null,pendingEvent=null;
 let settingsDraft=null;
 let undoFn=null;
+let dayDetailDate=null;
 let dragPayload=null;
 
 // ---------- helpers ----------
@@ -955,6 +956,7 @@ function render(){
   if(viewMode==="month")renderMonth();else renderTable();
   renderMobile();
   syncStorageWarning();
+  renderDayDetail();
 }
 
 function mobilePeriodLabel(){
@@ -1018,7 +1020,7 @@ function renderMobile(){
 }
 function bindMobileEvents(){
   const prev=document.getElementById("mobilePrevBtn"),next=document.getElementById("mobileNextBtn");if(prev)prev.onclick=()=>navigate(-1);if(next)next.onclick=()=>navigate(1);
-  document.querySelectorAll("#mobileShell [data-mobile-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.mobileDate);render()});
+  document.querySelectorAll("#mobileShell [data-mobile-date]").forEach(b=>b.onclick=()=>{selectDate(b.dataset.mobileDate)});
   document.querySelectorAll("#mobileShell [data-mobile-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.mobileTrackerDate),b.dataset.mobileTrackerId)});
   document.querySelectorAll("#mobileShell [data-mobile-sleep]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.mobileDate),b.dataset.mobileSleep,b));
   document.querySelectorAll("#mobileShell [data-mobile-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.mobileAddDate,slot:b.dataset.mobileAddSlot}));
@@ -1037,10 +1039,10 @@ function renderTable(){
   const start=viewMode==="day"?new Date(focusDate):startOfWeek(focusDate);
   const dates=viewMode==="day"?[new Date(focusDate)]:Array.from({length:7},(_,i)=>addDays(start,i));
   const today=fmtDate(nowDate()),selected=fmtDate(focusDate);
-  let html=`<div class="${viewMode==="day"?"day-mode":""}"><table class="schedule-table"><thead><tr><th class="row-head">요일</th>`;
+  let html=`<div class="${viewMode==="day"?"day-mode":""}"><table class="schedule-table"><thead><tr class="weekday-row"><th></th>${dates.map(d=>`<th>${DOW_KO[d.getDay()]}</th>`).join("")}</tr><tr><th class="row-head">일자</th>`;
   dates.forEach(d=>{
     const ds=fmtDate(d),h=getHoliday(d),classes=["day-head",d.getDay()===0?"sunday":"",d.getDay()===6?"saturday":"",ds===selected?"selected":"",ds===today?"today-col":"",isPastDate(d)?"is-past":""].join(" ");
-    html+=`<th class="${classes}"><div class="dow">${DOW[d.getDay()]}</div><button class="day-number ${ds===today?"today":""}" data-select-date="${ds}">${d.getDate()}</button><div class="holiday-name">${h?esc(h.names.join(" · ")):""}</div></th>`;
+    html+=`<th class="${classes}"><button class="day-number ${ds===today?"today":""}" data-select-date="${ds}">${d.getDate()}</button><div class="holiday-name">${h?esc(h.names.join(" · ")):""}</div></th>`;
   });
   html+=`</tr></thead><tbody>`;
   html+=renderTrackerRow(dates,selected);
@@ -1080,7 +1082,7 @@ function renderScheduleRow(dates,selected,slot){
         ${rep?`<span class="repeat-mark">↻</span>`:""}<div class="event-title">${esc(e.title)}</div><div class="event-time">${esc(formatEventTime(e))}</div></button>`;
     });
     if(evs.length>limit)cards+=`<button class="more-btn" data-more-date="${ds}">+${evs.length-limit}개</button>`;
-    s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""} ${!isPastDate(d)&&isPastSlot(d,slot)?"is-past-slot":""}" data-drop-date="${ds}" data-drop-slot="${slot}" data-date-col="${ds}"><div class="events">${cards}</div><button class="cell-add" data-add-date="${ds}" data-add-slot="${slot}">+ 일정</button></td>`;
+    s+=`<td class="data-cell ${ds===selected?"selected":""} ${isPastDate(d)?"is-past":""} ${!isPastDate(d)&&isPastSlot(d,slot)?"is-past-slot":""}" data-drop-date="${ds}" data-drop-slot="${slot}" data-date-col="${ds}"><div class="events">${cards}</div><button class="cell-add ${cards?"has-events":"is-empty"}" aria-label="${ds} ${SLOT_LABELS[slot]} 일정 추가" data-add-date="${ds}" data-add-slot="${slot}">+</button></td>`;
   });return s+`</tr>`;
 }
 function renderMonth(){
@@ -1100,7 +1102,7 @@ function renderMonth(){
       ${evs.length>2?`<button class="month-more" data-month-date="${ds}">+${evs.length-2}개</button>`:""}
     </div>`;
   }
-  html+=`</div>${renderMonthDetail()}`;
+  html+=`</div>`;
   host.innerHTML=html;bindMonthEvents();
 }
 function renderMonthDetail(){
@@ -1117,23 +1119,23 @@ function renderMonthDetail(){
 }
 
 // ---------- bindings ----------
-function selectDate(ds){focusDate=parseDate(ds);render()}
+function selectDate(ds){focusDate=parseDate(ds);render();openDayDetail(ds)}
 function bindTableEvents(){
   document.querySelectorAll("[data-select-date]").forEach(b=>b.onclick=()=>selectDate(b.dataset.selectDate));
   document.querySelectorAll("[data-tracker-date]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTracker(parseDate(b.dataset.trackerDate),b.dataset.trackerId)});
   document.querySelectorAll("[data-sleep-open]").forEach(b=>b.onclick=()=>openSleep(parseDate(b.dataset.date),b.dataset.sleepOpen,b));
   document.querySelectorAll("[data-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.addDate,slot:b.dataset.addSlot}));
-  document.querySelectorAll("[data-more-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.moreDate);viewMode="day";render()});
+  document.querySelectorAll("[data-more-date]").forEach(b=>b.onclick=()=>{selectDate(b.dataset.moreDate)});
   bindEventCards();
   bindWorkCards();
   bindDropTargets();
 }
 function bindMonthEvents(){
-  document.querySelectorAll("[data-month-date]").forEach(b=>b.onclick=()=>{focusDate=parseDate(b.dataset.monthDate);render()});
+  document.querySelectorAll("[data-month-date]").forEach(b=>b.onclick=()=>{selectDate(b.dataset.monthDate)});
   document.querySelectorAll("#monthView [data-tracker-date]").forEach(b=>b.onclick=()=>toggleTracker(parseDate(b.dataset.trackerDate),b.dataset.trackerId));
   document.querySelectorAll("#monthView [data-add-date]").forEach(b=>b.onclick=()=>openEventForm({date:b.dataset.addDate,slot:b.dataset.addSlot}));
   document.querySelectorAll("#monthView .event-card").forEach(b=>b.onclick=()=>openEventForm({event:state.events.find(e=>e.id===b.dataset.eventId),occurrenceDate:b.dataset.occurrenceDate}));
-  document.getElementById("monthToDay")?.addEventListener("click",()=>{viewMode="day";render()});
+  document.getElementById("monthToDay")?.addEventListener("click",()=>openDayDetail(fmtDate(focusDate)));
 }
 function bindEventCards(){
   document.querySelectorAll(".event-card[data-event-id]").forEach(card=>{
@@ -1486,6 +1488,65 @@ document.addEventListener('pointerdown',e=>{if(!eventMenu.contains(e.target))clo
 document.addEventListener('keydown',e=>{if(!eventMenu.hidden&&e.key==='Escape'){closeEventMenu();contextCard?.focus()}});
 window.addEventListener('resize',closeEventMenu);window.addEventListener('scroll',closeEventMenu,true);
 
+// ---------- day detail ----------
+const dayDetail=document.createElement('div');dayDetail.id='dayDetail';dayDetail.className='modal-backdrop day-detail-backdrop';
+dayDetail.innerHTML='<section class="day-detail-dialog" role="dialog" aria-modal="true" aria-label="일자 상세"><header class="day-detail-header"><label><span id="dayDetailTitle"></span><input type="date" id="dayDetailDate" aria-label="상세 날짜 선택"></label><button type="button" data-day-close aria-label="일자 상세 닫기">×</button></header><div class="day-detail-meta"></div><div class="day-timeline-scroll"><div class="day-timeline"></div></div><footer><button type="button" data-day-close>닫기</button><button type="button" id="dayDetailSave">저장</button></footer></section>';
+document.getElementById('eventModal').before(dayDetail);
+let dayReturnFocus=null;
+function openDayDetail(ds){
+ dayReturnFocus=document.activeElement;dayDetailDate=ds;dayDetail.classList.add('open');renderDayDetail();
+ dayDetail.querySelector('.day-timeline-scroll').scrollTop=6*64;
+ dayDetail.querySelector('[data-day-close]').focus();
+}
+function closeDayDetail(){dayDetail.classList.remove('open');dayDetailDate=null;dayReturnFocus?.focus();}
+function updateDaySleep(type,raw){
+ if(!accounts.owner){window.dispatchEvent(new Event('my-week-login-request'));return false}
+ const value=raw.trim(),match=value.match(/^(\d{1,2}):?(\d{2})$/);
+ if(value&&(!match||+match[1]>23||+match[2]>59)){toast('시간을 07:30 또는 0730처럼 입력해주세요.');return false}
+ const ds=dayDetailDate,before=clone(state.sleepLogs[ds]||{});state.sleepLogs[ds]||={};
+ if(value)state.sleepLogs[ds][type]=pad(+match[1])+':'+pad(+match[2]);else delete state.sleepLogs[ds][type];
+ saveState('시간을 저장했어요.',()=>{state.sleepLogs[ds]=before;saveState('변경을 취소했어요.')});return true;
+}
+function renderDayDetail(){
+ const host=document.getElementById('dayDetail');if(!host||!dayDetailDate||!host.classList.contains('open'))return;
+ const ds=dayDetailDate,date=parseDate(ds),scroll=host.querySelector('.day-timeline-scroll').scrollTop;
+ document.getElementById('dayDetailTitle').textContent=`${date.getMonth()+1}/${date.getDate()}/${DOW_KO[date.getDay()]}`;
+ document.getElementById('dayDetailDate').value=ds;
+ host.querySelector('.day-detail-meta').innerHTML=`<div><span>트래커</span><div>${state.trackerDefs.map(t=>`<button type="button" class="tracker-toggle ${getTrackerLog(date,t.id)?'active':''}" data-day-tracker="${esc(t.id)}" aria-label="${esc(t.name)}" aria-pressed="${getTrackerLog(date,t.id)}">${trackerIcon(t)}</button>`).join('')}</div></div>`+['wake','bed'].map(type=>`<div><label for="day-${type}">${type==='wake'?'기상':'취침'}</label><input id="day-${type}" data-day-sleep="${type}" aria-label="상세 ${type==='wake'?'기상':'취침'} 시간" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${esc(sleepValue(date,type))}"><button type="button" class="day-delete" data-day-clear="${type}" aria-label="${type==='wake'?'기상':'취침'} 시간 삭제">−</button></div>`).join('');
+ const minutes=t=>{const [h,m]=t.split(':').map(Number);return h*60+m};
+ const entries=occurrences(date).map(o=>({kind:'event',id:o.event.id,title:o.event.title,start:o.event.startTime||'00:00',end:o.event.endTime||addMinutes(o.event.startTime||'00:00',30)}));
+ for(const slot of ['morning','afternoon','evening']){const work=workFor(date,slot);if(work){const times=(work.time||'09:00~18:00').split('~');entries.push({kind:'work',id:slot,title:work.title,start:work.start||times[0],end:work.end||times[1]});}}
+ for(const type of ['wake','bed']){const time=sleepValue(date,type);if(time)entries.push({kind:'sleep',id:type,title:type==='wake'?'기상':'취침',start:time,end:time});}
+ entries.forEach(e=>{e.from=minutes(e.start);e.to=Math.max(e.from+35,minutes(e.end)||e.from+35)});
+ entries.sort((a,b)=>a.from-b.from||b.to-a.to);
+ const lanes=[];for(const e of entries){let lane=lanes.findIndex(end=>end<=e.from);if(lane<0)lane=lanes.length;lanes[lane]=e.to;e.lane=lane;}
+ const count=Math.max(1,lanes.length);
+ host.querySelector('.day-timeline').innerHTML=Array.from({length:24},(_,hour)=>`<div class="day-hour" style="top:${hour*64}px"><span>${hour}시</span><button type="button" data-day-add="${hour}" aria-label="${hour}시 일정 추가">+</button></div>`).join('')+entries.map(e=>`<div class="day-time-card ${e.kind==='sleep'?'sleep-marker':''}" style="top:${Math.min(e.from/60*64,1500)}px;height:${Math.min(1536-Math.min(e.from/60*64,1500),Math.max(36,(e.to-e.from)/60*64))}px;left:calc(56px + (100% - 68px) * ${e.lane/count});width:calc((100% - 68px) / ${count} - 6px)"><button type="button" data-day-edit="${e.kind}" data-id="${esc(e.id)}"><strong>• ${esc(e.title)}</strong><span>${esc(e.start)}${e.kind==='sleep'?'':' ~ '+esc(e.end)}</span></button>${e.kind!=='work'?`<button type="button" class="day-delete" data-day-delete="${e.kind}" data-id="${esc(e.id)}" aria-label="${esc(e.title)} 삭제">−</button>`:''}</div>`).join('');
+ host.querySelector('.day-timeline-scroll').scrollTop=scroll;
+ host.querySelectorAll('[data-day-tracker]').forEach(b=>b.onclick=()=>toggleTracker(date,b.dataset.dayTracker));
+ host.querySelectorAll('[data-day-sleep]').forEach(input=>{input.onchange=()=>{if(!updateDaySleep(input.dataset.daySleep,input.value)){input.setAttribute('aria-invalid','true');input.focus()}};input.onkeydown=e=>{if(e.key==='Enter')input.blur()};});
+ host.querySelectorAll('[data-day-clear]').forEach(b=>b.onclick=()=>updateDaySleep(b.dataset.dayClear,''));
+ host.querySelectorAll('[data-day-add]').forEach(b=>b.onclick=()=>{openEventForm({date:ds,slot:getSlot(pad(b.dataset.dayAdd)+':00')});setTimeParts('eventStartHour','eventStartMinute',pad(b.dataset.dayAdd)+':00');setTimeParts('eventEndHour','eventEndMinute',pad(Math.min(23,+b.dataset.dayAdd+1))+':'+(+b.dataset.dayAdd===23?'59':'00'));});
+ host.querySelectorAll('[data-day-edit]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.dayEdit==='event')openEventForm({event:state.events.find(e=>e.id===b.dataset.id),occurrenceDate:ds});
+  if(b.dataset.dayEdit==='work')openWorkEditor(date,b.dataset.id);
+  if(b.dataset.dayEdit==='sleep')document.getElementById('day-'+b.dataset.id).focus();
+ });
+ host.querySelectorAll('[data-day-delete]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.dayDelete==='sleep'){updateDaySleep(b.dataset.id,'');return}
+  document.getElementById('eventId').value=b.dataset.id;document.getElementById('eventOriginalDate').value=ds;deleteEvent();
+ });
+}
+dayDetail.querySelectorAll('[data-day-close]').forEach(b=>b.onclick=closeDayDetail);
+document.getElementById('dayDetailSave').onclick=()=>{if(!dayDetail.querySelector('[aria-invalid=true]'))closeDayDetail();};
+document.getElementById('dayDetailDate').onchange=e=>{if(e.target.value){dayDetailDate=e.target.value;focusDate=parseDate(dayDetailDate);render()}};
+dayDetail.addEventListener('click',e=>{if(e.target===dayDetail)closeDayDetail()});
+dayDetail.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){e.stopImmediatePropagation();closeDayDetail();return}
+ if(e.key==='Tab'){const nodes=[...dayDetail.querySelectorAll('button,input')].filter(el=>!el.disabled&&el.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+});
+window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='planner-home')return;closeDayDetail();document.querySelectorAll('.modal-backdrop.open').forEach(el=>el.classList.remove('open'));focusDate=nowDate();viewMode='week';render();});
+
 // ---------- listeners ----------
 fillTimeSelects();
 document.querySelectorAll("[data-personal-view]").forEach(b=>b.onclick=()=>{viewMode=b.dataset.personalView;render()});
@@ -1588,7 +1649,7 @@ render();
  ['workStatusBtn','quickAddBtn'].forEach(id=>quick.append(document.getElementById(id)));
  document.getElementById('quickAddBtn').insertAdjacentHTML('afterbegin','<span>추가</span>');
  document.getElementById('workStatusBtn').innerHTML='<span>설정</span><svg class="header-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7h7m4 0h7M3 17h3m4 0h11"/><circle cx="12" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>';
- document.getElementById('settingsBtn').innerHTML='<span aria-hidden="true">⋯</span>';
+ document.getElementById('settingsBtn').innerHTML='<span class="settings-filled-icon" aria-hidden="true"></span>';
 })();
 </script><script type="module" src="./schedule-sync.js?v=20261016-persistent-auth"></script></body>
 </html>
