@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {reminderFixture} from './reminder-fixture.mjs';
 import {focusFixture} from './focus-fixture.mjs';
+import {projectGridFixture} from './project-grid-fixture.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const previewPort=Number(process.env.PREVIEW_PORT)||4175;
 const state=title=>({version:5,workConfig:{weekdays:[],label:'회사',start:'09:00',end:'18:00'},workExceptions:{},workOverrides:{},categories:[{id:'personal',name:'개인',color:'#84d7dc'}],trackerDefs:[{id:"coffee",name:"커피",emoji:"☕"},{id:"yoga_tracker",name:"명상",emoji:"🧘"},{id:"bell",name:"배변",emoji:"💩"}],trackerLogs:{"2026-10-16":{coffee:true,bell:true}},sleepLogs:{},events:[{id:'fixture',title,startDate:'2026-10-08',startTime:'10:00',endTime:'11:00',category:'personal',notes:'',active:true,recurrence:{type:'none'},exdates:[]}]});
@@ -11,6 +12,7 @@ let revision=1;
 const rows=new Map(['A','B'].map(id=>[id,{state:{mySpendingV1:{schema:1,revision:'ledger',data:{fixture:'preserve ledger'}},myWeekV1:{schema:1,revision:'schedule',data:state(id+' 테스트 일정')}},updated_at:String(revision)}]));
 if(process.env.REMINDER_QA==='1')for(const row of rows.values())row.state.myWorkV1={schema:1,revision:'reminder-fixture',data:reminderFixture()};
 if(process.env.FOCUS_QA==='1')rows.get('A').state.myWorkV1={schema:1,revision:'focus-fixture',data:focusFixture()};
+if(process.env.PROJECT_QA==='1')rows.get('A').state.myWorkV1={schema:1,revision:'project-grid-fixture',data:projectGridFixture()};
 const sdk=`export function createClient(url,key,options){
  let session=JSON.parse(options.auth.storage.getItem('fixture-session')||'null'),listener;
  return {auth:{onAuthStateChange(fn){listener=fn;return{data:{subscription:{unsubscribe(){}}}}},async getSession(){return{data:{session}}},async getUser(){return{data:{user:session?.user}}},async signInWithPassword({email}){session={user:{id:email.startsWith('a')?'A':'B',email}};options.auth.storage.setItem('fixture-session',JSON.stringify(session));listener('SIGNED_IN',session);return{data:{user:session.user,session}}},async signOut(){session=null;options.auth.storage.removeItem('fixture-session');listener('SIGNED_OUT',null);return{}},stopAutoRefresh(){}},channel(){return{on(){return this},subscribe(){return this}}},async removeChannel(){},from(){let op='read',payload,filters={};const q={select(){return q},eq(k,v){filters[k]=v;return q},insert(v){op='insert';payload=v;return q},update(v){op='update';payload=v;return q},async maybeSingle(){return fetch('/fixture-api',{method:'POST',body:JSON.stringify({op,payload,filters,user:session?.user.id})}).then(r=>r.json())}};return q}}

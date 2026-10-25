@@ -1,30 +1,30 @@
-.project-overview{padding:20px 0 0}
+.project-overview{min-width:0}
 .project-heading{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
-.project-heading [data-dropdown]{position:relative}
-.project-heading .screen-toggle{padding:0;font-size:14px;color:#e2e5ec;font-weight:600}
-.project-heading .surface-menu{left:0;right:auto}
-.project-heading h2{color:#a6afbf;font-weight:400}
-.project-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.project-list-toolbar h2{font-size:14px;line-height:22px;font-weight:600;margin:0}
+.project-heading h2{color:var(--muted);font-weight:400}
+.project-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.project-list-toolbar h2{font-size:14px;line-height:22px;font-weight:500;margin:0}
 .project-list-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .project-list-actions [data-dropdown]{position:relative}
 .project-list-actions .surface-menu{right:0;min-width:160px}
 .project-list-actions .menu-option{display:flex;justify-content:space-between;gap:16px;width:100%}
 .project-list-actions .menu-option[aria-checked=true]::after{content:'✓'}
 .project-list-actions .menu-option[aria-checked=mixed]::after{content:'−'}
-.project-overview .project-grid{display:flex;flex-direction:column;gap:8px}
-.project-overview .project-overview-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;min-height:64px;padding:12px 16px;background:#2c313b;border:0;border-radius:8px;width:100%;text-align:left}
-.project-overview-card .project-card-body{min-width:0}
-.project-overview-card h2{font-size:16px;line-height:1.5;font-weight:500;margin:0;overflow-wrap:anywhere}
-.project-card-meta{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;max-width:180px}
-.project-state{display:flex;align-items:center;gap:6px;font-size:12px;color:#8cd1d5;white-space:nowrap}
-.project-state i{width:5px;height:5px;background:currentColor;border-radius:50%;flex-shrink:0}
-.project-period{display:block;font-size:12px;line-height:1.6;color:#d0d3da;margin-top:3px}
-.project-stage-badge{font-size:11px;line-height:18px;padding:3px 8px;border-radius:5px;background:#485c66;color:#a6d9dc;max-width:130px;overflow-wrap:anywhere}
-.project-overview .is-paused,.project-overview .is-cancelled{background:#2d323c;color:#b5b9c4}
-.project-overview .is-paused .project-state{color:#b5b9c4}
-.project-overview .is-done .project-state{color:#c0c5d0}
-.project-overview .is-cancelled .project-state{color:#f29b9b}
+.project-overview .project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.project-grid>.list-empty{grid-column:1/-1}
+.project-overview .project-overview-card{display:flex;align-items:flex-start;min-width:0;min-height:148px;padding:20px;background:var(--panel);border:1px solid transparent;border-radius:8px;width:100%;text-align:left}
+.project-overview-card .project-card-body{display:block;width:100%;min-width:0}
+.project-overview-card h2{font-size:18px;line-height:1.5;font-weight:500;margin:0;overflow-wrap:anywhere;color:var(--text)}
+.project-current-works{display:grid;gap:7px;margin-top:16px;color:var(--muted);font-size:14px;line-height:1.5}
+.project-current-work{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.project-no-work,.project-more-works{font-size:12px;color:var(--muted)}
+.project-overview .is-paused h2,.project-overview .is-done h2,.project-overview .is-cancelled h2{color:var(--muted)}
 .project-overview .is-cancelled h2{text-decoration:line-through}
-.project-overview-card:hover{filter:brightness(1.08)}
-@media(max-width:720px){.project-overview{padding-top:16px}.project-list-toolbar{gap:8px}.project-heading{gap:3px}.project-heading h2,.project-heading .screen-toggle{font-size:12px}.project-list-actions{gap:0}.project-overview .project-overview-card{padding:12px;gap:8px}.project-card-meta{max-width:92px;gap:6px;flex-direction:column;align-items:flex-end}.project-stage-badge{max-width:92px}.project-overview-card h2{font-size:15px}}
+.project-overview .project-overview-card:hover{background:var(--card);border-color:var(--line);filter:none}
+@media(max-width:720px){
+ .project-overview .project-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+ .project-overview .project-overview-card{padding:18px;min-height:126px}
+ .project-overview-card h2{font-size:16px}
+ .project-current-works{margin-top:12px}
+ .project-list-toolbar{gap:8px}
+ .project-list-actions{gap:0}
+}

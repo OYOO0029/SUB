@@ -1,5 +1,9 @@
 export const PROJECT_STATES=[['active','진행중'],['done','완료'],['paused','보류'],['cancelled','취소']];
 export function projectState(p){return p.lifecycle||({'완료':'done','종료':'done','취소':'cancelled','탈락':'cancelled','보류':'paused'}[p.stage])||'active';}
+export function projectActiveWorks(data,projectId){
+ const activeWorkIds=new Set(data.tasks.filter(t=>!t.deletedAt&&t.status==='todo'&&t.workId).map(t=>t.workId));
+ return data.works.filter(w=>!w.deletedAt&&w.projectId===projectId&&activeWorkIds.has(w.id));
+}
 export function projectList(projects,states=['active'],sort='added',direction='asc'){
  const factor=direction==='desc'?-1:1;
  return projects.map((p,i)=>({p,i})).filter(({p})=>!p.deletedAt&&states.includes(projectState(p))).sort((a,b)=>{

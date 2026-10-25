@@ -3,7 +3,7 @@ import {appStorage} from '../schedule-storage.mjs';
 import {createWorkflowUI} from './workflow-ui.js?v=20261018-workflow-3';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
 import {createItem} from './editing.js?v=20261018-workflow';
-import {PROJECT_STATES,projectState,projectList} from './project-view.js';
+import {PROJECT_STATES,projectState,projectList,projectActiveWorks} from './project-view.js?v=20261026-project-grid';
 import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
 import {createDetailUI} from './detail-ui.js?v=20261018-workflow';
 import {activeChecks} from './editing.js?v=20261018-workflow';
@@ -109,10 +109,8 @@ function workCard(w){
 function worksScreen(){const list=data.works.filter(w=>!w.deletedAt&&(!ui.project||(ui.project==='standalone'?!w.projectId:w.projectId===ui.project))&&(!ui.work||w.id===ui.work)).filter(w=>[w.title,w.notes,...w.tags].join(' ').toLowerCase().includes(ui.search.toLowerCase()));return `<div class="work-project-groups">${projectGroups(list,workCard,'work-grid',w=>data.projects.find(p=>p.id===w.projectId))||'<p class="list-empty">표시할 업무가 없습니다.</p>'}</div>${button(icon('plus'),'add-work','aria-label="업무 추가" title="업무 추가"','quick-add')}`;}
 function projectCard(p){
  const state=projectState(p),label=PROJECT_STATES.find(([v])=>v===state)[1];
- const showState=ui.projectStates.length>1;
- const stage=p.stage&&p.stage.replace(/\s/g,'')!==label&&!(state==='active'&&p.stage==='진행')?p.stage:'';
- const period=[p.start,p.end!==p.start?p.end:null].filter(Boolean).map(d=>d.replaceAll('-','.')).join(' ~ ');
- return `<button class="project-card project-overview-card is-${state}" data-action="detail" data-type="project" data-id="${esc(p.id)}"><span class="project-card-body"><h2>${esc(p.title)}</h2>${flow.summary(p)}</span>${showState||stage?`<span class="project-card-meta">${showState?`<span class="project-state"><i></i>${label}</span>`:''}${stage?`<span class="project-stage-badge">${esc(stage)}</span>`:''}</span>`:''}</button>`;
+ const works=projectActiveWorks(data,p.id),visible=works.slice(0,2),more=works.length-visible.length;
+ return `<button class="project-card project-overview-card is-${state}" data-action="detail" data-type="project" data-id="${esc(p.id)}" aria-label="${esc(p.title)} · ${label} · ${works.length?'진행 중인 업무: '+esc(works.map(w=>w.title).join(', ')):'진행 중인 업무 없음'}"><span class="project-card-body"><h2>${esc(p.title)}</h2><span class="project-current-works">${visible.map(w=>`<span class="project-current-work" title="${esc(w.title)}">${esc(w.title)}</span>`).join('')||'<span class="project-no-work">진행 중인 업무 없음</span>'}${more?`<span class="project-more-works">외 ${more}개</span>`:''}</span></span></button>`;
 }
 function projectsScreen(){
  const ps=projectList(data.projects,ui.projectStates,ui.projectSort,ui.projectDirection);
