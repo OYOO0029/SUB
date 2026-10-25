@@ -12,7 +12,7 @@ export function startWorkCloud({getData,replaceData,resetEditors,notify,download
   get storageKey(){return workAccount.storageKey;},
   setAccount(scope){const empty=workAccount.deactivate();resetEditors();replaceData(empty);if(scope){try{replaceData(workAccount.activate(scope));}catch(error){replaceData(workAccount.deactivate());throw error;}}},
   apply(value){const next=workAccount.write(value);replaceData(next);},
-  busy:()=>!!document.querySelector('#detail[open],#editor[open],#property-editor[open],[data-quick-task],[data-check-form]:not([hidden])')||document.body.classList.contains('task-dragging')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)&&!document.activeElement?.closest('#cloud-dialog'),
+  busy:()=>!!document.querySelector('#detail[open],#editor[open],#property-editor[open],[data-quick-task],[data-focus-add],[data-focus-plan-form],[data-focus-timer-form],[data-check-form]:not([hidden])')||document.body.classList.contains('task-dragging')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)&&!document.activeElement?.closest('#cloud-dialog'),
   isPristine:()=>!workAccount.raw(),hasLegacy:()=>false,
   export:()=>download(JSON.stringify(getData(),null,2),'what-to-do-work-backup.json'),download
  };

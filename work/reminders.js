@@ -29,7 +29,7 @@ export function createReminderCenter({getData,getScope=()=> 'preview',isReady=()
   document.body.append(panel);
   let scope=getScope(),signature='',items=[];
   const bell=()=>document.querySelector('[data-reminder-bell]');
-  const busy=()=>document.hidden||window.plannerInactive||!!document.querySelector('dialog[open],[data-menu-panel]:not([hidden]),[data-quick-task],[data-check-form]:not([hidden])')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)||document.body.classList.contains('task-dragging');
+  const busy=()=>document.hidden||window.plannerInactive||!!document.querySelector('dialog[open],[data-menu-panel]:not([hidden]),[data-quick-task],[data-focus-add],[data-focus-plan-form],[data-focus-timer-form],[data-check-form]:not([hidden])')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)||document.body.classList.contains('task-dragging');
   function close(restore=false){panel.hidden=true;bell()?.setAttribute('aria-expanded','false');if(restore)bell()?.focus();}
   function position(){
     const anchor=bell();if(!anchor||panel.hidden)return;

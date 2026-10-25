@@ -1,0 +1,86 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {createFocusTimer} from '../work/focus-timer.js';
+import {timelineRows,koreaClock} from '../work/focus-timeline.js';
+import {createFocusView} from '../work/focus-view.js';
+import {createItem} from '../work/editing.js';
+import {emptyWorkState} from '../work/work-account.mjs';
+import {today,taskContext} from '../work/model.js';
+
+test('timer uses full duration, elapsed wall clock, scoped resume and no task-data writes',()=>{
+  const saved=new Map(),storage={getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v)};
+  let owner='a',now=100000;const options={storage,getScope:()=>owner,now:()=>now};
+  const timer=createFocusTimer(options);
+  assert.equal(timer.read().ratio,1);assert.equal(timer.read().clock,'60:00');
+  timer.change('select','task-a');timer.change('start');now+=1800000;
+  assert.equal(timer.read().ratio,.5);assert.equal(timer.read().clock,'30:00');
+  const refreshed=createFocusTimer(options);assert.equal(refreshed.read().clock,'30:00');assert.equal(refreshed.read().taskId,'task-a');
+  refreshed.change('pause');now+=10000;assert.equal(refreshed.read().clock,'30:00');
+  refreshed.change('minutes',37);assert.equal(refreshed.read().ratio,1);refreshed.change('start');now+=3700000;
+  assert.equal(refreshed.tick(),true);assert.equal(refreshed.tick(),false);assert.equal(refreshed.read().clock,'00:00');
+  refreshed.change('reset');assert.equal(refreshed.read().clock,'37:00');
+  assert.throws(()=>refreshed.change('minutes',0));assert.throws(()=>refreshed.change('minutes',1.5));
+  owner='b';assert.equal(refreshed.read().clock,'60:00');assert.equal(refreshed.read().taskId,null);
+  owner=null;assert.equal(refreshed.change('start'),false);assert.equal(refreshed.read().running,false);
+  owner='a';assert.equal(refreshed.read().clock,'37:00');assert.equal(saved.size,1);
+  assert([...saved.keys()].every(k=>k.startsWith('my-work-focus-timer-v1:')));
+});
+
+test('timeline covers 08–19 without duplicated ticks, retains exact legacy minutes and overlaps',()=>{
+  const tasks=[{id:'a',blocks:[{date:'2026-10-26',start:'09:03',end:'10:17'}]},{id:'b',blocks:[{date:'2026-10-26',start:'10:00',end:'11:00'}]}];
+  const before=structuredClone(tasks),rows=timelineRows(tasks,'2026-10-26',860);
+  assert.equal(rows[0].start,480);assert.equal(rows.at(-1).end,1140);
+  const ticks=rows.flatMap(r=>Array.from({length:(r.end-r.start)/10},(_,i)=>r.start+i*10));
+  assert.equal(ticks.length,66);assert.equal(new Set(ticks).size,66);
+  assert.equal(rows.find(r=>r.type==='events').events.length,2);
+  assert.deepEqual(tasks,before);
+  assert.deepEqual(rows.find(r=>r.start===860),{type:'gap',start:860,end:870});
+  assert.equal(koreaClock(new Date('2026-10-25T15:00:00Z')),0);
+});
+
+test('focus UI connects existing tasks, keeps timer and drafts, and saves only explicit 10-minute plans',()=>{
+  const dom=new JSDOM('<div id="app"></div>',{pretendToBeVisual:true,url:'https://fixture.invalid'});
+  const keys=['window','document','FormData'],originals=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
+  for(const key of keys)Object.defineProperty(globalThis,key,{value:dom.window[key],configurable:true,writable:true});
+  let view;
+  try{
+    const data=emptyWorkState(),date=today(),task=createItem(data,'task','오늘 수정할 업무',{date});
+    task.due=date;task.dueTime='16:00';task.checks.push({id:'check',title:'상세에서만 확인',done:false});
+    const p=createItem(data,'project','프로젝트'),w=createItem(data,'work','업무 묶음',{projectId:p.id});task.workId=w.id;
+    const second=createItem(data,'task','마감만 오늘인 일',{date:null});second.due=date;
+    const originalDue=task.due,originalWork=task.workId;
+    const ui={tab:'tasks',view:'list',date,status:'active'};
+    const esc=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+    let saves=0,owner='qa-account';
+    const render=()=>document.querySelector('#app').innerHTML=view.screen();
+    view=createFocusView({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',flow:{row:t=>esc(t.title)},passes:()=>true,render,persist(){saves++;render()},notify(){},storage:dom.window.localStorage});
+    const click=s=>{const e=document.querySelector(s);assert(e,'Missing '+s);e.click()};
+    const submit=s=>document.querySelector(s).dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+    render();assert.equal(document.querySelectorAll('.focus-task').length,2);
+    assert.equal(document.querySelector('.focus-context').textContent,'프로젝트 > 업무 묶음');
+    assert.equal(document.querySelector('.focus-due').textContent,'16:00까지');
+    assert(!document.querySelector('.focus-task').textContent.includes('상세에서만 확인'));
+    assert.equal(document.querySelector('.focus-progress').getAttribute('stroke-dasharray'),'100 100');
+    click(`[data-focus="select"][data-id="${task.id}"]`);click('[data-focus="start"]');
+    const savedTimer=dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account');
+    ui.view='timeline';render();assert.equal(document.querySelectorAll('[data-tick]').length,67);
+    const history=document.querySelector('.focus-history');if(history)assert.equal(history.open,false);
+    click(`[data-focus="plan"][data-id="${task.id}"]`);
+    const originalPlan=JSON.stringify(task.plans);click('[data-focus="block"][data-minute]');click('[data-focus="close-picker"]');
+    assert.equal(task.blocks.length,0);assert.equal(JSON.stringify(task.plans),originalPlan);
+    click(`[data-focus="plan"][data-id="${task.id}"]`);
+    while(document.querySelector('[data-focus="block-prev"]:not([disabled])'))click('[data-focus="block-prev"]');
+    click('[data-minute="480"]');assert.match(document.querySelector('.focus-range').textContent,/08:00–08:10 · 10분/);
+    click('[data-minute="510"]');submit('[data-focus-plan-form]');
+    assert.equal(task.blocks[0].start,'08:00');assert.equal(task.blocks[0].end,'08:40');assert.equal(saves,1);
+    assert.equal(task.due,originalDue);assert.equal(task.workId,originalWork);assert.equal(task.checks.length,1);
+    assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
+    click('[data-focus="add"]');const input=document.querySelector('[data-focus-add] input');input.value='추가 중인 초안';input.dispatchEvent(new dom.window.Event('input',{bubbles:true}));render();
+    assert.equal(document.querySelector('[data-focus-add] input').value,'추가 중인 초안');assert(view.busy());
+    submit('[data-focus-add]');assert.equal(data.tasks.length,3);assert.equal(saves,2);
+    assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
+    assert.equal(taskContext(data,task).project.id,p.id);
+    owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.focus-clock').textContent,'60:00');assert.equal(document.querySelector('.focus-linked').hidden,true);
+  }finally{view?.destroy();dom.window.close();for(const key of keys){const d=originals.get(key);if(d)Object.defineProperty(globalThis,key,d);else delete globalThis[key];}}
+});

@@ -1,0 +1,6 @@
+// Synthetic records for the opt-in local focus preview only.
+export function focusFixture(){
+  const date='2026-10-26';
+  const task=(id,title,due,dueTime,start,end)=>({id,title,workId:'fixture-work',projectId:null,status:'todo',tags:[],people:[],notes:'검수용 예시 메모',deletedAt:null,due,dueTime,remindFrom:null,checks:[{id:'check-'+id,title:'상세보기에서 확인',done:false}],plans:[{id:'plan-'+id,start:date,end:due||date,state:'active'}],blocks:start?[{id:'block-'+id,date,start,end}]:[],completedAt:null});
+  return {schemaVersion:1,projects:[{id:'fixture-project',title:'프로젝트 예시',lifecycle:'active',stages:['기획','준비','실행','검토'],stage:'실행',start:null,end:null,notes:'',tags:[],people:[]}],works:[{id:'fixture-work',title:'화면 개선',projectId:'fixture-project',stage:'실행',due:null,notes:'',tags:[],people:[]}],tasks:[task('sent','수정 화면 전달하기',date,'16:00','13:00','13:40'),task('review','추가 수정사항 확인하기',date,'18:00','14:00','14:40'),task('files','자주검사 현황 정리하기','2026-10-28',''),task('draft','디자인 수정 시안 만들기','2026-10-30','','15:20','16:10'),task('feedback','긴 제목도 읽기 편하게 전달받은 수정 의견을 확인하고 관련 자료 정리하기',date,'17:00'),task('docs','현장확인 서류 준비하기','2026-11-03','','16:30','17:10')],personal:[],tracker:{}};
+}
