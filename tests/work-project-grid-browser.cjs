@@ -17,7 +17,7 @@ const root=path.resolve(__dirname,'..'),port=4197,origin=`http://127.0.0.1:${por
   const screenshot=async name=>{if(output)await page.screenshot({path:path.join(output,name+'.png'),fullPage:true})};
   const navigate=async label=>page.getByRole('button',{name:label,exact:true}).click();
   const geometry=()=>page.locator('.workspace-content').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {left:r.left+parseFloat(s.paddingLeft),right:r.right-parseFloat(s.paddingRight),width:document.querySelector('.main').getBoundingClientRect().width}});
-  const baseline=await geometry();assert.equal(baseline.width,1120);
+  const baseline=await geometry();assert.equal(baseline.width,768);
   await navigate('프로젝트');assert.deepEqual(await geometry(),baseline);assert.equal(await page.locator('.project-overview-card').count(),4);
   const first=page.locator('.project-overview-card').first();assert.equal(await first.locator('.project-current-work').count(),2);assert.equal(await first.locator('.project-more-works').textContent(),'외 1개');
   assert.equal(await first.locator('.project-next,.project-count,.project-card-meta').count(),0);
