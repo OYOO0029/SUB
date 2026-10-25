@@ -1,7 +1,10 @@
-.project-overview{min-width:0}
+#app:has(.project-overview){height:100dvh;min-height:0}
+#app:has(.project-overview)>.main{min-height:0}
+.new-workspace:has(.project-overview)>.workspace-content{display:flex;min-height:0}
+.project-overview{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0}
 .project-heading{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
 .project-heading h2{color:var(--muted);font-weight:400}
-.project-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.project-list-toolbar{display:flex;flex-shrink:0;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 .project-list-toolbar h2{font-size:14px;line-height:22px;font-weight:500;margin:0}
 .project-list-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .project-list-actions [data-dropdown]{position:relative}
@@ -9,7 +12,7 @@
 .project-list-actions .menu-option{display:flex;justify-content:space-between;gap:16px;width:100%}
 .project-list-actions .menu-option[aria-checked=true]::after{content:'✓'}
 .project-list-actions .menu-option[aria-checked=mixed]::after{content:'−'}
-.project-overview .project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.project-overview .project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;align-content:start;flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--subtle) transparent}
 .project-grid>.list-empty{grid-column:1/-1}
 .project-overview .project-overview-card{display:flex;align-items:flex-start;min-width:0;min-height:148px;padding:20px;background:var(--panel);border:1px solid transparent;border-radius:8px;width:100%;text-align:left}
 .project-overview-card .project-card-body{display:block;width:100%;min-width:0}

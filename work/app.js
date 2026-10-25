@@ -33,6 +33,7 @@ const passes=t=>taskFilter(data,t,ui);
 const findTask=id=>data.tasks.find(t=>t.id===id);
 const flow=createWorkflowUI({getData:()=>data,ui,esc,icon,button,passes});
 let toastTimer,undoFn=null;
+let projectListScroll={owner:null,top:0};
 const focus=createFocusView({getData:()=>data,getScope:()=>workAccount.owner,ui,esc,icon,flow,passes,render,persist,notify:toast,storage:appStorage,filters:()=>workspaceActions(true)});
 function toast(message,undo=null){clearTimeout(toastTimer);undoFn=undo;$('#toast').innerHTML=`${icon('check')}<span>${esc(message)}</span>${undo?button('되돌리기','undo','','text-button'):''}`;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),6000);}
 function persist(message,undo,keepMenus=false){const ok=saveState(data);ui.saveWarning=ok?'':'기기에 저장하지 못했습니다. 내보내기로 현재 내용을 보관해 주세요.';render({keepMenus});if(ui.detail&&$('#detail').open)renderDetail();toast(ok?message:'저장 공간을 확인해 주세요. 입력 내용은 현재 창에 유지됩니다.',undo);}
@@ -151,11 +152,15 @@ function bodyScreen(){if(!workAccount.owner)return '<div class="list-empty">로�
 function updateCountdown(){const el=$('#leave-count');if(el)el.textContent=countdown();}
 function render({keepMenus=false}={}){
  focus.rollover();
+ const projectGrid=$('.project-overview .project-grid');
+ if(projectListScroll.owner!==workAccount.owner)projectListScroll={owner:workAccount.owner,top:0};
+ else if(projectGrid)projectListScroll.top=projectGrid.scrollTop;
  const folds=new Map([...document.querySelectorAll('details[data-fold]')].map(d=>[d.dataset.fold,d.open]));
   const menus=keepMenus?[...document.querySelectorAll('[data-menu-panel]:not([hidden])')].map(el=>el.id):[];
   const filtered=ui.project||ui.work||ui.status!=='active'||ui.group!=='none';
   $('#app').innerHTML=`<header class="app-header new-header ${ui.searchOpen&&ui.mode==='work'?'search-expanded':''}"><div class="header-inner"><div class="header-start"><div class="mode-switch planner-switch" role="group" aria-label="개인 업무 전환">${button(icon('home'),'mode',`data-value="personal" aria-label="개인" title="개인" aria-pressed="${ui.mode==='personal'}"`,'mode planner-mode'+(ui.mode==='personal'?' active':''))}${button(icon('briefcase'),'mode',`data-value="work" aria-label="업무" title="업무" aria-pressed="${ui.mode==='work'}"`,'mode planner-mode'+(ui.mode==='work'?' active':''))}</div>${ui.mode==='work'&&ui.date===today()?`<span class="leave-countdown">퇴근까지 <strong id="leave-count">${countdown()}</strong></span>`:''}</div><div class="header-actions">${ui.mode==='work'?searchPanel()+`<button type="button" class="icon-button reminder-bell" data-reminder-bell aria-label="리마인드" title="리마인드" aria-haspopup="dialog" aria-controls="reminder-popover" aria-expanded="false">${icon('bell')}<span class="reminder-count" data-reminder-count hidden></span></button>`:''}${button(icon('users'),'cloud-open','aria-label="계정 · 동기화" title="계정 · 동기화"','icon-button')}${button(icon('more'),'settings','aria-label="설정" title="설정"','icon-button')}</div></div></header><main class="main"><div id="work-account-notice"></div>${ui.saveWarning?`<div class="save-warning" role="alert">${esc(ui.saveWarning)} ${button('다시 저장','retry-save','','text-button')} ${button('내보내기','export','','text-button')}</div>`:''}<div class="workspace new-workspace ${ui.tab==='projects'?'projects-workspace':''}">${flow.nav()}${ui.mode==='work'&&ui.tab==='calendar'?`<nav class="workspace-nav" aria-label="업무 메뉴">${viewButtons()}<div class="date-navigation">${button(icon('left'),'prev','aria-label="이전 날짜"','icon-button')}<label class="date-label" title="${fmt(ui.date,{year:'numeric',month:'long',day:'numeric',weekday:'short'})}">${ui.view==='month'?fmt(ui.date,{year:'numeric',month:'long'}):short(ui.date)}<input id="date-picker" type="date" value="${ui.date}" aria-label="기준 날짜 선택"></label>${button(icon('chevron'),'next','aria-label="다음 날짜"','icon-button')}${ui.date!==today()?button('오늘','today','','today-button'):''}</div>${workspaceActions()}</nav>`:''}<div class="workspace-content">${bodyScreen()}</div></div></main>`;
  document.querySelectorAll('details[data-fold]').forEach(d=>{if(folds.has(d.dataset.fold))d.open=folds.get(d.dataset.fold);});
+ const restoredProjectGrid=$('.project-overview .project-grid');if(restoredProjectGrid)restoredProjectGrid.scrollTop=projectListScroll.top;
   requestAnimationFrame(fitMonthCalendar);
   if(menus.length)surfaces.restore(menus);reminders.refresh();window.dispatchEvent(new Event('my-week-render'));
 }

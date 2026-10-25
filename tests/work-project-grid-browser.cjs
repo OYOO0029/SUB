@@ -30,6 +30,19 @@ const root=path.resolve(__dirname,'..'),port=4197,origin=`http://127.0.0.1:${por
   await page.locator('.project-overview-card[data-id="site"]').click();await page.locator('[data-fold="group-site-check"]>summary').click();await page.locator('[data-fold="done-site-check"]>summary').click();await page.locator('[data-complete="task-site-check"]').uncheck();await page.getByRole('button',{name:'‹ 프로젝트 목록',exact:true}).click();
   assert.equal(await page.locator('.project-overview-card[data-id="site"] .project-current-work').count(),1);
   await page.getByRole('button',{name:'프로젝트 상태 필터',exact:true}).click();await page.locator('[data-action="project-filter"][data-value="all"]').click();assert.equal(await page.locator('.project-overview-card').count(),6);await page.keyboard.press('Escape');
+  for(const width of [1280,390]){
+   await page.setViewportSize({width,height:560});
+   const grid=page.locator('.project-overview .project-grid'),toolbar=page.locator('.project-list-toolbar'),before=await toolbar.boundingBox();
+   assert(await grid.evaluate(el=>el.scrollHeight>el.clientHeight),'list should overflow inside content');
+   await grid.hover();await page.mouse.wheel(0,600);await page.waitForFunction(()=>document.querySelector('.project-grid').scrollTop>0);
+   assert.equal((await toolbar.boundingBox()).y,before.y,'toolbar moves with cards');
+   assert(await page.evaluate(()=>window.scrollY===0&&document.documentElement.scrollHeight<=innerHeight+1),'outer page scrolls');
+   await page.locator('.project-overview-card').last().focus();
+   const scrollTop=await grid.evaluate(el=>el.scrollTop);
+   await page.keyboard.press('Enter');await page.locator('.flow-project-page').waitFor();await page.getByRole('button',{name:'‹ 프로젝트 목록',exact:true}).click();
+   assert(Math.abs(await grid.evaluate(el=>el.scrollTop)-scrollTop)<1,'returning from detail resets list scroll');
+   await screenshot('project-scroll-'+(width===1280?'desktop':'mobile'));
+  }
   for(const width of [1280,768,390,320]){
    await page.setViewportSize({width,height:900});await navigate('오늘 할 일');const expected=await geometry();
    await navigate('프로젝트');assert.deepEqual(await geometry(),expected);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -40,6 +53,6 @@ const root=path.resolve(__dirname,'..'),port=4197,origin=`http://127.0.0.1:${por
    await page.waitForTimeout(100);assert(await page.locator('.calendar-week').count()>=5);
    assert(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),'monthly view overflow at '+width);
   }
-  assert.deepEqual(errors,[]);console.log('PASS: shared content geometry, two-column cards, current work groups, completion refresh, project detail/filter, 320–1280px, and monthly fit.');
+  assert.deepEqual(errors,[]);console.log('PASS: shared content geometry, two-column cards, current work groups, completion refresh, internal scroll/fixed toolbar/return position, project detail/filter, 320–1280px, and monthly fit.');
  }finally{await browser?.close();server.kill();}
 })().catch(error=>{console.error(error);process.exitCode=1});
