@@ -70,3 +70,10 @@ html{scrollbar-gutter:stable}
  .tt-table .tt-c-focus{width:80px}
  .focus-event-content{grid-template-columns:minmax(0,1fr) 44px}
 }
+
+/* List alignment contract: centered headers and short values, left-aligned names. */
+#app .tt-table th{text-align:center;vertical-align:middle}
+#app .tt-column{justify-content:center;margin-inline:auto}
+#app .tt-table td{vertical-align:middle}
+#app .tt-table .tt-due,#app .tt-table td:first-child,#app .tt-table td:last-child{text-align:center}
+#app .pl-table th{text-align:center;vertical-align:middle}

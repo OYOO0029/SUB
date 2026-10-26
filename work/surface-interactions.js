@@ -16,6 +16,11 @@ export function installSurfaceInteractions(){
     const panel=panelFor(button);if(!panel)return;
     closeAll(panel);panel.hidden=false;button.setAttribute('aria-expanded','true');
     panel.classList.remove('opens-left');panel.style.removeProperty('--menu-shift-y');
+    if(button.closest('.pl-table')){
+      const anchor=button.getBoundingClientRect();panel.style.position='fixed';panel.style.transform='none';panel.style.right='auto';panel.style.maxHeight=Math.max(100,innerHeight-24)+'px';panel.style.overflowY='auto';
+      panel.style.left=Math.max(12,Math.min(anchor.left,innerWidth-panel.offsetWidth-12))+'px';panel.style.top=Math.max(12,Math.min(anchor.bottom+6,innerHeight-panel.offsetHeight-12))+'px';
+      if(focus)entries(panel)[0]?.focus();return;
+    }
     const rect=panel.getBoundingClientRect();
     if(panel.hasAttribute('data-submenu')&&rect.right>innerWidth-12)panel.classList.add('opens-left');
     const after=panel.getBoundingClientRect();
@@ -49,6 +54,7 @@ export function installSurfaceInteractions(){
   },true);
   document.addEventListener('focusin',event=>{if(!event.target.closest('[data-dropdown]'))closeAll();});
   window.addEventListener('resize',()=>closeAll());
+  document.addEventListener('scroll',event=>{if(event.target.matches?.('.project-list-scroll'))closeAll();},true);
 
   let drag=null,suppressUntil=0,suppressedStrip=null;
   const finish=()=>{

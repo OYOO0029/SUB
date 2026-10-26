@@ -1,4 +1,4 @@
-import {createTodayTable} from './today-table.js?v=20261027-remaining-1';
+import {createTodayTable} from './today-table.js?v=20261026-project-list-1';
 import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261018-workflow';
 import {executionSections,unfinished} from './workflow.js?v=20261018-workflow';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261018-workflow';
@@ -100,5 +100,5 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   const interval=setInterval(updateTimer,1000);
   window.addEventListener('storage',event=>{if(event.key?.startsWith('my-work-focus-timer-v1:')){timer.reload();updateTimer();}});
   function rollover(){const next=today();if(next!==lastDay){if(ui.tab==='tasks'&&ui.date===lastDay)ui.date=next;lastDay=next;}}
-  return {screen,overlays:()=>ui.tab!=='tasks'?table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
+  return {screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
 }

@@ -53,7 +53,7 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     const ui={tab:'tasks',view:'list',date,status:'active'};
     const esc=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
     let saves=0,owner='qa-account';
-    const render=()=>document.querySelector('#app').innerHTML=view.screen();
+    const render=()=>document.querySelector('#app').innerHTML=ui.tab==='tasks'?view.screen():view.overlays();
     view=createFocusView({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',flow:{row:t=>esc(t.title)},passes:()=>true,render,persist(){saves++;render()},notify(){},storage:dom.window.localStorage});
     const click=s=>{const e=document.querySelector(s);assert(e,'Missing '+s);e.click()};
     const submit=s=>document.querySelector(s).dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
@@ -66,9 +66,9 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     const savedTimer=dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account');
     click('[data-tt="close-panel"]');assert(document.querySelector('.tt-mini'));
     ui.tab='projects';document.querySelector('#app').innerHTML=view.overlays();assert(document.querySelector('.tt-mini'));assert(!document.querySelector('.tt-panel'));
-    click('.tt-mini-title');assert.equal(ui.tab,'tasks');assert(document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));
+    click('.tt-mini-title');assert.equal(ui.tab,'projects');assert(document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
-    ui.view='timeline';render();assert.equal(document.querySelectorAll('[data-tick]').length,67);
+    click('[data-tt="close-panel"]');ui.tab='tasks';ui.view='timeline';render();click(`[data-tt="focus"][data-id="${task.id}"]`);assert.equal(document.querySelectorAll('[data-tick]').length,67);
     assert(!document.querySelector('.focus-ring'));assert(document.querySelector('.tt-panel'));
     const history=document.querySelector('.focus-history');if(history)assert.equal(history.open,false);
     click(`[data-focus="plan"][data-id="${task.id}"]`);
