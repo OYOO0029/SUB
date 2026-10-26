@@ -6,7 +6,7 @@ import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from 
 import {createItem,changeCheck} from './editing.js?v=20261026-storage-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-list-ux-1';
 import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
-import {createDetailUI} from './detail-ui.js?v=20261026-task-minimal-1';
+import {createDetailUI} from './detail-ui.js?v=20261026-work-detail-1';
 import {activeChecks} from './editing.js?v=20261026-storage-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261018-workflow';
 import {startWorkCloud} from './integration.js?v=20261026-storage-2';

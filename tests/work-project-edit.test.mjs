@@ -22,6 +22,9 @@ test('unified project properties save to their project and list status changes p
   const taskBefore=structuredClone(t);let reminder=document.querySelector('[data-task-reminder]');reminder.checked=true;reminder.dispatchEvent(new window.Event('change',{bubbles:true}));assert(t.remindFrom);
   reminder=document.querySelector('[data-task-reminder]');reminder.checked=false;reminder.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(t.remindFrom,null);assert.deepEqual({...t,remindFrom:taskBefore.remindFrom},taskBefore);
   document.querySelector('#detail').close();
+  const w=createItem(data,'work','Work',{projectId:p.id});w.stage='기존 단계';t.workId=w.id;const preserved=structuredClone(data);
+  detail.open('work',w.id);assert(document.querySelector('table[aria-label="업무의 할 일"]'));assert.equal(document.querySelector('[data-choice-field="stage"]'),null);assert.equal(document.querySelector('[data-action="close-detail"]').getAttribute('aria-label'),'상세 닫기');assert.equal(document.querySelector('.detail-footer'),null);assert.deepEqual(data,preserved);
+  document.querySelector('#detail').close();
   let opened=null;window.addEventListener('work-open-project',e=>opened=e.detail);detail.open('project',p.id);assert.equal(opened,p.id);assert.equal(document.querySelector('#detail').open,false);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });
