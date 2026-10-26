@@ -1,6 +1,6 @@
-import {uid,planToday,today} from './model.js?v=20261018-workflow';
-import {validate} from './repository.js?v=20261026-storage-1';
-import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
+import {uid,planToday,today} from './model.js?v=20261026-controls-1';
+import {validate} from './repository.js?v=20261026-controls-1';
+import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
 export const getItem=(data,type,id)=>data[collection(type)]?.find(x=>x.id===id);
@@ -28,7 +28,7 @@ export function createItem(data,type,title,{date=today(),workId=null,projectId=n
 }
 
 export function updateItem(data,type,id,patch){
-  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom'],work:['title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
+  const allowed={task:['title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom','remindUntil'],work:['title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
   Object.assign(item,patch);

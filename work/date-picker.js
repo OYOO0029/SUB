@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261018-workflow';
+import {today,addDays,addMonths} from './model.js?v=20261026-controls-1';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
@@ -63,7 +63,7 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
   }
   function open(options){
     const start=options.start||'',end=options.end||start;
-    draft={...options,start,end,range:!!(options.allowRange&&end&&end!==start),active:'start',month:(start||today()).slice(0,7)+'-01',includeTime:!!options.time,time:options.time||'',reminder:options.reminder||null,reminderChanged:false,format:options.format||'absolute',error:'',saved:false,waiting:false};
+    draft={...options,start,end,range:!!(options.allowRange&&(options.range||end&&end!==start)),active:'start',month:(start||today()).slice(0,7)+'-01',includeTime:!!options.time,time:options.time||'',reminder:options.reminder||null,reminderChanged:false,format:options.format||'absolute',error:'',saved:false,waiting:false};
     dialog.className='notion-date-picker';render();if(!dialog.open)dialog.showModal();position();
     dialog.querySelector(`[data-calendar-day="${start||today()}"]`)?.focus({preventScroll:true});
   }

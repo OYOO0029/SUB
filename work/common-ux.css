@@ -161,3 +161,15 @@ html{scrollbar-gutter:stable}
 #detail.minimal-work .wd-tasks{margin-top:0}
 #detail.minimal-work .wd-tasks .ux-tools{display:flex;align-items:center;gap:8px}
 #detail.minimal-work .pl-table-wrap{max-height:calc(100dvh - 220px)}
+.ux-status{position:relative;display:inline-flex}
+button.ux-status-filter{display:flex;align-items:center;justify-content:space-between;gap:20px;min-width:94px;max-width:none;padding:0 12px;color:var(--text,#e5e9ef);font-weight:500}
+.ux-status-filter svg{width:12px;height:12px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ux-status .ux-status-menu{position:absolute;right:0;left:auto;top:calc(100% + 6px);min-width:140px;padding:6px;border:1px solid var(--border,#353c47);border-radius:8px;background:#272c35;box-shadow:0 8px 24px #0005;z-index:90}
+.ux-status-menu .menu-option{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-height:34px;padding:8px 12px;border:0;border-radius:5px;background:transparent;color:inherit;text-align:left;font-size:12px}
+.ux-status-menu .menu-option:hover,.ux-status-menu .menu-option:focus-visible{background:#343c47}
+.ux-status-menu .menu-option[aria-checked=true]{background:#8ecbd014;color:#a6d8dc}
+.ux-col-resize{position:absolute;top:0;right:-4px;width:9px;height:100%;z-index:5;cursor:col-resize;touch-action:none}
+.ux-col-resize::after{content:'';position:absolute;left:4px;top:8px;bottom:8px;width:2px;background:transparent}
+.ux-col-resize:hover::after,.ux-col-resize:focus-visible::after{background:#8ecbd0}
+.resizing-table,.resizing-table *{cursor:col-resize!important;user-select:none!important}
+table[data-resizable] th{position:sticky}table[data-resizable] th:last-child .ux-col-resize{right:0}

@@ -1,20 +1,21 @@
+import {installTableResize} from './table-resize.js?v=20261026-controls-1';
 import {workImages} from './image-store.mjs';
-import {createFocusView} from './focus-view.js?v=20261026-status-1';
+import {createFocusView} from './focus-view.js?v=20261026-controls-1';
 import {appStorage} from '../schedule-storage.mjs';
-import {createWorkflowUI} from './workflow-ui.js?v=20261026-status-1';
-import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
-import {createItem,changeCheck} from './editing.js?v=20261026-storage-1';
-import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-list-ux-1';
-import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
-import {createDetailUI} from './detail-ui.js?v=20261026-status-1';
-import {activeChecks} from './editing.js?v=20261026-storage-1';
-import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261018-workflow';
-import {startWorkCloud} from './integration.js?v=20261026-storage-2';
-import {loadState,saveState,validate,workAccount} from './repository.js?v=20261026-storage-1';
-import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js?v=20261018-workflow';
+import {createWorkflowUI} from './workflow-ui.js?v=20261026-controls-1';
+import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261026-controls-1';
+import {createItem,changeCheck} from './editing.js?v=20261026-controls-1';
+import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-controls-1';
+import {createReminderCenter} from './reminders.js?v=20261026-controls-1';
+import {createDetailUI} from './detail-ui.js?v=20261026-controls-1';
+import {activeChecks} from './editing.js?v=20261026-controls-1';
+import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261026-controls-1';
+import {startWorkCloud} from './integration.js?v=20261026-controls-1';
+import {loadState,saveState,validate,workAccount} from './repository.js?v=20261026-controls-1';
+import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js?v=20261026-controls-1';
 import {installTaskDrag} from './task-drag.js';
-import {installSurfaceInteractions} from './surface-interactions.js?v=20261026-project-list-1';
-import {workCalendarDays,calendarWeeks,monthLaneCapacity} from './calendar-layout.js?v=20261018-workflow';
+import {installSurfaceInteractions} from './surface-interactions.js?v=20261026-controls-1';
+import {workCalendarDays,calendarWeeks,monthLaneCapacity} from './calendar-layout.js?v=20261026-controls-1';
 
 const loaded=loadState();let data=loaded.state;
 const ui={mode:'work',tab:'tasks',projectPage:null,projectPageTab:'tasks',calendarPlans:true,calendarDue:true,view:'list',monthLanes:3,projectStates:['active'],projectSort:'added',projectDirection:'asc',date:today(),completed:false,cloudStatus:'online',search:'',searchOpen:false,searchScope:'all',project:'',work:'',status:'active',group:'none',tools:false,detail:null,saveWarning:loaded.warning};
@@ -282,6 +283,7 @@ function moveMenu(id){
 document.addEventListener('submit',event=>{if(!event.target.matches('[data-move-form]'))return;event.preventDefault();const form=event.target;$('#editor').close();moveTask(form.dataset.moveForm,new FormData(form).get('before')||null);});
 installTaskDrag(moveTask);
 const surfaces=installSurfaceInteractions();
+installTableResize();
 let reminderAccountReady=false;
 const reminders=createReminderCenter({getData:()=>data,getScope:()=>workAccount.owner,isReady:()=>reminderAccountReady,esc,icon,
  onOpen:id=>openDetail('task',id),

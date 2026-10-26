@@ -1,10 +1,10 @@
-import {createTodayTable} from './today-table.js?v=20261026-status-1';
-import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261018-workflow';
-import {executionSections,unfinished} from './workflow.js?v=20261018-workflow';
-import {orderedTasks,deadlineConflict} from './work-view.js?v=20261018-workflow';
-import {createItem,conflicts} from './editing.js?v=20261026-storage-1';
-import {createFocusTimer} from './focus-timer.js?v=20261026-focus-1';
-import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-focus-1';
+import {createTodayTable} from './today-table.js?v=20261026-controls-1';
+import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261026-controls-1';
+import {executionSections,unfinished} from './workflow.js?v=20261026-controls-1';
+import {orderedTasks,deadlineConflict} from './work-view.js?v=20261026-controls-1';
+import {createItem,conflicts} from './editing.js?v=20261026-controls-1';
+import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
+import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
 export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render,persist,notify,storage,save=()=>persist(''),filters=()=>''}){
   const timer=createFocusTimer({storage,getScope});

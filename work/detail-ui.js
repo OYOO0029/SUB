@@ -1,11 +1,11 @@
-import {statusFilter} from './status-filter.js?v=20261026-status-1';
-import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261018-workflow';
+import {statusFilter} from './status-filter.js?v=20261026-controls-1';
+import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261026-controls-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
-import {uid,today,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261018-workflow';
-import {getItem,createItem,updateItem,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261026-storage-1';
-import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
-import {deadlineConflict} from './work-view.js?v=20261018-workflow';
-import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261026-deadline-1';
+import {uid,today,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261026-controls-1';
+import {getItem,createItem,updateItem,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261026-controls-1';
+import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
+import {deadlineConflict} from './work-view.js?v=20261026-controls-1';
+import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261026-controls-1';
 
 export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무',project:'프로젝트'};
@@ -58,7 +58,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     if(type==='task'){
       const {work,project}=taskContext(data,e),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');
       const planned=p?`${p.start}${p.end!==p.start?' – '+p.end:''}`:'';
-      const reminder=property('리마인드','calendar',`<div class="task-reminder"><input type="checkbox" data-task-reminder aria-label="리마인드 사용" ${e.remindFrom?'checked':''}>${e.remindFrom?valueButton(showDate(e.remindFrom),'field-date','data-field="remindFrom" aria-label="리마인드 날짜 변경"'):'<span class="empty-value">사용 안 함</span>'}</div>`);
+      const reminder=property('리마인드','calendar',`<div class="task-reminder"><input type="checkbox" data-task-reminder aria-label="리마인드 사용" ${e.remindFrom?'checked':''}>${e.remindFrom?valueButton(showDate(e.remindFrom)+' – '+(e.remindUntil?showDate(e.remindUntil):'종료일 없음'),'field-date','data-field="remindFrom" aria-label="리마인드 기간 변경"'):'<span class="empty-value">사용 안 함</span>'}</div>`);
       props=property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+property('업무','briefcase',relation('workId',e.workId,'work'))+dateProperty('예정일','plan',planned)+dateProperty('마감','due',e.due?`${e.due}${e.dueTime?' '+e.dueTime:''}`:'')+reminder+property('메모','note',textField('notes',e.notes,'메모',true))+checks(e);
       extra=property('시간 배치','clock',valueButton(e.blocks.filter(b=>b.date===ui.date).map(b=>`${b.start} – ${b.end}`).join(' / '),'time',`data-id="${id}"`));
 
@@ -122,12 +122,12 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   const calendar=createDatePicker({dialog:$('#property-editor'),esc,icon,onFormat:format=>{dateFormat=format;try{localStorage.setItem('what-to-do:detail-date-format',format);}catch{}render();},onCommit:d=>{
     const data=getData();
     if(d.field==='plan')updatePlan(data,ui.detail.id,d.start,d.end);
-    else updateItem(data,ui.detail.type,ui.detail.id,d.field==='period'?{start:d.start||null,end:d.end||null}:{[d.field]:d.start||null,...(d.allowTime?{dueTime:d.includeTime?d.time:''}:{}),...(d.reminderChanged?{remindFrom:d.reminder}:{})});
+    else updateItem(data,ui.detail.type,ui.detail.id,d.field==='remindFrom'?{remindFrom:d.start||null,remindUntil:d.start&&d.range?d.end||null:null}:d.field==='period'?{start:d.start||null,end:d.end||null}:{[d.field]:d.start||null,...(d.allowTime?{dueTime:d.includeTime?d.time:''}:{}),...(d.reminderChanged?{remindFrom:d.reminder}:{})});
     persist();
   }});
   function dateEditor(field,anchor){
-    closeRelation();const e=item(),p=e.plans&&(planFor(e,ui.date)||e.plans.find(p=>p.state==='active')),range=['plan','period'].includes(field),dueTask=field==='due'&&ui.detail.type==='task';
-    calendar.open({field,title:{plan:'예정일',period:'사업 기간',due:'마감',remindFrom:'리마인드 시작일'}[field],start:field==='plan'?p?.start:field==='period'?e.start:e[field],end:field==='plan'?p?.end:e.end,allowRange:range,allowTime:dueTask,time:dueTask?e.dueTime:'',allowReminder:false,reminder:dueTask?e.remindFrom:null,format:dateFormat,anchor:anchor.getBoundingClientRect()});
+    closeRelation();const e=item(),p=e.plans&&(planFor(e,ui.date)||e.plans.find(p=>p.state==='active')),range=['plan','period','remindFrom'].includes(field),dueTask=field==='due'&&ui.detail.type==='task';
+    calendar.open({field,title:{plan:'예정일',period:'사업 기간',due:'마감',remindFrom:'리마인드 기간'}[field],start:field==='plan'?p?.start:field==='period'?e.start:e[field],end:field==='remindFrom'?e.remindUntil:field==='plan'?p?.end:e.end,allowRange:range,range:field==='remindFrom'&&!!e.remindUntil,allowTime:dueTask,time:dueTask?e.dueTime:'',allowReminder:false,reminder:dueTask?e.remindFrom:null,format:dateFormat,anchor:anchor.getBoundingClientRect()});
   }
   function create(type='task',opts={}){
     $('#editor').innerHTML=`<header class="editor-header"><h2 id="editor-title">${labels[type]} 추가</h2>${button(icon('close'),'close-editor','type="button" aria-label="닫기"','icon-button')}</header><form data-create-form="${type}" data-work-id="${opts.workId||''}" data-project-id="${opts.projectId||''}" data-date="${opts.date||(opts.projectId||opts.workId?'':ui.date)}"><div class="editor-body"><input class="create-title" name="title" aria-label="새 ${labels[type]} 이름" placeholder="${labels[type]} 이름" required maxlength="160"><p class="form-error" role="alert"></p></div><footer class="editor-footer"><button type="submit" class="small-button">추가</button></footer></form>`;
@@ -197,7 +197,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function focusChip(field){$(`[data-action="chip-picker"][data-field="${field}"]`)?.focus();}
   function closeChoiceForm(form){form.hidden=true;form.reset();form.querySelector('.property-error').textContent='';const trigger=form.parentElement.querySelector('[data-action="add-choice"]');trigger.setAttribute('aria-expanded','false');trigger.focus();}
   document.addEventListener('change',event=>{
-    const el=event.target;if(el.matches('[data-task-reminder]')){event.stopImmediatePropagation();try{const e=item(),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');updateItem(getData(),'task',e.id,{remindFrom:el.checked?(p?.start||e.due||today()):null});persist();}catch(err){error(err);}return;}if(el.matches('[data-project-lifecycle]')){event.stopImmediatePropagation();try{const value=el.value;el.value=projectState(item());changeProjectState(ui.detail.id,value);}catch(err){error(err);}return;}if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
+    const el=event.target;if(el.matches('[data-task-reminder]')){event.stopImmediatePropagation();try{const e=item(),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');updateItem(getData(),'task',e.id,{remindFrom:el.checked?(p?.start||e.due||today()):null,...(!el.checked?{remindUntil:null}:{})});persist();}catch(err){error(err);}return;}if(el.matches('[data-project-lifecycle]')){event.stopImmediatePropagation();try{const value=el.value;el.value=projectState(item());changeProjectState(ui.detail.id,value);}catch(err){error(err);}return;}if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
     try{selectDetailOption(getData(),ui.detail.type,ui.detail.id,el.value);if(el.dataset.choiceField==='status')$('.detail-complete').checked=item().status==='done';persist(false);if(!ui.saveWarning){const out=$('#project-inline-error')||$('#inline-error');if(out)out.textContent='';}}
     catch(err){error(err);document.querySelectorAll('[data-choice-field]').forEach(r=>r.checked=r.value===item()[r.dataset.choiceField]);}
   },true);

@@ -18,7 +18,7 @@ export function isVisible(task,date,includeCompleted=false){
   if(task.status==='done')return includeCompleted&&(task.completedAt?.slice(0,10)===date||isPlanned(task,date));
   return isPlanned(task,date)||isDuePast(task,date)||isCarried(task,date)||task.due===date;
 }
-export function reminderTasks(state,date){return state.tasks.filter(t=>!t.deletedAt&&t.status!=='done'&&t.status!=='cancelled'&&t.reminderAcknowledgedOn!==date&&!!t.remindFrom&&t.remindFrom<=date);}
+export function reminderTasks(state,date){return state.tasks.filter(t=>!t.deletedAt&&t.status!=='done'&&t.status!=='cancelled'&&t.reminderAcknowledgedOn!==date&&!!t.remindFrom&&t.remindFrom<=date&&(!t.remindUntil||date<=t.remindUntil));}
 export function planFor(task,date){return task.plans.find(p=>p.state==='active'&&p.start<=date&&p.end>=date);}
 export function planToday(task,date){
   if(task.excludedDates)task.excludedDates=task.excludedDates.filter(d=>d!==date);
