@@ -13,3 +13,5 @@ export function projectList(projects,states=['active'],sort='added',direction='a
   return String(av).localeCompare(String(bv),'ko',{numeric:true})*factor||a.i-b.i;
  }).map(({p})=>p);
 }
+
+export function projectWorkDue(data,projectId){return projectActiveWorks(data,projectId).map(w=>w.due).filter(Boolean).sort()[0]||null;}

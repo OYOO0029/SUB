@@ -6,7 +6,7 @@ import {createFocusTimer} from '../work/focus-timer.js';
 import {createItem} from '../work/editing.js';
 import {emptyWorkState} from '../work/work-account.mjs';
 import {validate} from '../work/repository.js';
-import {today} from '../work/model.js';
+import {today,addDays} from '../work/model.js';
 
 test('today table filters, real task edits, clipboard sanitizing, account reset and timer isolation',async()=>{
  const dom=new JSDOM('<main id="app"></main>',{url:'https://fixture.invalid',pretendToBeVisual:true});
@@ -31,6 +31,11 @@ test('today table filters, real task edits, clipboard sanitizing, account reset 
   click(`[data-tt="detail"][data-id="${b.id}"]`);click(`[data-tt="detail"][data-id="${a.id}"]`);assert(document.querySelector('[data-tt-memo] img'));
   const restored=document.querySelector('[data-tt-memo]');restored.querySelector('img').remove();restored.dispatchEvent(new dom.window.Event('input',{bubbles:true}));assert(!a.memoParts.some(p=>p.image||p.asset));
   const original=JSON.stringify(data);click(`[data-tt="focus"][data-id="${a.id}"]`);change('[data-tt-clock]','37');click('[data-tt="start"]');assert(timer.read().running);assert.equal(timer.read().minutes,37);click(`[data-tt="focus"][data-id="${b.id}"]`);click('[data-tt="start"]');assert.equal(timer.read().taskId,a.id);assert(document.querySelector('[data-tt-error]').textContent);assert.equal(JSON.stringify(data),original);
+  view.reset();const future=addDays(date,2),r1=createItem(data,'task','Zulu remaining',{date:future,projectId:p.id}),r2=createItem(data,'task','Alpha remaining',{date:future});r1.due=future;r2.due=future;render();
+  const remainingRows=()=>[...document.querySelectorAll('table[aria-label="남은 할 일"] [data-tt-row]')].map(e=>e.dataset.ttRow);
+  click('[data-scope="remaining"][data-key="project"]');change('[data-tt-filter="project"]',p.id);assert.deepEqual(remainingRows(),[r1.id]);assert.equal(view.items().length,2);
+  click('[data-tt="clear-column"]');click('[data-scope="remaining"][data-key="sort"]');click('[data-tt="sort"][data-value="title"]');assert.deepEqual(remainingRows(),[r2.id,r1.id]);
+  click('[data-scope="remaining"][data-key="due"]');change('[data-tt-filter="due"]','none');assert.equal(remainingRows().length,0);click('[data-tt="clear-remaining"]');assert.equal(remainingRows().length,2);assert.equal(r1.due,future);
   owner='other';view.reset();render();assert(!document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));assert(saves>=5);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });

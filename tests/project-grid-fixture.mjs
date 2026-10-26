@@ -9,5 +9,6 @@ export function projectGridFixture(){
  addProject('long','다음 분기 공동 운영을 위한 파트너 협업 프로젝트');addWork('partner','long','협업 일정 조율');
  addProject('empty','다음 분기 준비');addWork('preparing','empty','준비 중인 업무','waiting');
  addProject('paused','보류 프로젝트','paused');addProject('done','완료 프로젝트','done');
+ baseProject.start='2026-10-01';baseProject.end='2027-03-31';baseWork.due='2026-11-05';data.works.find(w=>w.id==='web-feedback').due='2026-11-12';
  return data;
 }

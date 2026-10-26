@@ -77,3 +77,17 @@ html{scrollbar-gutter:stable}
 #app .tt-table td{vertical-align:middle}
 #app .tt-table .tt-due,#app .tt-table td:first-child,#app .tt-table td:last-child{text-align:center}
 #app .pl-table th{text-align:center;vertical-align:middle}
+
+/* List headers reserve their chevron slot, revealing it without moving text. */
+#app :is(.tt-column,.pl-column)>.icon{opacity:0;transition:opacity .12s ease}
+#app :is(.tt-column,.pl-column):is(:hover,:focus-visible,[aria-expanded=true])>.icon{opacity:1}
+@media(hover:none){#app :is(.tt-column,.pl-column)>.icon{opacity:1}}
+/* 18px visible focus control, matching checkboxes; retain a 32/44px hit target. */
+#app :is(.tt-table,.pl-table) .tt-focus{position:relative;border:0;background:transparent;border-radius:0}
+#app :is(.tt-table,.pl-table) .tt-focus::before{content:'';position:absolute;width:18px;height:18px;box-sizing:border-box;border:1px solid var(--line);border-radius:3px;left:50%;top:50%;transform:translate(-50%,-50%)}
+#app :is(.tt-table,.pl-table) .tt-focus:hover::before{background:var(--panel);border-color:var(--muted)}
+#app :is(.tt-table,.pl-table) .tt-focus>.icon{width:10px;height:10px;position:relative}
+.tt-remaining-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+#app .tt-remaining-toolbar h2{margin:0}
+.tt-remaining-toolbar>.tt-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0}
+.tt-remaining-toolbar>.tt-button .icon{width:16px;height:16px}
