@@ -30,8 +30,20 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function checkAddButton(id){return button(icon('plus'),'open-check-add',`data-task-id="${esc(id)}" type="button" aria-label="확인사항 추가" title="확인사항 추가" aria-expanded="false"`,'icon-button check-add-trigger');}
   function checkForm(id){return `<form class="inline-check-add" data-check-form="${esc(id)}" hidden><input name="title" placeholder="확인사항 입력" aria-label="새 확인사항 내용" maxlength="160" required autocomplete="off"><button type="submit" class="quiet-link" aria-label="확인사항 저장">저장</button>${button('취소','cancel-check-add','type="button" aria-label="확인사항 취소"','quiet-link')}</form>`;}
   function closeCheckForm(form){form.hidden=true;form.reset();const scope=form.closest('.task-card,.check-section'),trigger=scope.querySelector('.check-add-trigger');trigger.setAttribute('aria-expanded','false');trigger.focus();}
+  function projectInfo(e){
+    const data=getData();
+    const props=property('현황','folder',`<select data-project-lifecycle aria-label="프로젝트 현황">${PROJECT_STATES.map(([v,l])=>`<option value="${v}" ${projectState(e)===v?'selected':''}>${l}</option>`).join('')}</select>`)+property('진행 단계','briefcase',choiceField('stage',e.stage,stageOptions(data,'project',e),'프로젝트 진행 단계'))+dateProperty('사업 기간','period',e.start?`${e.start} – ${e.end}`:'')+property('사업비','note',textField('budget',e.budget,'사업비'))+property('관련 인원','users',chipsField(e,'people'))+property('태그','tag',chipsField(e))+property('메모','note',textField('notes',e.notes,'메모',true));
+    return `<section class="pl-project-properties" data-project-context="${esc(e.id)}"><div class="pl-page-heading"><input class="detail-title-input" data-inline-field="title" aria-label="프로젝트 이름" value="${esc(e.title)}" maxlength="160">${button(icon('trash'),'trash-entity','aria-label="프로젝트 휴지통으로 이동"','icon-button')}</div><p id="project-inline-error" role="alert"></p><dl class="properties">${props}</dl></section>`;
+  }
+  for(const event of ['pointerdown','focusin'])document.addEventListener(event,e=>{const host=e.target.closest('[data-project-context]');if(host)ui.detail={type:'project',id:host.dataset.projectContext};},true);
+  function changeProjectState(id,value){
+    if(!PROJECT_STATES.some(([v])=>v===value))return;
+    const remaining=projectTasks(getData(),id).filter(unfinished);
+    if(value!=='active'&&remaining.length){pendingLifecycle={id,value};const label=PROJECT_STATES.find(([v])=>v===value)[1];popover('프로젝트 '+label,`<p>미완료 할 일이 ${remaining.length}개 있습니다. 할 일의 완료 상태와 마감일은 유지됩니다.</p><div class="lifecycle-actions">${button('프로젝트 상태만 변경','apply-project-state','data-remove="no"','small-button')}${remaining.some(t=>isPlanned(t,today()))?button('오늘 배치도 해제','apply-project-state','data-remove="yes"','small-button'):''}${button('취소','cancel-project-state','','quiet-link')}</div>`);}
+    else{updateItem(getData(),'project',id,{lifecycle:value});persist();}
+  }
   function render(){
-    if(!ui.detail)return;const {type,id}=ui.detail,e=item(),data=getData();if(!e||e.deletedAt){$('#detail').close();return;}
+    if(!ui.detail)return;if(ui.detail.type==='project'&&ui.projectPage===ui.detail.id&&!$('#detail').open)return;const {type,id}=ui.detail,e=item(),data=getData();if(!e||e.deletedAt){$('#detail').close();return;}
     let props='',body='',extra='';
     if(type==='task'){
       const {work,project}=taskContext(data,e),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');
@@ -52,11 +64,12 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
 
   }
   function open(type,id){
+    if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:id}));return;}
     if($('#detail').open&&ui.detail&&(ui.detail.type!==type||ui.detail.id!==id))history.push({...ui.detail,scroll:$('#detail').scrollTop});else if(!$('#detail').open)history=[];
     ui.detail={type,id};ui.inlineSaved='';$('#detail').classList.add('flow-drawer');render();if(!$('#detail').open)$('#detail').showModal();$('#detail').scrollTop=0;
   }
   function persist(refresh=true,refreshList=true){save(refreshList);if(refresh)render();else if(ui.saveWarning)error(new Error(ui.saveWarning));const hint=$('[data-save-state]');if(hint)hint.textContent=ui.saveWarning?'저장 실패 · 입력 유지':'기기에 저장됨';}
-  function error(err){if($('#inline-error'))$('#inline-error').textContent=err.message;else notify(err.message);}
+  function error(err){const out=$('#detail').open?$('#detail #inline-error'):$('#project-inline-error')||$('#inline-error');if(out)out.textContent=err.message;else notify(err.message);}
   function popover(title,body,cls=''){closeRelation();const el=$('#property-editor');el.className=cls;el.innerHTML=`<header><h3 id="property-editor-title">${title}</h3>${button(icon('close'),'close-property','aria-label="속성 닫기" type="button"','icon-button')}</header>${body}`;if(!el.open)el.showModal();}
   function focusRelation(field){$(`#detail [data-action="field-relation"][data-field="${field}"]`)?.focus();}
   function closeRelation(restoreFocus=false){
@@ -143,7 +156,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       else if(a==='open-check-add'){const form=el.closest('.task-card,.check-section').querySelector('[data-check-form]');form.hidden=false;el.setAttribute('aria-expanded','true');form.querySelector('input').focus();}
       else if(a==='cancel-check-add')closeCheckForm(el.closest('[data-check-form]'));
       else if(a==='delete-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:new Date().toISOString()});persist();notify('확인사항을 휴지통으로 이동했습니다.');}
-      else if(a==='trash-entity'){trashItem(data,ui.detail.type,ui.detail.id);$('#detail').close();persist(false);notify('휴지통으로 이동했습니다. 연결된 항목은 유지됩니다.');}
+      else if(a==='trash-entity'){trashItem(data,ui.detail.type,ui.detail.id);if(ui.detail.type==='project'){ui.projectPage=null;ui.detail=null;}$('#detail').close();persist(false);notify('휴지통으로 이동했습니다. 연결된 항목은 유지됩니다.');}
       else if(a==='restore-entity'){restoreItem(data,el.dataset.type,el.dataset.id);persist(false);trash();}
       else if(a==='restore-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:null});persist(false);trash();}
       else if(a==='time-slot'){const scroll=$('.time-grid-scroll').scrollTop,index=Number(el.dataset.index);if(timeDraft.awaitingEnd){timeDraft.last=index;timeDraft.awaitingEnd=false;}else{timeDraft.first=index;timeDraft.last=index;timeDraft.awaitingEnd=true;}renderTime();$('.time-grid-scroll').scrollTop=scroll;$(`[data-action="time-slot"][data-index="${index}"]`)?.focus({preventScroll:true});}
@@ -164,8 +177,8 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function focusChip(field){$(`[data-action="chip-picker"][data-field="${field}"]`)?.focus();}
   function closeChoiceForm(form){form.hidden=true;form.reset();form.querySelector('.property-error').textContent='';const trigger=form.parentElement.querySelector('[data-action="add-choice"]');trigger.setAttribute('aria-expanded','false');trigger.focus();}
   document.addEventListener('change',event=>{
-    const el=event.target;if(el.matches('[data-project-lifecycle]')){event.stopImmediatePropagation();try{const remaining=projectTasks(getData(),ui.detail.id).filter(unfinished);if(el.value!=='active'&&remaining.length){pendingLifecycle={id:ui.detail.id,value:el.value};const label=PROJECT_STATES.find(([v])=>v===el.value)[1];document.querySelectorAll('[data-project-lifecycle]').forEach(r=>r.checked=r.value===projectState(item()));popover('프로젝트 '+label,`<p>미완료 할 일이 ${remaining.length}개 있습니다. 할 일의 완료 상태와 마감일은 유지됩니다.</p><div class="lifecycle-actions">${button('프로젝트 상태만 변경','apply-project-state','data-remove="no"','small-button')}${remaining.some(t=>isPlanned(t,today()))?button('오늘 배치도 해제','apply-project-state','data-remove="yes"','small-button'):''}${button('취소','cancel-project-state','','quiet-link')}</div>`);}else{updateItem(getData(),'project',ui.detail.id,{lifecycle:el.value});persist(false);}}catch(err){error(err);}return;}if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
-    try{selectDetailOption(getData(),ui.detail.type,ui.detail.id,el.value);if(el.dataset.choiceField==='status')$('.detail-complete').checked=item().status==='done';persist(false);if(!ui.saveWarning)$('#inline-error').textContent='';}
+    const el=event.target;if(el.matches('[data-project-lifecycle]')){event.stopImmediatePropagation();try{const value=el.value;el.value=projectState(item());changeProjectState(ui.detail.id,value);}catch(err){error(err);}return;}if(!el.matches('[data-choice-field]'))return;event.stopImmediatePropagation();if(!el.checked)return;
+    try{selectDetailOption(getData(),ui.detail.type,ui.detail.id,el.value);if(el.dataset.choiceField==='status')$('.detail-complete').checked=item().status==='done';persist(false);if(!ui.saveWarning){const out=$('#project-inline-error')||$('#inline-error');if(out)out.textContent='';}}
     catch(err){error(err);document.querySelectorAll('[data-choice-field]').forEach(r=>r.checked=r.value===item()[r.dataset.choiceField]);}
   },true);
   function saveField(event){
@@ -190,6 +203,6 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     }catch(err){const out=form.querySelector('.form-error,.property-error');if(out)out.textContent=err.message;else error(err);}
   },true);
   document.addEventListener('keydown',event=>{const el=event.target;if(el.closest('[data-choice-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeChoiceForm(el.closest('[data-choice-form]'));return;}if(el.matches('[data-inline-field],[data-check-title]')&&event.key==='Enter'&&!event.isComposing&&el.tagName!=='TEXTAREA'){event.preventDefault();el.blur();}if(el.closest('[data-check-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCheckForm(el.closest('[data-check-form]'));}if(el.matches('[data-quick-task] input')&&event.key==='Escape'){event.preventDefault();save();}});
-  $('#detail').addEventListener('close',()=>{history=[];ui.inlineSaved='';if($('#detail').dataset.skipCloseSave){delete $('#detail').dataset.skipCloseSave;return;}save();});$('#editor').addEventListener('close',()=>$('#editor').classList.remove('time-editor'));
-  return {open,render,timeEditor,create,trash,checkForm,checkAddButton};
+  $('#detail').addEventListener('close',()=>{history=[];$('#detail').innerHTML='';ui.inlineSaved='';if($('#detail').dataset.skipCloseSave){delete $('#detail').dataset.skipCloseSave;return;}save();});$('#editor').addEventListener('close',()=>$('#editor').classList.remove('time-editor'));
+  return {open,render,timeEditor,create,trash,checkForm,checkAddButton,projectInfo,changeProjectState};
 }

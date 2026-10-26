@@ -24,8 +24,8 @@ html{scrollbar-gutter:stable}
 #app .ux-view-tabs>.ux-view-icon{width:var(--ux-control);min-width:var(--ux-control);height:var(--ux-control);padding:0}
 .ux-view-icon .icon{width:16px;height:16px;display:block;flex:none}
 .tt-remaining{margin-top:24px;padding-top:24px;border-top:1px solid var(--line);min-width:0}
-.tt-remaining>h2{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;line-height:20px;margin:0 0 12px}
-.tt-remaining>h2>span{font-size:12px;font-weight:400;color:var(--muted)}
+.tt-remaining-toolbar h2{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;line-height:20px;margin:0 0 12px}
+.tt-remaining-toolbar h2>span{font-size:12px;font-weight:400;color:var(--muted)}
 .tt-today{display:inline-flex;align-items:center;justify-content:center;min-height:var(--ux-control);padding:0 4px;background:transparent;color:var(--muted);font-size:12px;white-space:nowrap;border-radius:6px}
 .tt-today:hover{background:var(--panel);color:var(--text)}
 #app .tt-status>.tt-button{line-height:20px;display:inline-flex;align-items:center;justify-content:center}
@@ -91,3 +91,8 @@ html{scrollbar-gutter:stable}
 #app .tt-remaining-toolbar h2{margin:0}
 .tt-remaining-toolbar>.tt-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0}
 .tt-remaining-toolbar>.tt-button .icon{width:16px;height:16px}
+
+#app .tt-remaining-toolbar h2{font-size:13px;font-weight:500;line-height:20px}
+.tt-today{width:32px;height:32px;padding:0}
+.tt-today>.icon{width:16px;height:16px}
+.ux-empty{font-size:11px;line-height:16px;font-weight:400;color:var(--muted)}
