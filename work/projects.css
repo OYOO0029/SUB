@@ -51,7 +51,7 @@
 
 .pl-project-table{min-width:660px}
 .pl-project-table td[rowspan]{background:var(--workspace,#21242b)}
-.pl-hierarchy{min-width:640px}
+.pl-hierarchy{min-width:560px}
 .pl-work-row{background:var(--panel)}
 .pl-work-title,.pl-task-title{display:flex;align-items:center;gap:8px;min-width:0}
 .pl-work-title>.pl-name{font-weight:600}
@@ -101,3 +101,16 @@
 
 #app .pl-project-properties .inline-choices{gap:4px}
 #app .pl-project-properties .choice-option{font-size:12px;gap:4px}
+
+/* Project identity stays visible; optional properties stay in one disclosure. */
+.pl-project-properties .pl-page-heading{gap:10px;margin-bottom:8px}
+.pl-project-properties .pl-page-heading .detail-title-input{flex:0 1 auto;field-sizing:content;width:auto;max-width:60%;min-width:80px}
+.pl-project-properties .pl-page-heading>[data-dropdown]{margin-left:auto}
+.pl-project-properties [data-project-lifecycle]{flex:none;font-size:12px;color:#9fbfdf;background:rgba(107,156,207,.12);border:0;min-height:28px}
+.pl-project-properties [data-project-lifecycle][data-state=done]{color:#93c8b0;background:rgba(100,176,143,.12)}
+.pl-project-properties [data-project-lifecycle][data-state=paused]{color:#d5b18a;background:rgba(199,150,95,.12)}
+.pl-project-properties [data-project-lifecycle][data-state=cancelled]{color:#d19b9f;background:rgba(193,112,121,.12)}
+.pl-project-period{margin:0 0 8px}
+.pl-project-extra>summary{font-size:12px;color:var(--muted);cursor:pointer;width:fit-content;padding:6px 0}
+#project-inline-error:empty{display:none}
+@media(max-width:580px){.pl-project-properties .pl-page-heading .detail-title-input{width:0;flex:1}}
