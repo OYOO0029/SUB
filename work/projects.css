@@ -65,3 +65,15 @@
 .pl-add-cell .flow-add{margin:0}
 .pl-hierarchy td:nth-child(n+2){font-size:12px}
 .pl-hierarchy .pl-name small{font-size:11px;white-space:nowrap;color:var(--muted)}
+
+/* Project overview only: keep work rows aligned across merged project cells. */
+.pl-project-table th:not(:last-child),.pl-project-table td:not(.pl-end-cell):not([colspan]){border-right:1px solid var(--line)}
+.pl-project-table .pl-status-cell{text-align:center}
+.pl-status-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:58px;box-sizing:border-box;padding:3px 7px;border-radius:12px;font-size:12px;line-height:18px;font-weight:400;white-space:nowrap;color:#9fbfdf;background:rgba(107,156,207,.12)}
+.pl-status-badge i{width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.pl-status-badge[data-state="done"]{color:#93c8b0;background:rgba(100,176,143,.12)}
+.pl-status-badge[data-state="paused"]{color:#d5b18a;background:rgba(199,150,95,.12)}
+.pl-status-badge[data-state="cancelled"]{color:#d19b9f;background:rgba(193,112,121,.12)}
+.pl-status-heading .pl-column{position:relative;width:100%}
+.pl-status-heading .pl-column>.icon{position:absolute;right:0}
+.pl-status-heading .tt-filter-dot{position:absolute;right:-5px}
