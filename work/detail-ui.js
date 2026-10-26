@@ -1,7 +1,7 @@
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261018-workflow';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261018-workflow';
-import {getItem,createItem,updateItem,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261018-workflow';
+import {getItem,createItem,updateItem,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261026-storage-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
 import {deadlineConflict} from './work-view.js?v=20261018-workflow';
 import {createDatePicker,dateLabel} from './date-picker.js';
@@ -142,10 +142,10 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       else if(a==='remove-chip'){const field=el.dataset.field;updateItem(data,ui.detail.type,ui.detail.id,{[field]:chipValues(item(),field).filter((_,i)=>i!==Number(el.dataset.index))});persist();focusChip(field);}
       else if(a==='open-check-add'){const form=el.closest('.task-card,.check-section').querySelector('[data-check-form]');form.hidden=false;el.setAttribute('aria-expanded','true');form.querySelector('input').focus();}
       else if(a==='cancel-check-add')closeCheckForm(el.closest('[data-check-form]'));
-      else if(a==='delete-check'){const t=getItem(data,'task',el.dataset.taskId);t.checks.find(c=>c.id===el.dataset.checkId).deletedAt=new Date().toISOString();persist();notify('확인사항을 휴지통으로 이동했습니다.');}
+      else if(a==='delete-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:new Date().toISOString()});persist();notify('확인사항을 휴지통으로 이동했습니다.');}
       else if(a==='trash-entity'){trashItem(data,ui.detail.type,ui.detail.id);$('#detail').close();persist(false);notify('휴지통으로 이동했습니다. 연결된 항목은 유지됩니다.');}
       else if(a==='restore-entity'){restoreItem(data,el.dataset.type,el.dataset.id);persist(false);trash();}
-      else if(a==='restore-check'){getItem(data,'task',el.dataset.taskId).checks.find(c=>c.id===el.dataset.checkId).deletedAt=null;persist(false);trash();}
+      else if(a==='restore-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:null});persist(false);trash();}
       else if(a==='time-slot'){const scroll=$('.time-grid-scroll').scrollTop,index=Number(el.dataset.index);if(timeDraft.awaitingEnd){timeDraft.last=index;timeDraft.awaitingEnd=false;}else{timeDraft.first=index;timeDraft.last=index;timeDraft.awaitingEnd=true;}renderTime();$('.time-grid-scroll').scrollTop=scroll;$(`[data-action="time-slot"][data-index="${index}"]`)?.focus({preventScroll:true});}
       else if(a==='time-save'){const r=slotRange(timeDraft.first,timeDraft.last);setTime(getItem(data,'task',timeDraft.id),timeDraft.date,r.start,r.end);ui.date=timeDraft.date;$('#editor').close();persist();}
       else if(a==='time-clear'){removeTime(getItem(data,'task',timeDraft.id),timeDraft.date);$('#editor').close();persist();}
@@ -172,7 +172,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     const el=event.target;if(!el.matches('[data-inline-field],[data-check-title],#block-date'))return;event.stopImmediatePropagation();
     try{
       if(el.id==='block-date'){if(el.value)timeEditor(timeDraft.id,el.value);else el.value=timeDraft.date;return;}
-      if(el.dataset.checkTitle){if(!el.value.trim())throw new Error('확인사항 내용을 입력해 주세요.');getItem(getData(),'task',el.dataset.taskId).checks.find(c=>c.id===el.dataset.checkTitle).title=el.value.trim();}
+      if(el.dataset.checkTitle){if(!el.value.trim())throw new Error('확인사항 내용을 입력해 주세요.');changeCheck(getData(),el.dataset.taskId,el.dataset.checkTitle,{title:el.value.trim()});}
       else{const field=el.dataset.inlineField,value=field==='stages'?[...new Set(el.value.split(',').map(s=>s.trim()).filter(Boolean))]:el.value;updateItem(getData(),ui.detail.type,ui.detail.id,{[field]:value});el.classList.toggle('is-empty',!el.value);}
       if(el.dataset.inlineField==='status'){$('.detail-complete').checked=item().status==='done';}persist(false,false);if(!ui.saveWarning&&$('#inline-error'))$('#inline-error').textContent='';
     }catch(err){error(err);if(el.dataset.inlineField){const saved=item()[el.dataset.inlineField];el.value=Array.isArray(saved)?saved.join(', '):saved||'';}}
@@ -184,7 +184,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     try{
       if(form.hasAttribute('data-chip-picker')){const value=f.value.trim(),field=form.dataset.chipPicker;if(!value)return;updateItem(data,ui.detail.type,ui.detail.id,{[field]:[...new Set([...chipValues(item(),field),value])]});$('#property-editor').close();persist();focusChip(field);}
       else if(form.hasAttribute('data-choice-form')){selectDetailOption(data,ui.detail.type,ui.detail.id,f.label,{add:true});persist();$('[data-choice-field]:checked')?.focus();}
-      else if(form.hasAttribute('data-check-form')){if(!f.title.trim())return;const id=form.dataset.checkForm,inDetail=!!form.closest('#detail');getItem(data,'task',id).checks.push({id:uid(),title:f.title.trim(),done:false});persist();const scope=inDetail?$('#detail'):$('#app');scope.querySelector(`[data-action="open-check-add"][data-task-id="${id}"]`)?.focus();}
+      else if(form.hasAttribute('data-check-form')){if(!f.title.trim())return;const id=form.dataset.checkForm,inDetail=!!form.closest('#detail');changeCheck(data,id,null,{title:f.title.trim()});persist();const scope=inDetail?$('#detail'):$('#app');scope.querySelector(`[data-action="open-check-add"][data-task-id="${id}"]`)?.focus();}
       else if(form.hasAttribute('data-tag-form')){if(!f.tag.trim())return;updateItem(data,ui.detail.type,ui.detail.id,{tags:[...new Set([...item().tags,...f.tag.split(',').map(s=>s.trim()).filter(Boolean)])]});persist();$('[data-tag-form] input').focus();}
       else{const type=form.dataset.createForm||'task',e=createItem(data,type,f.title,{date:form.hasAttribute('data-create-form')?(form.dataset.date||null):ui.date,workId:form.dataset.workId||null,projectId:form.dataset.projectId||null});if(form.hasAttribute('data-create-form')){$('#editor').close();persist(false);if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:e.id}));}else open(type,e.id);}else{persist(false);notify('추가했습니다.');}}
     }catch(err){const out=form.querySelector('.form-error,.property-error');if(out)out.textContent=err.message;else error(err);}

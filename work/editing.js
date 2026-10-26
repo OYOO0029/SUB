@@ -1,5 +1,5 @@
 import {uid,planToday,today} from './model.js?v=20261018-workflow';
-import {validate} from './repository.js?v=20261018-workflow';
+import {validate} from './repository.js?v=20261026-storage-1';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
@@ -111,4 +111,22 @@ export function restoreItem(data,type,id){
   }
   if(type==='project')for(const taskId of item.detachedTasks||[]){const t=getItem(data,'task',taskId);if(t&&!t.projectId&&!t.workId)t.projectId=id;}
   item.detachedTasks=[];item.detachedLinks=[];
+}
+
+// Shared memo/check commands: validate the complete draft before changing UI data.
+export function updateMemo(data,id,parts){
+ const draft=structuredClone(data),task=getItem(draft,'task',id);
+ if(!task||task.deletedAt)throw Error('할 일을 찾을 수 없습니다.');
+ task.memoParts=structuredClone(parts);task.notes=parts.map(p=>p.text||'').join('');task.memoText=task.notes;
+ validate(draft);Object.assign(getItem(data,'task',id),task);return task;
+}
+export function changeCheck(data,id,checkId,patch){
+ const draft=structuredClone(data),task=getItem(draft,'task',id);
+ if(!task||task.deletedAt)throw Error('할 일을 찾을 수 없습니다.');
+ let check=checkId?task.checks.find(c=>c.id===checkId&&(!c.deletedAt||patch.deletedAt===null)):null;
+ if(checkId&&!check)throw Error('하위 할 일을 찾을 수 없습니다.');
+ if(!check){check={id:uid(),title:'',done:false};task.checks.push(check);}
+ if(Object.keys(patch).some(k=>!['title','done','deletedAt'].includes(k)))throw Error('수정할 수 없는 속성입니다.');
+ Object.assign(check,patch);check.title=check.title.trim();if(!check.title||check.title.length>160)throw Error('하위 할 일 제목을 1~160자로 입력해 주세요.');
+ validate(draft);Object.assign(getItem(data,'task',id),task);return check;
 }

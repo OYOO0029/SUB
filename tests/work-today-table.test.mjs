@@ -17,7 +17,7 @@ test('today table filters, real task edits, clipboard sanitizing, account reset 
   const a=createItem(data,'task','이미지 붙여넣기',{date,projectId:p.id}),b=createItem(data,'task','단발성 검수',{date});a.due=date;a.notes='원본 메모';a.checks.push({id:'c1',title:'원본 하위 항목',done:false});
   const timer=createFocusTimer({storage:dom.window.localStorage,getScope:()=>owner});let view;const render=()=>document.querySelector('#app').innerHTML=view.screen();
   const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  view=createTodayTable({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer,render,save:()=>{validate(data);saves++},notify(){},flow:{row:()=>''}});
+  view=createTodayTable({images:{async upload(file){return {bucket:'work-images',path:'test/image.png',mime:file.type,size:file.size}},async url(){return 'blob:fixture'}},getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer,render,save:()=>{validate(data);saves++},notify(){},flow:{row:()=>''}});
   const click=s=>{assert(document.querySelector(s),s);document.querySelector(s).click()},change=(s,v)=>{const el=document.querySelector(s);el.value=v;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))};
   render();assert.deepEqual([...document.querySelectorAll('th')].map(t=>t.textContent.trim()),['','프로젝트','할 일','마감','집중']);
   click('[data-key="project"]');change('[data-tt-filter="project"]',p.id);assert.equal(view.items().length,1);assert.equal(view.items()[0].id,a.id);
@@ -29,7 +29,7 @@ test('today table filters, real task edits, clipboard sanitizing, account reset 
   const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1sAAAAASUVORK5CYII=';
   const imagePaste=new dom.window.Event('paste',{bubbles:true,cancelable:true}),file=new dom.window.File([Buffer.from(png,'base64')],'test.png',{type:'image/png'});Object.defineProperty(imagePaste,'clipboardData',{value:{items:[{type:'image/png',getAsFile:()=>file}]}});editor.dispatchEvent(imagePaste);await new Promise(r=>setTimeout(r,35));assert.equal(editor.querySelectorAll('img').length,1);validate(data);
   click(`[data-tt="detail"][data-id="${b.id}"]`);click(`[data-tt="detail"][data-id="${a.id}"]`);assert(document.querySelector('[data-tt-memo] img'));
-  const restored=document.querySelector('[data-tt-memo]');restored.querySelector('img').remove();restored.dispatchEvent(new dom.window.Event('input',{bubbles:true}));assert(!a.memoParts.some(p=>p.image));
+  const restored=document.querySelector('[data-tt-memo]');restored.querySelector('img').remove();restored.dispatchEvent(new dom.window.Event('input',{bubbles:true}));assert(!a.memoParts.some(p=>p.image||p.asset));
   const original=JSON.stringify(data);click(`[data-tt="focus"][data-id="${a.id}"]`);change('[data-tt-clock]','37');click('[data-tt="start"]');assert(timer.read().running);assert.equal(timer.read().minutes,37);click(`[data-tt="focus"][data-id="${b.id}"]`);click('[data-tt="start"]');assert.equal(timer.read().taskId,a.id);assert(document.querySelector('[data-tt-error]').textContent);assert.equal(JSON.stringify(data),original);
   owner='other';view.reset();render();assert(!document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));assert(saves>=5);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}

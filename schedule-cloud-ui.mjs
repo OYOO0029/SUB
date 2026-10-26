@@ -1,4 +1,5 @@
-import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261027-journal-1';
+import {backupUsage} from './schedule-backups.mjs';
+import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261026-storage-1';
 import {SYNC_CONFIG,SUPABASE_SDK} from './schedule-config.mjs';
 import {appStorage} from './schedule-storage.mjs';
 import {authErrorMessage} from './schedule-auth-errors.mjs';
@@ -23,6 +24,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  '<p class="small">기록이 서로 다를 때만 사용할 데이터를 선택하세요. 선택 전 기록을 보호 백업에 보관합니다.</p></div>',
  '<button type="button" data-cloud="legacy" class="full" hidden>이 기기의 이전 기록 가져오기</button>',
  '<div class="cloud-choices"><button type="button" data-cloud="backup">현재 기록 백업</button><button type="button" data-cloud="protected">보호된 백업</button></div>',
+ '<p id="cloud-backup-usage" class="small"></p>',
  '<button type="button" data-cloud="logout" class="full">로그아웃</button></div>',
  '<p class="small">노션과 다른 기기에서 같은 계정으로 로그인하면 기록이 동기화됩니다.</p><p id="cloud-storage" class="small"></p></form>'
  ].join('');
@@ -39,6 +41,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
   document.querySelectorAll('[data-cloud-label]').forEach(el=>el.textContent=user?'계정 · 동기화':restorePending?'로그인 확인 중':'로그인 · 동기화');
   document.querySelectorAll('[data-cloud-status]').forEach(el=>{el.textContent=statusText;el.dataset.state=statusKind;});
   window.dispatchEvent(new Event('my-week-sync-status'));text('#cloud-detail',statusText);dialog.querySelector('#cloud-detail').dataset.state=statusKind;
+  const usage=engine?backupUsage(storage,engine.key):null;text('#cloud-backup-usage',usage?`이 브라우저 백업 ${usage.count}개 · ${(usage.bytes/1024).toFixed(0)}KB (복구용 ${usage.protectedCount}개 보존)`:'');
   text('#cloud-account',user?.email||'같은 계정으로 어디서나 이어서 기록하세요.');
   text('#cloud-storage',storage.persistent?'':'이 환경에서는 로그인 상태가 이 창에서만 유지됩니다. 닫기 전에 ‘동기화됨’을 확인하세요.');
   dialog.querySelector('#cloud-fields').hidden=!!user||restorePending;
@@ -181,7 +184,7 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
     return;
    }
    if(!user)throw Error('먼저 로그인해 주세요.');
-   if(action==='backup'){bridge.export();return;}
+   if(action==='backup'){await bridge.export();return;}
    if(action==='protected'){
     const prefix=namespace+'.cloud.v1:'+SYNC_CONFIG.url+':'+user.id;
     const backups=storage.keys().filter(k=>k===prefix||k.startsWith(prefix+':')).map(key=>({key,value:JSON.parse(storage.getItem(key))}));
@@ -235,6 +238,14 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(window,'beforeunload',event=>{
   if(engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
  });
+ async function storageFile(method,path,blob){
+  await connect();const account=user,revision=generation;
+  if(!account||!path.startsWith(account.id+'/')||!/^[-A-Za-z0-9_]+\/[-A-Za-z0-9_]+\.(png|jpeg|webp|gif)$/.test(path))throw Error('현재 계정의 이미지 경로를 확인해 주세요.');
+  const bucket=client.storage.from('work-images');
+  const {data,error}=await (method==='upload'?bucket.upload(path,blob,{upsert:false,contentType:blob.type,cacheControl:'3600'}):bucket.download(path));
+  if(error)throw Error('이미지 저장소에 연결하지 못했습니다. 네트워크와 비공개 저장소 설정을 확인해 주세요.');
+  if(revision!==generation||user?.id!==account.id)throw Error('계정이 변경되었습니다. 다시 시도해 주세요.');return data;
+ }
  paint();const ready=connect().catch(restoreError);
- return {ready,get status(){return statusKind;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
+ return {ready,protect(data,reason){if(!engine||!user)throw Error('로그인해 주세요.');engine.backup(data,reason);},files:{upload:(path,blob)=>storageFile('upload',path,blob),download:path=>storageFile('download',path)},get status(){return statusKind;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }

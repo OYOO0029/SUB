@@ -1,15 +1,16 @@
-import {createFocusView} from './focus-view.js?v=20261026-project-list-1';
+import {workImages} from './image-store.mjs';
+import {createFocusView} from './focus-view.js?v=20261026-storage-1';
 import {appStorage} from '../schedule-storage.mjs';
 import {createWorkflowUI} from './workflow-ui.js?v=20261026-project-list-1';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
-import {createItem} from './editing.js?v=20261018-workflow';
+import {createItem,changeCheck} from './editing.js?v=20261026-storage-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks} from './project-view.js?v=20261026-project-grid';
 import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
-import {createDetailUI} from './detail-ui.js?v=20261018-workflow';
-import {activeChecks} from './editing.js?v=20261018-workflow';
+import {createDetailUI} from './detail-ui.js?v=20261026-storage-1';
+import {activeChecks} from './editing.js?v=20261026-storage-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261018-workflow';
-import {startWorkCloud} from './integration.js?v=20261027-journal-1';
-import {loadState,saveState,validate,workAccount} from './repository.js?v=20261018-workflow';
+import {startWorkCloud} from './integration.js?v=20261026-storage-1';
+import {loadState,saveState,validate,workAccount} from './repository.js?v=20261026-storage-1';
 import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js?v=20261018-workflow';
 import {installTaskDrag} from './task-drag.js';
 import {installSurfaceInteractions} from './surface-interactions.js?v=20261026-project-list-1';
@@ -177,10 +178,10 @@ function showEditor(html){$('#editor').innerHTML=html;if(!$('#editor').open)$('#
 function editorFrame(title,body,footer=''){return `<header class="editor-header"><h2 id="editor-title">${title}</h2>${button(icon('close'),'close-editor','type="button" aria-label="닫기"','icon-button')}</header>${body}${footer}`;}
 function editEntity(type='task',id=null,opts={}){if(!workAccount.owner){window.dispatchEvent(new Event('my-week-login-request'));return;}if(id)openDetail(type,id);else detailUI.create(type,opts);}
 function timeEditor(id){detailUI.timeEditor(id);}
-function settings(){showEditor(editorFrame('설정',`<div class="editor-body"><section><h3>계정과 동기화</h3><p class="form-help">개인 일정과 같은 계정으로 업무를 저장합니다.</p><button class="small-button" data-action="cloud-open"><span data-cloud-label>계정 · 동기화</span></button><p class="work-cloud-status" data-cloud-status></p></section><section class="detail-section"><h3>업무 데이터</h3><div class="settings-actions">${button(icon('download')+'JSON 내보내기','export','','small-button')}<button class="small-button" data-open-work-import>업무 백업 가져오기</button>${button(icon('trash')+'휴지통','trash','','small-button')}</div></section><section class="detail-section"><a class="property-link" href="../schedule.html">개인 일정 열기 ${icon('arrow')}</a></section></div>`,`<footer class="editor-footer">${button('닫기','close-editor','','small-button')}</footer>`));window.dispatchEvent(new Event('my-week-render'));}
+function settings(){showEditor(editorFrame('설정',`<div class="editor-body"><section><h3>계정과 동기화</h3><p class="form-help">개인 일정과 같은 계정으로 업무를 저장합니다.</p><button class="small-button" data-action="cloud-open"><span data-cloud-label>계정 · 동기화</span></button><p class="work-cloud-status" data-cloud-status></p></section><section class="detail-section"><h3>업무 데이터</h3><div class="settings-actions">${button(icon('download')+'JSON 내보내기','export','','small-button')}<button class="small-button" data-open-work-import>업무 백업 가져오기</button><button class="small-button" data-migrate-work-images>기존 이미지 별도 저장</button>${button(icon('trash')+'휴지통','trash','','small-button')}</div></section><section class="detail-section"><a class="property-link" href="../schedule.html">개인 일정 열기 ${icon('arrow')}</a></section></div>`,`<footer class="editor-footer">${button('닫기','close-editor','','small-button')}</footer>`));window.dispatchEvent(new Event('my-week-render'));}
 function trash(){detailUI.trash();}
 function tracker(){const days=monthDays(ui.date).filter(d=>d.slice(0,7)===ui.date.slice(0,7));showEditor(editorFrame(`${fmt(ui.date,{month:'long'})} 트래커`,`<div class="editor-body"><p class="form-help">날짜별 버튼을 눌러 기록하고 취소할 수 있어요.</p>${['물 마시기','운동','독서'].map((name,i)=>`<section class="tracker-section"><h3>${name} <span class="count">${days.filter(d=>data.tracker[d+'-'+i]).length}일</span></h3><div class="tracker-month">${days.map(d=>`<button class="tracker-date ${data.tracker[d+'-'+i]?'checked':''}" data-action="track-month" data-date="${d}" data-index="${i}" aria-label="${d} ${name}" aria-pressed="${!!data.tracker[d+'-'+i]}">${Number(d.slice(8))}</button>`).join('')}</div></section>`).join('')}</div>`));}
-function download(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`what-to-do-work-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('업무 데이터를 내보냈어요.');}
+async function download(){try{const portable=await workImages.portable(data);const blob=new Blob([JSON.stringify(portable,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`what-to-do-work-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('업무 데이터를 내보냈어요.');}catch(error){toast(error.message||'백업하지 못했습니다.');}}
 
 const detailUI=createDetailUI({getData:()=>data,ui,esc,icon,button,property,taskCard,workCard,notify:toast,save:(refresh=true)=>{if(!workAccount.owner)return;const ok=saveState(data);ui.saveWarning=ok?'':'저장하지 못했습니다. 입력 내용은 현재 창에 유지됩니다.';if(refresh)render();}});
 
@@ -246,7 +247,7 @@ document.addEventListener('change',async event=>{
   const el=event.target;
   if(el.matches('[data-calendar-layer]')){ui[el.dataset.calendarLayer]=el.checked;render();}
   else if(el.matches('[data-complete]')){const t=findTask(el.dataset.complete),before=structuredClone(t);complete(t,today());persist(t.status==='done'?'완료했습니다.':'다시 할 일로 바꿨어요.',()=>{Object.assign(t,before);persist('완료 변경을 되돌렸어요.');});}
-  else if(el.matches('[data-check]')){const t=findTask(el.dataset.taskId);t.checks.find(c=>c.id===el.dataset.check).done=el.checked;persist('확인사항을 저장했어요.');}
+  else if(el.matches('[data-check]')){changeCheck(data,el.dataset.taskId,el.dataset.check,{done:el.checked});persist('확인사항을 저장했어요.');}
   else if(el.id==='show-completed'){ui.completed=el.checked;ui.status=el.checked?'all':'active';render();}
   else if(el.id==='project-filter'){ui.project=el.value;ui.work='';render();}
   else if(el.id==='work-filter'){ui.work=el.value;render();}
@@ -284,7 +285,7 @@ function saveReminderChange(message,undo){const ok=saveState(data);if(!ok){ui.sa
 
 render();
 window.addEventListener('click',event=>{if(!workAccount.owner&&event.target.closest('.workspace-content')){event.preventDefault();event.stopImmediatePropagation();window.dispatchEvent(new Event('my-week-login-request'));}},true);
-const workCloud=startWorkCloud({getData:()=>data,replaceData:value=>{data=value;ui.saveWarning='';render();},notify:toast,
+const workCloud=startWorkCloud({save:()=>saveState(data),getData:()=>data,replaceData:value=>{data=value;ui.saveWarning='';render();},notify:toast,
  onStatus(kind){ui.cloudStatus=kind;document.querySelectorAll('[data-save-state]').forEach(el=>el.textContent=kind==='online'?'저장됨':kind==='error'?'동기화 실패 · 재시도 필요':kind==='offline'?'기기에 저장됨 · 연결 후 동기화':kind==='conflict'?'다른 기기 변경 확인 필요':kind==='waiting'?'기기에 저장됨 · 동기화 대기':'동기화 중');if(workAccount.owner&&['online','error','offline','conflict'].includes(kind))reminderAccountReady=true;reminders.refresh();},
  resetEditors(){focus.resetPanels();reminderAccountReady=false;reminders.close();clearTimeout(toastTimer);undoFn=null;ui.detail=null;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';document.querySelectorAll('dialog[open]:not(#cloud-dialog)').forEach(dialog=>{dialog.dataset.skipCloseSave='true';dialog.close();});document.body.classList.remove('task-dragging','dragging-reminders');},
  download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
