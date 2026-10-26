@@ -1,0 +1,58 @@
+/* Shared interaction tokens. Calendar cells retain their compact event geometry. */
+html{scrollbar-gutter:stable}
+#app{--ux-control:32px;--ux-icon:16px;--ux-gap:8px;--ux-radius:6px}
+#app button{font-family:inherit}
+#app :is(.icon-button,.filter-toggle,.ux-tools>.focus-button){display:inline-flex;align-items:center;justify-content:center;width:var(--ux-control);height:var(--ux-control);min-height:var(--ux-control);padding:0;flex-shrink:0;border-radius:var(--ux-radius);background:transparent;color:var(--muted)}
+#app :is(.icon-button,.filter-toggle,.ux-tools,.tt-panel,.tt-mini) .icon{width:var(--ux-icon);height:var(--ux-icon);display:block;flex:none;stroke-width:1.65}
+#app .new-header :is([data-action=cloud-open],[data-action=settings]) .icon{display:none}
+#app .new-header :is([data-action=cloud-open],[data-action=settings])::before{width:16px;height:16px}
+#app :is(.icon-button,.filter-toggle):hover{background:var(--panel);color:var(--text)}
+#app :is(.flow-nav-link,.view-tab,.focus-tab,.tt-button,.small-button,.today-button){font-size:13px;font-weight:400;line-height:20px}
+#app :is(.view-tab,.focus-tab,.small-button,.today-button){display:inline-flex;align-items:center;justify-content:center;height:var(--ux-control);min-height:var(--ux-control);width:auto;padding:0 10px;border-radius:var(--ux-radius);white-space:nowrap}
+#app :is(.view-tab,.focus-tab){background:transparent;color:var(--muted)}
+#app :is(.flow-nav-link[aria-current=page],.view-tab[aria-pressed=true],.focus-tab[aria-pressed=true],.tt-status [aria-pressed=true]){background:var(--panel);color:var(--text);font-weight:600}
+#app :is(.ux-tools,.project-list-actions,.workspace-actions){display:flex;align-items:center;gap:var(--ux-gap);flex-shrink:0}
+.ux-view-tabs{display:flex;align-items:center;gap:4px}
+#app .flow-nav-link:nth-child(1){width:80px}
+#app .flow-nav-link:nth-child(2){width:74px}
+#app .flow-nav-link:nth-child(3){width:64px}
+#app .view-tab{min-width:64px}
+#app .ux-tools>.tt-button{width:var(--ux-control);height:var(--ux-control);min-height:var(--ux-control)}
+#app .tt-presets>.tt-button{min-height:var(--ux-control)}
+.tt-status{display:flex;align-items:center;gap:4px;min-height:32px;margin-bottom:12px}
+#app .tt-status>.tt-button{line-height:20px;display:inline-flex;align-items:center;justify-content:center}
+.project-list-toolbar{min-height:32px;margin-bottom:12px}
+.new-workspace>.workspace-content:has(.project-overview){padding-top:16px}
+.project-list-toolbar h2{font-size:13px;font-weight:400;line-height:20px}
+.new-workspace>.workspace-nav{padding:16px var(--work-content-inset) 12px;min-height:60px;gap:8px}
+#app .date-navigation{display:flex;align-items:center;gap:4px}
+#app .workspace-nav .date-label{font-size:13px;font-weight:400;line-height:20px;min-height:32px;display:flex;align-items:center}
+#app :is(.flow-task-title,.focus-task-title,.focus-event-title,.tt-title){font-size:14px;font-weight:400;line-height:20px}
+#app .project-overview-card h2{font-size:14px;font-weight:400;line-height:20px}
+#app .project-current-works{font-size:13px;line-height:20px}
+#app :is(.tt-panel h2,.focus-picker h2,.project-page-heading h1){font-size:16px;font-weight:600;line-height:24px}
+#app :is(.tt-panel h3,.flow-group>summary>span){font-size:13px;font-weight:600}
+#app :is(.tt-sub,.flow-task) input[type=checkbox]{width:18px;height:18px;flex-shrink:0}
+#app .tt-timer-controls .tt-button{width:32px;height:32px;padding:0}
+.ux-event-detail{background:transparent;text-align:left;padding:0;min-width:0;width:100%}
+.ux-event-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.ux-event-meta .focus-plan-time{background:transparent;padding:4px 0;margin:0;min-height:28px;font-size:12px}
+.focus-event-content{grid-template-columns:minmax(0,1fr) 32px}
+.focus-event:focus-within .focus-event-content{opacity:1}
+.tt-panel .tt-clock{margin:8px 0}
+#app :is(.focus-add,.flow-add,[data-tt-add-check]) input:not([type=checkbox]),#app .tt-date input{min-height:var(--ux-control);padding:4px 8px;font-size:13px;border-radius:var(--ux-radius)}
+#app:has(.tt-mini) .main{padding-bottom:80px}
+#app :is(button,input,select,[contenteditable]):focus-visible{outline:2px solid var(--muted);outline-offset:2px}
+@media(max-width:580px){
+ .new-workspace>.workspace-nav{display:flex;flex-wrap:wrap}
+ .new-workspace>.workspace-nav .date-navigation{position:static;transform:none;order:-1;flex-basis:100%;justify-content:center}
+ .new-workspace>.workspace-nav .workspace-actions{margin-left:auto}
+ .focus-event-content{grid-template-columns:minmax(0,1fr) 32px}
+}
+@media(pointer:coarse){
+ #app{--ux-control:44px}
+ #app :is(.flow-nav-link,.tt-focus,.tt-status>.tt-button,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button){min-height:44px}
+ #app :is(.tt-focus,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button){width:44px}
+ .tt-table .tt-c-focus{width:60px}
+ .focus-event-content{grid-template-columns:minmax(0,1fr) 44px}
+}

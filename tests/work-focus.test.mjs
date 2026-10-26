@@ -64,7 +64,12 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     assert.equal(document.querySelector('.focus-ring'),null);
     click(`[data-tt="focus"][data-id="${task.id}"]`);click('[data-tt="start"]');
     const savedTimer=dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account');
+    click('[data-tt="close-panel"]');assert(document.querySelector('.tt-mini'));
+    ui.tab='projects';document.querySelector('#app').innerHTML=view.overlays();assert(document.querySelector('.tt-mini'));assert(!document.querySelector('.tt-panel'));
+    click('.tt-mini-title');assert.equal(ui.tab,'tasks');assert(document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));
+    assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     ui.view='timeline';render();assert.equal(document.querySelectorAll('[data-tick]').length,67);
+    assert(!document.querySelector('.focus-ring'));assert(document.querySelector('.tt-panel'));
     const history=document.querySelector('.focus-history');if(history)assert.equal(history.open,false);
     click(`[data-focus="plan"][data-id="${task.id}"]`);
     const originalPlan=JSON.stringify(task.plans);click('[data-focus="block"][data-minute]');click('[data-focus="close-picker"]');
@@ -81,6 +86,6 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     submit('[data-focus-add]');assert.equal(data.tasks.length,3);assert.equal(saves,2);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     assert.equal(taskContext(data,task).project.id,p.id);
-    owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.focus-clock').textContent,'60:00');assert.equal(document.querySelector('.focus-linked').hidden,true);
+    owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.tt-panel'),null);assert.equal(document.querySelector('.tt-mini'),null);assert.equal(document.querySelector('.focus-ring'),null);
   }finally{view?.destroy();dom.window.close();for(const key of keys){const d=originals.get(key);if(d)Object.defineProperty(globalThis,key,d);else delete globalThis[key];}}
 });

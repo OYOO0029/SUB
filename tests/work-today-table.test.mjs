@@ -19,7 +19,7 @@ test('today table filters, real task edits, clipboard sanitizing, account reset 
   const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   view=createTodayTable({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer,render,save:()=>{validate(data);saves++},notify(){},flow:{row:()=>''}});
   const click=s=>{assert(document.querySelector(s),s);document.querySelector(s).click()},change=(s,v)=>{const el=document.querySelector(s);el.value=v;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))};
-  render();assert.deepEqual([...document.querySelectorAll('th')].map(t=>t.textContent.trim()),['','프로젝트⌄','할 일⌄','마감⌄','집중']);
+  render();assert.deepEqual([...document.querySelectorAll('th')].map(t=>t.textContent.trim()),['','프로젝트','할 일','마감','집중']);
   click('[data-key="project"]');change('[data-tt-filter="project"]',p.id);assert.equal(view.items().length,1);assert.equal(view.items()[0].id,a.id);
   click('[data-tt="clear-column"]');assert.equal(view.items().length,2);click('[data-tt="sort"][data-value="project"]');
   click(`[data-tt="detail"][data-id="${a.id}"]`);click('[data-tt="add-check"]');document.querySelector('[data-tt-add-check] input').value='새 하위 항목';document.querySelector('[data-tt-add-check]').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(a.checks.length,2);

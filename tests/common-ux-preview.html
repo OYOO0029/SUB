@@ -1,0 +1,13 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>Common UX isolated QA</title>
+<style>body{margin:0;background:#101318;color:white;font:12px sans-serif}nav{display:flex;gap:8px;padding:8px;flex-wrap:wrap}iframe{display:block;border:0;height:850px;margin:auto}pre{max-height:55px;overflow:auto;white-space:pre-wrap;margin:8px}</style>
+<nav><button data-width="1280">1280px</button><button data-width="720">720px</button><button data-width="390">390px</button><button data-width="320">320px</button></nav>
+<nav><button data-tab="tasks" data-view="list">리스트</button><button data-tab="tasks" data-view="timeline">타임라인</button><button data-tab="projects">프로젝트</button><button data-tab="calendar" data-view="week">주간</button><button data-tab="calendar" data-view="month">월간</button></nav>
+<pre id="metrics"></pre><iframe title="가상 계정 검수" style="width:390px"></iframe>
+<script>
+if(['localhost','127.0.0.1'].includes(location.hostname)){
+ const frame=document.querySelector('iframe');frame.src='/work/index.html?embedded=1';
+ document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>frame.style.width=b.dataset.width+'px');
+ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const d=frame.contentDocument;d.querySelector(`[data-action=navigate][data-value=${b.dataset.tab}]`)?.click();if(b.dataset.view)d.querySelector(`[data-action=view][data-value=${b.dataset.view}]`)?.click()});
+ setInterval(()=>{const d=frame.contentDocument,w=frame.contentWindow;if(!d.querySelector('.flow-nav'))return;const box=e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(v=>Math.round(v*100)/100)};document.querySelector('#metrics').textContent=JSON.stringify({width:w.innerWidth,overflow:d.documentElement.scrollWidth>w.innerWidth,tabs:[...d.querySelectorAll('.flow-nav-link')].map(e=>({box:box(e),font:w.getComputedStyle(e).fontSize})),toolbar:[...d.querySelectorAll('.tt-toolbar,.project-list-toolbar,.workspace-nav')].map(box),icons:[...d.querySelectorAll('.ux-tools button,.project-list-actions>button,.project-list-actions>[data-dropdown]>button,.workspace-nav .filter-toggle')].map(e=>({box:box(e),icon:e.querySelector('svg')?box(e.querySelector('svg')):null}))})},400);
+}else document.querySelector('iframe').remove();
+</script></html>
