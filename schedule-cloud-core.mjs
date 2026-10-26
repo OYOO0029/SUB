@@ -1,4 +1,4 @@
-import {writeBackup} from './schedule-backups.mjs';
+import {writeBackup,pruneRoutineBackups} from './schedule-backups.mjs?v=20261026-storage-2';
 // This slot shares the existing user-owned row without replacing the older app's state.
 export const CLOUD_SLOT = 'myWeekV1';
 const copy = x => JSON.parse(JSON.stringify(x));
@@ -20,6 +20,7 @@ export class CloudSync {
   Object.assign(this,{api,bridge,storage,key,status,slot}); this.active=true;this.chain=Promise.resolve();this.timer=null;this.seq=0;this.meta=null;this.writeRetries=0;
   const raw=storage.getItem(key);if(raw){this.meta=JSON.parse(raw);if(this.meta?.base)bridge.validate(this.meta.base.data);if(this.meta?.pending)bridge.validate(this.meta.pending);}
   this.savedPending=copy(this.meta?.pending||null);
+  pruneRoutineBackups(storage,key);
  }
  stop(){this.active=false;clearTimeout(this.timer);}
  otherPending(){const shared=JSON.parse(this.storage.getItem(this.key)||'null');return shared?.pending&&!equalState(shared.pending,this.savedPending)&&!equalState(shared.pending,this.meta?.pending)?this.bridge.validate(shared.pending):null;}

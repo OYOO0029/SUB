@@ -1,5 +1,5 @@
-import {backupUsage} from './schedule-backups.mjs';
-import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261026-storage-1';
+import {backupUsage} from './schedule-backups.mjs?v=20261026-storage-2';
+import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261026-storage-2';
 import {SYNC_CONFIG,SUPABASE_SDK} from './schedule-config.mjs';
 import {appStorage} from './schedule-storage.mjs';
 import {authErrorMessage} from './schedule-auth-errors.mjs';

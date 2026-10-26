@@ -15,3 +15,10 @@ export function writeBackup(storage,key,data,reason){
  storage.setItem(target,value);
 }
 export function backupUsage(storage,key){const entries=backupEntries(storage,key);return {count:entries.length,bytes:entries.reduce((n,e)=>n+e.bytes,0),protectedCount:entries.filter(e=>e.value.reason!=='before-pull').length};}
+
+// Apply the same budget to snapshots created before this release.
+export function pruneRoutineBackups(storage,key){
+ const entries=backupEntries(storage,key).filter(e=>e.value.reason==='before-pull').sort((a,b)=>String(a.value.at).localeCompare(String(b.value.at)));
+ let bytes=entries.reduce((n,e)=>n+e.bytes,0);
+ while(entries.length&&(entries.length>ROUTINE_BACKUP_LIMIT||bytes>ROUTINE_BACKUP_BYTES)){const old=entries.shift();storage.removeItem(old.key);bytes-=old.bytes;}
+}

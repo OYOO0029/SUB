@@ -1,5 +1,5 @@
 import {createImageStore,configureWorkImages,workImages,hydrateWorkImages,migrateInlineImages} from './image-store.mjs';
-import {startCloud} from '../schedule-cloud-ui.mjs?v=20261026-storage-1';
+import {startCloud} from '../schedule-cloud-ui.mjs?v=20261026-storage-2';
 import {appStorage} from '../schedule-storage.mjs';
 import {workAccount,validate} from './repository.js?v=20261026-storage-1';
 import {mergeWorkData} from './work-account.mjs';

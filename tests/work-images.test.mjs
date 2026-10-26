@@ -4,7 +4,7 @@ import {createImageStore,migrateInlineImages} from '../work/image-store.mjs';
 import {createItem,changeCheck,updateMemo} from '../work/editing.js';
 import {emptyWorkState} from '../work/work-account.mjs';
 import {validate} from '../work/repository.js';
-import {writeBackup,backupEntries,backupUsage,ROUTINE_BACKUP_BYTES} from '../schedule-backups.mjs';
+import {writeBackup,backupEntries,backupUsage,ROUTINE_BACKUP_BYTES,pruneRoutineBackups} from '../schedule-backups.mjs';
 
 function fixture(){let scope='https://fixture|owner';const files=new Map(),revoked=[];const store=createImageStore({getScope:()=>scope,getFiles:()=>({async upload(path,blob){files.set(path,blob)},async download(path){return files.get(path)}}),makeURL:()=>`blob:fixture-${files.size}`,revokeURL:url=>revoked.push(url)});return {store,files,revoked,setScope:value=>scope=value};}
 test('images persist private references, portable backups embed bytes, account switches isolate cache',async()=>{
@@ -44,4 +44,11 @@ test('routine backups cap count and bytes, deduplicate, preserve recovery and ot
  for(let i=0;i<12;i++)writeBackup(storage,'owner',{value:i},'before-pull');assert.equal(backupEntries(storage,'owner').length,6);assert.equal(backupUsage(storage,'owner').protectedCount,1);
  for(let i=0;i<8;i++)writeBackup(storage,'owner',{value:i,text:'x'.repeat(80000)},'before-pull');const routine=backupEntries(storage,'owner').filter(x=>x.value.reason==='before-pull');assert(routine.reduce((s,x)=>s+x.bytes,0)<=ROUTINE_BACKUP_BYTES);
  writeBackup(storage,'owner',{text:'x'.repeat(ROUTINE_BACKUP_BYTES)},'before-pull');assert.equal(map.get('owner:pending'),'pending');assert.equal(map.get('other:backup:keep'),'other');assert.equal(backupUsage(storage,'owner').protectedCount,1);
+});
+test('existing routine snapshots are pruned on upgrade without removing recovery snapshots',()=>{
+ const map=new Map(),storage={keys:()=>[...map.keys()],getItem:k=>map.get(k),removeItem:k=>map.delete(k)};
+ for(let i=0;i<32;i++)map.set('owner:backup:'+i,JSON.stringify({reason:'before-pull',at:String(i).padStart(2,'0'),data:{i}}));
+ map.set('owner:backup:protected',JSON.stringify({reason:'conflict',at:'00',data:{keep:true}}));
+ map.set('owner:pending','keep');pruneRoutineBackups(storage,'owner');
+ assert.equal(backupEntries(storage,'owner').length,6);assert(map.has('owner:backup:31'));assert(!map.has('owner:backup:0'));assert(map.has('owner:backup:protected'));assert.equal(map.get('owner:pending'),'keep');
 });
