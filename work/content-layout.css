@@ -2,6 +2,9 @@
 #app{--work-content-inset:28px}
 .new-workspace>.workspace-content{padding:24px var(--work-content-inset) 36px}
 .new-workspace>.flow-nav,.new-workspace>.workspace-nav{padding-inline:var(--work-content-inset)}
+.new-workspace>.flow-nav{padding-block:12px;gap:4px;align-items:center}
+.new-workspace>.flow-nav>.flow-nav-link{height:32px;padding:0 10px;font-size:13px;line-height:20px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.new-workspace>.workspace-content:has(.tt-screen){padding-top:16px;padding-bottom:24px}
 .new-workspace>.workspace-content:has(.connected-calendar){padding-top:0}
 @media(max-width:720px){
  #app{--work-content-inset:18px}

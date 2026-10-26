@@ -1,36 +1,45 @@
 /* Scoped to Today's table. Existing project/calendar layout and design tokens stay intact. */
-.tt-screen{position:relative;padding-bottom:68px}
+.tt-screen{position:relative;padding:0}
+.tt-screen:has(.tt-mini){padding-bottom:68px}
 .tt-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:12px}
 .tt-toolbar>div{display:flex;align-items:center;gap:4px}
+.tt-toolbar>div:last-child>.tt-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;min-height:32px;padding:0;line-height:1}
+.tt-toolbar .icon,.tt-focus .icon,.tt-timer-controls .icon,.tt-mini .icon{display:block;width:16px;height:16px;flex:none}
+.tt-status>.tt-button{height:32px;min-height:32px;padding:0 10px;line-height:32px;white-space:nowrap}
 .tt-button{background:transparent;padding:7px 9px;border-radius:6px;min-height:32px;color:var(--muted);font-size:12px}
 .tt-button:hover{background:var(--panel);color:var(--text)}
 .tt-status [aria-pressed=true]{background:#33433f;color:var(--text)}
-.tt-table-wrap{border:1px solid var(--line);border-radius:9px;overflow:auto;min-height:400px}
+.tt-table-wrap{border:1px solid var(--line);border-radius:8px;overflow:auto}
 .tt-table{width:100%;table-layout:fixed;border-collapse:collapse;text-align:left}
-.tt-table .tt-c-check{width:42px}.tt-table .tt-c-project{width:150px}.tt-table .tt-c-due{width:82px}.tt-table .tt-c-focus{width:48px}
-.tt-table th{height:40px;font-size:12px;font-weight:400;color:var(--muted);background:var(--panel);padding:0 10px;position:sticky;top:0}
-.tt-table td{height:48px;padding:0 10px;border-top:1px solid var(--line);font-size:13px}
+.tt-table .tt-c-check{width:44px}.tt-table .tt-c-project{width:144px}.tt-table .tt-c-due{width:82px}.tt-table .tt-c-focus{width:48px}
+.tt-table th{height:40px;font-size:12px;line-height:18px;font-weight:400;color:var(--muted);background:var(--panel);padding:0 10px;position:sticky;top:0}
+.tt-table td{height:48px;padding:0 10px;vertical-align:middle;line-height:20px;border-top:1px solid var(--line);font-size:13px}
 .tt-table tr:hover,.tt-table tr.is-selected{background:var(--panel)}
 .tt-table .is-done .tt-title>span{text-decoration:line-through;color:var(--muted)}
+.tt-table :is(th,td):first-child{padding:0;text-align:center}
+.tt-table :is(th,td):last-child{padding:0 8px;text-align:center}
 .tt-check{display:flex;align-items:center;justify-content:center;min-height:36px}.tt-check input{width:18px;height:18px;margin:0}
 .tt-project{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--muted)}
 .tt-title{display:flex;align-items:center;gap:7px;background:none;text-align:left;padding:0;width:100%;min-height:36px;font-size:14px}
 .tt-title>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tt-title small{font-size:11px;color:var(--muted);flex:none}
 .tt-due{font-size:12px!important;color:var(--muted);font-variant-numeric:tabular-nums}
-.tt-column{display:flex;gap:6px;align-items:center;min-height:40px;background:none;padding:0;color:inherit;font-size:12px}.tt-column small{font-size:9px}
-.tt-focus{display:flex;align-items:center;justify-content:center;width:30px;height:32px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--mint)}
+.tt-column{display:flex;gap:6px;align-items:center;min-height:40px;background:none;padding:0;color:inherit;font-size:12px;line-height:18px}.tt-column small{font-size:9px}
+.tt-focus{display:flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;margin:0 auto;border:1px solid var(--line);border-radius:6px;background:none;color:var(--mint)}
 .tt-empty{height:120px!important;text-align:center;color:var(--muted)}
 .tt-menu{position:fixed;z-index:120;width:232px;max-height:70vh;overflow:auto;padding:12px;background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 30px #0004;border-radius:8px}
 .tt-menu-top{display:flex;justify-content:space-between;align-items:center;font-size:13px}.tt-menu>.tt-button{display:block;width:100%;text-align:left}.tt-menu select,.tt-menu input{width:100%;font:inherit;font-size:12px;background:var(--canvas);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:9px;margin:8px 0}
 .tt-menu [aria-pressed=true]{color:var(--mint)}
 .tt-panel{position:fixed;right:16px;top:84px;bottom:16px;width:380px;z-index:90;background:var(--workspace,#21242b);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px #0005;display:flex;flex-direction:column;overflow:hidden}
-.tt-panel>header{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}.tt-panel h2{font-size:16px;overflow-wrap:anywhere}.tt-panel-body{padding:20px;overflow:auto;flex:1}.tt-panel h3{font-size:13px;margin:22px 0 12px}
+.tt-panel>header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}.tt-panel h2{font-size:16px;overflow-wrap:anywhere}.tt-panel-body{padding:20px;overflow:auto;flex:1}.tt-panel h3{font-size:13px;margin:22px 0 12px}
 .tt-panel input:not([type=checkbox]){background:transparent;color:var(--text);border:1px solid var(--line);border-radius:5px;padding:8px;min-width:0;font:inherit}.tt-date{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .tt-panel .tt-clock{width:100%;font-size:56px!important;line-height:1.3;text-align:center;border-color:transparent!important;margin:18px 0;font-weight:400!important;font-variant-numeric:tabular-nums}
-.tt-presets,.tt-timer-controls{display:flex;justify-content:center;gap:8px;margin:12px 0}.tt-timer-controls .tt-button{width:40px;height:40px;background:var(--panel)}
+.tt-presets,.tt-timer-controls{display:flex;justify-content:center;gap:8px;margin:12px 0}.tt-timer-controls .tt-button{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;background:var(--panel)}
 .tt-section-title{display:flex;align-items:center;justify-content:space-between;margin-top:20px}.tt-section-title h3{margin:0}.tt-sub{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);min-height:44px}.tt-sub input[type=checkbox]{flex:none;width:17px;height:17px}.tt-sub input:not([type=checkbox]){flex:1;border:0!important;padding:8px 0!important;font-size:13px!important}.tt-sub .is-done{text-decoration:line-through;color:var(--muted)!important}
 [data-tt-add-check]{display:flex;gap:6px;margin-top:12px}[data-tt-add-check] input{flex:1}[data-tt-add-check] button{background:var(--panel);padding:8px;border-radius:5px}
 .tt-memo{white-space:pre-wrap;overflow-wrap:anywhere;min-height:170px;border:1px solid var(--line);border-radius:7px;padding:12px;font-size:13px;line-height:1.7}.tt-memo:empty:before{content:'메모를 입력하거나 이미지를 붙여넣으세요';color:var(--muted);pointer-events:none}.tt-memo img{max-width:100%;height:auto;display:block;margin:8px 0}.tt-detail-footer{display:flex;justify-content:space-between;margin-top:12px}.tt-error{color:#e5b397;font-size:12px}.tt-error:empty{display:none}
 .tt-mini{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:91;display:flex;align-items:center;gap:8px;width:min(520px,calc(100% - 32px));background:#33433f;border:1px solid #718b81;border-radius:10px;padding:10px 12px}.tt-mini-title{min-width:0;flex:1;text-align:left;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;background:none;font-size:13px}.tt-mini [data-tt-mini-clock]{font-variant-numeric:tabular-nums}.tt-screen:has(.tt-mini) .tt-panel{bottom:88px}
 .tt-screen :is(button,input,select,[contenteditable]):focus-visible{outline:2px solid var(--muted);outline-offset:2px}
-@media(max-width:720px){.tt-table{min-width:620px}.tt-panel{width:min(380px,calc(100% - 24px));right:12px;top:74px}.tt-toolbar{gap:4px}.tt-toolbar .tt-button{padding:6px}.tt-table-wrap{min-height:320px}}
+@media(max-width:720px){.tt-table{min-width:620px}.tt-panel{width:min(380px,calc(100% - 24px));right:12px;top:74px}.tt-toolbar{gap:4px}.tt-status>.tt-button{padding-inline:8px}.tt-toolbar>div:last-child>.tt-button{padding:0}}
+
+.tt-mini>.tt-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;min-height:32px;padding:0;flex:none}
+.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;padding:0;line-height:1}
