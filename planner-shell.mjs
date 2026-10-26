@@ -20,7 +20,7 @@ function showMode(next) {
     frame.title = mode === 'personal' ? '개인 일정' : '업무 일정';
     const url = new URL(mode === 'personal' ? './personal.html' : './work/index.html', location.href);
     url.searchParams.set('embedded','1');
-    url.searchParams.set('v',mode === 'work' ? '20261027-spacing-1' : '20261026-project-scroll');
+    url.searchParams.set('v',mode === 'work' ? '20261027-presets-1' : '20261026-project-scroll');
     frame.src = url.href;
     const frameMode = mode;
     frame.addEventListener('load', () => {
