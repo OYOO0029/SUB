@@ -77,3 +77,15 @@ test('default work appears only on weekdays, keeps explicit overrides and stays 
   assert.equal(d.querySelectorAll('#monthView .event-card.work').length,0);
  }finally{close()}
 });
+
+test('tracker check persists in account storage and returns across account reload and views',async()=>{
+ const {w,d,close}=await setup();try{
+  const toggle=d.querySelector('[data-tracker-date]'),{trackerDate:date,trackerId:id}=toggle.dataset;
+  toggle.click();assert.equal(w.myWeekSyncBridge.read().trackerLogs[date][id],true);
+  assert.equal(JSON.parse(w.localStorage.getItem('myWeekPlanner_v5:account:test-account')).trackerLogs[date][id],true);
+  w.myWeekSyncBridge.setAccount(null);w.myWeekSyncBridge.setAccount('test-account');
+  assert.equal(w.myWeekSyncBridge.read().trackerLogs[date][id],true);
+  d.querySelector('[data-personal-view=month]').click();
+  assert(d.querySelector(`[data-tracker-date="${date}"][data-tracker-id="${id}"]`).classList.contains('active'));
+ }finally{close()}
+});

@@ -12,3 +12,40 @@ test('network failure keeps pending edits and retries after reconnect',async()=>
 test('edits during a server write are retained for the next write',async()=>{const d=db(),a=screen(d);await a.sync.choose('push');a.edit(1);const write=d.api.write;let release;d.api.write=async(...args)=>{await new Promise(r=>release=r);return write(...args)};const pending=a.sync.reconcile();await new Promise(r=>setTimeout(r,0));a.edit(2);d.api.write=write;release();await pending;await a.sync.chain;assert.equal(cloudValue(d.row,validateState).data.budgets['2026-10'].total,2);a.sync.stop();});
 test('editing form defers incoming data; legacy root updates remain untouched',async()=>{const d=db(),a=screen(d),b=screen(d);await a.sync.choose('push');await b.sync.choose('pull');a.edit(5);await a.sync.reconcile();b.busy(true);await b.sync.reconcile();assert.equal(b.data.budgets['2026-10'],undefined);b.busy(false);await b.sync.reconcile();assert.equal(b.data.budgets['2026-10'].total,5);const row=d.row;row.state.legacy='changed';row.updated_at='999';d.row=row;b.edit(6);await b.sync.reconcile();assert.equal(d.row.state.legacy,'changed');});
 test('invalid or removed shared state never overwrites local records',async()=>{const d=db(),a=screen(d);await a.sync.choose('push');const row=d.row;delete row.state[CLOUD_SLOT];d.row=row;await a.sync.reconcile();assert.equal(a.sync.meta.conflict,true);assert.equal(d.writes,1);});
+
+test('another tab cannot clear a tracker checkpoint before its upload or reload',async()=>{
+ const d=db(),a=screen(d),b=screen(d);await a.sync.choose('push');await b.sync.choose('pull');
+ // Same-origin tabs share the account journal even though each has its own UI state.
+ b.sync.storage=a.sync.storage;
+ a.data.trackerLogs['2026-10-26']={coffee:true};a.sync.changed();clearTimeout(a.sync.timer);
+ await b.sync.reconcile();
+ const journal=JSON.parse(a.map.get('test'));
+ assert.equal(journal.pending?.trackerLogs['2026-10-26']?.coffee,true);
+ const restored=new CloudSync({api:d.api,bridge:a.sync.bridge,storage:a.sync.storage,key:'test',status(){}});
+ await restored.reconcile();assert.equal(cloudValue(d.row,validateState).data.trackerLogs['2026-10-26'].coffee,true);
+ a.sync.stop();b.sync.stop();restored.stop();
+});
+
+test('shared-journal edits during a remote read are not replaced by its stale response',async()=>{
+ const d=db(),a=screen(d),b=screen(d);await a.sync.choose('push');await b.sync.choose('pull');b.sync.storage=a.sync.storage;
+ const read=d.api.read;let release;d.api.read=()=>new Promise(r=>release=r);
+ const pull=b.sync.reconcile();await new Promise(r=>setTimeout(r,0));
+ a.data.trackerLogs['2026-10-26']={coffee:true};a.sync.changed();clearTimeout(a.sync.timer);
+ release(await read());await pull;
+ assert.equal(JSON.parse(a.map.get('test')).pending.trackerLogs['2026-10-26'].coffee,true);
+ a.sync.stop();b.sync.stop();
+});
+
+test('simultaneous same-browser edits keep both recoverable versions',async()=>{
+ const d=db(),a=screen(d),b=screen(d);await a.sync.choose('push');await b.sync.choose('pull');b.sync.storage=a.sync.storage;
+ a.data.trackerLogs['2026-10-26']={coffee:true};a.sync.changed();clearTimeout(a.sync.timer);
+ b.data.trackerLogs['2026-10-26']={bell:true};b.sync.changed();clearTimeout(b.sync.timer);
+ assert.equal(b.sync.meta.conflict,true);
+ assert.equal(JSON.parse(a.map.get('test')).pending.trackerLogs['2026-10-26'].coffee,true);
+ const backups=[...a.map.entries()].filter(([k])=>k.includes(':backup:')).map(([,v])=>JSON.parse(v));
+ assert(backups.some(v=>v.reason==='same-browser-local'&&v.data.trackerLogs['2026-10-26'].bell));
+ assert(backups.some(v=>v.reason==='same-browser-other-tab'&&v.data.trackerLogs['2026-10-26'].coffee));
+ b.data.trackerLogs['2026-10-27']={bell:true};b.sync.changed();
+ assert([...a.map.entries()].filter(([k])=>k.includes(':backup:')).some(([,v])=>JSON.parse(v).data.trackerLogs['2026-10-27']?.bell));
+ a.sync.stop();b.sync.stop();
+});

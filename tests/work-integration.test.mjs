@@ -40,6 +40,14 @@ test('conflicting work edits preserve pending changes and reject silent overwrit
 test('offline work survives reload and synchronizes to another client',async()=>{
  const server=db(),a=screen(server,data());await a.sync.choose('push');a.edit('Offline');const read=server.api.read;server.api.read=async()=>{throw Error('offline');};await a.sync.reconcile();a.sync.stop();const restored=screen(server,a.data,a.storage);server.api.read=read;await restored.sync.reconcile();const other=screen(server);await other.sync.choose('pull');assert.equal(other.data.tasks[0].title,'Offline');
 });
+
+test('a passive work tab preserves another tab pending memo before upload',async()=>{
+ const server=db(),a=screen(server,data());await a.sync.choose('push');
+ const b=screen(server,data(),a.storage);const next=a.data;next.tasks[0].notes='미전송 업무 메모';a.data=next;a.sync.changed();clearTimeout(a.sync.timer);
+ await b.sync.reconcile();assert.equal(JSON.parse(a.storage.getItem('test:myWorkV1')).pending.tasks[0].notes,'미전송 업무 메모');
+ a.sync.stop();const restored=screen(server,a.data,a.storage);await restored.sync.reconcile();
+ assert.equal(server.row.state.myWorkV1.data.tasks[0].notes,'미전송 업무 메모');assert.deepEqual(server.row.state.myWeekV1.data.events,['keep']);b.sync.stop();restored.sync.stop();
+});
 test('account cache and pending import remain isolated and no empty account gets demo records',()=>{
  const storage=memory(),account=createWorkAccount({storage,validate});assert.deepEqual(account.activate('project|A').tasks,[]);account.write(data('A'));account.stage(data('Import'));account.claim();account.deactivate();assert.deepEqual(account.activate('project|B').tasks,[]);assert.throws(()=>account.claim(),/다른 계정/);assert.equal(account.activate('project|A').tasks[0].title,'A');assert.equal(account.claim().tasks[0].title,'Import');account.finish();assert.equal(account.staged(),null);assert([...storage.map.keys()].some(k=>k.includes('import-backup')));
 });

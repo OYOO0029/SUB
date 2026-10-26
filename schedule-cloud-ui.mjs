@@ -1,4 +1,4 @@
-import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=work-integration-1';
+import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261027-journal-1';
 import {SYNC_CONFIG,SUPABASE_SDK} from './schedule-config.mjs';
 import {appStorage} from './schedule-storage.mjs';
 import {authErrorMessage} from './schedule-auth-errors.mjs';

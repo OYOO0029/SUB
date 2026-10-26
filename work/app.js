@@ -8,7 +8,7 @@ import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
 import {createDetailUI} from './detail-ui.js?v=20261018-workflow';
 import {activeChecks} from './editing.js?v=20261018-workflow';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261018-workflow';
-import {startWorkCloud} from './integration.js?v=20261026-focus-1';
+import {startWorkCloud} from './integration.js?v=20261027-journal-1';
 import {loadState,saveState,validate,workAccount} from './repository.js?v=20261018-workflow';
 import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js?v=20261018-workflow';
 import {installTaskDrag} from './task-drag.js';

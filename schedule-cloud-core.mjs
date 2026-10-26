@@ -18,16 +18,30 @@ export class CloudSync {
  constructor({api,bridge,storage,key,status,slot=CLOUD_SLOT}) {
   Object.assign(this,{api,bridge,storage,key,status,slot}); this.active=true;this.chain=Promise.resolve();this.timer=null;this.seq=0;this.meta=null;this.writeRetries=0;
   const raw=storage.getItem(key);if(raw){this.meta=JSON.parse(raw);if(this.meta?.base)bridge.validate(this.meta.base.data);if(this.meta?.pending)bridge.validate(this.meta.pending);}
+  this.savedPending=copy(this.meta?.pending||null);
  }
  stop(){this.active=false;clearTimeout(this.timer);}
- checkpoint(){this.storage.setItem(this.key,JSON.stringify(this.meta));}
+ otherPending(){const shared=JSON.parse(this.storage.getItem(this.key)||'null');return shared?.pending&&!equalState(shared.pending,this.savedPending)&&!equalState(shared.pending,this.meta?.pending)?this.bridge.validate(shared.pending):null;}
+ holdOtherPending(){
+  const pending=this.otherPending();if(!pending)return false;
+  if(this.meta?.pending){
+   this.meta.conflict=true;
+   const pair={local:this.meta.pending,other:pending};
+   if(!equalState(pair,this.siblingConflictSnapshot)){this.backup(this.meta.pending,'same-browser-local');this.backup(pending,'same-browser-other-tab');this.siblingConflictSnapshot=copy(pair);}
+   this.status('conflict','다른 창의 미전송 변경과 겹칩니다. 두 기록을 백업했고 자동 덮어쓰기를 멈췄습니다.');
+  }else this.status('waiting','다른 창의 저장을 기다리는 중입니다. 해당 창의 변경 기록을 보존합니다.');
+  return true;
+ }
+ checkpoint(explicit=false){if(!explicit&&this.holdOtherPending())return false;this.storage.setItem(this.key,JSON.stringify(this.meta));this.savedPending=copy(this.meta?.pending||null);return true;}
  backup(data,reason){this.storage.setItem(this.key+':backup:'+Date.now()+':'+crypto.randomUUID(),JSON.stringify({reason,at:new Date().toISOString(),data}));}
  queue(fn){this.chain=this.chain.then(()=>this.active?fn():undefined).catch(err=>{if(this.active)this.status('error',err.message||'서버 연결을 확인해 주세요.');});return this.chain;}
- changed(){if(!this.active)return;this.seq++;if(!this.meta?.linked){this.status('waiting','로그인 후 처음 사용할 데이터를 선택해 주세요.');return;}this.meta.pending=copy(this.bridge.read());this.checkpoint();this.status('saving','서버에 저장 중');clearTimeout(this.timer);this.timer=setTimeout(()=>this.reconcile(),500);}
+ changed(){if(!this.active)return;this.seq++;if(!this.meta?.linked){this.status('waiting','로그인 후 처음 사용할 데이터를 선택해 주세요.');return;}this.meta.pending=copy(this.bridge.read());if(!this.checkpoint())return;this.status('saving','서버에 저장 중');clearTimeout(this.timer);this.timer=setTimeout(()=>this.reconcile(),500);}
  reconcile(){return this.queue(async()=>{
+  if(this.holdOtherPending())return;
   if(!this.meta?.linked)return this.status('waiting','처음 연결할 데이터를 선택해 주세요.');
   if(this.meta.conflict)return this.status('conflict','다른 화면의 변경과 겹쳤습니다. 데이터를 선택해 주세요.');
   const seq=this.seq,row=await this.api.read();if(!this.active||seq!==this.seq)return;
+  if(this.holdOtherPending())return;
   const remote=cloudValue(row,this.bridge.validate,this.slot),pending=this.meta.pending;
   if(!remote){
    if(!this.meta.base){if(pending)return this.push(row,pending,seq);return this.status('online','연결됨 · 업무를 추가하세요');}
@@ -46,6 +60,7 @@ export class CloudSync {
   const value={schema:1,revision:crypto.randomUUID(),data:copy(this.bridge.validate(data))};
   const result=await this.api.write(withCloudValue(row,value,this.slot),row?.updated_at);
   if(!this.active)return;
+  if(this.holdOtherPending())return;
   if(!result){this.status('waiting','다른 화면의 저장을 확인하고 다시 동기화합니다.');clearTimeout(this.timer);if(++this.writeRetries<=3)this.timer=setTimeout(()=>this.reconcile(),1000);return;}
   this.writeRetries=0;
   this.meta={linked:true,base:value,pending:seq===this.seq?null:copy(this.bridge.read())};this.checkpoint();this.status(this.meta.pending?'saving':'online',this.meta.pending?'서버에 저장 중':'동기화됨');if(this.meta.pending)this.reconcile();
@@ -54,13 +69,13 @@ export class CloudSync {
   if(this.bridge.busy())throw Error('입력 중인 화면을 닫아 주세요.');
   const seq=this.seq,local=copy(this.bridge.read()),row=await this.api.read();if(!this.active)return;
   if(seq!==this.seq||this.bridge.busy())throw Error('내용이 변경되었습니다. 다시 선택해 주세요.');
-  const remote=cloudValue(row,this.bridge.validate,this.slot);this.backup(local,'before-connect');if(this.meta?.pending)this.backup(this.meta.pending,'pending-before-connect');
+  const remote=cloudValue(row,this.bridge.validate,this.slot);this.backup(local,'before-connect');if(this.meta?.pending)this.backup(this.meta.pending,'pending-before-connect');const sibling=this.otherPending();if(sibling)this.backup(sibling,'other-tab-before-explicit-connect');
   if(direction==='pull'){
    if(!remote)throw Error('현재 일정의 공유 데이터가 아직 없습니다. 기록이 있는 사이트에서 먼저 현재 데이터로 연결해 주세요.');
-   this.bridge.apply(remote.data);this.meta={linked:true,base:remote,pending:null};this.checkpoint();this.status('online','동기화됨');
+   this.bridge.apply(remote.data);this.meta={linked:true,base:remote,pending:null};this.checkpoint(true);this.status('online','동기화됨');
   }else{
    if(remote)this.backup(remote.data,'server-before-replace');
-   this.meta={linked:true,base:remote,pending:local};this.checkpoint();await this.push(row,local,seq);
+   this.meta={linked:true,base:remote,pending:local};this.checkpoint(true);await this.push(row,local,seq);
   }
  });}
  importData(incoming,merge){return this.queue(async()=>{
@@ -68,7 +83,7 @@ export class CloudSync {
   const seq=this.seq,local=copy(this.bridge.read()),row=await this.api.read();if(!this.active)return;
   if(seq!==this.seq||this.bridge.busy())throw Error('내용이 변경되었습니다. 다시 가져와 주세요.');
   const remote=cloudValue(row,this.bridge.validate,this.slot);
-  if(this.meta?.pending||this.meta?.conflict)throw Error('현재 변경사항을 먼저 동기화한 뒤 가져와 주세요.');
+  if(this.meta?.pending||this.meta?.conflict||this.otherPending())throw Error('현재 변경사항을 먼저 동기화한 뒤 가져와 주세요.');
   const merged=this.bridge.validate(merge(remote?.data||local,incoming));
   this.backup(local,'before-import-local');if(remote)this.backup(remote.data,'before-import-server');this.backup(incoming,'import-source');
   this.bridge.apply(merged);this.meta={linked:true,base:remote,pending:merged};this.checkpoint();
