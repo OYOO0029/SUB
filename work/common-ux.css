@@ -96,3 +96,11 @@ html{scrollbar-gutter:stable}
 .tt-today{width:32px;height:32px;padding:0}
 .tt-today>.icon{width:16px;height:16px}
 .ux-empty{font-size:11px;line-height:16px;font-weight:400;color:var(--muted)}
+
+/* Shared table grid and sticky headers within each list's scroll area. */
+.tt-table-wrap,.pl-table-wrap{max-height:min(60dvh,560px);overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.tt-table{border-collapse:separate;border-spacing:0}
+#app :is(.tt-table,.pl-table) th{position:sticky;top:0;z-index:3;background:var(--panel);box-shadow:0 1px 0 var(--line)}
+#app :is(.tt-table,.pl-table) th:not(:last-child),
+#app .tt-table td:not(:last-child):not([colspan]),
+#app .pl-table:not(.pl-project-table) td:not(:last-child):not([colspan]){border-right:1px solid var(--line)}
