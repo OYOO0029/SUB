@@ -4,7 +4,7 @@ import {uid,today,planFor,isPlanned,setTime,removeTime,taskContext} from './mode
 import {getItem,createItem,updateItem,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261026-storage-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261018-workflow';
 import {deadlineConflict} from './work-view.js?v=20261018-workflow';
-import {createDatePicker,dateLabel} from './date-picker.js';
+import {createDatePicker,dateLabel} from './date-picker.js?v=20261026-deadline-1';
 
 export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무 묶음',project:'프로젝트'};

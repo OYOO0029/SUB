@@ -121,3 +121,12 @@ html{scrollbar-gutter:stable}
 #detail.minimal-task .inline-memo{min-height:54px;height:54px}
 #detail.minimal-task .check-section{margin-top:12px}
 #detail.minimal-task .detail-extra{margin-top:16px}
+
+/* Shared corners for work surfaces and memo editor. */
+#app :is(.new-workspace,.tt-panel,.tt-table-wrap,.pl-table-wrap,.project-list-scroll,.tt-memo){border-radius:8px}
+.tt-date>.tt-button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;color:var(--text)}
+.tt-date>.tt-button .icon{width:14px;height:14px}
+.tt-saved-images{margin-top:12px;font-size:12px;color:var(--muted)}
+.tt-saved-images img{display:block;max-width:100%;height:auto;margin-top:8px}
+
+#app>.main>.new-workspace{border-radius:8px}
