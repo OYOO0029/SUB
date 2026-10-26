@@ -18,6 +18,10 @@ test('unified project properties save to their project and list status changes p
   const title=document.querySelector('[data-inline-field="title"]');title.focus();title.value='Updated';title.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(p.title,'Updated');assert.equal(ui.detail.id,p.id);
   detail.changeProjectState(p.id,'paused');assert.equal(p.lifecycle,'active');assert(document.querySelector('#property-editor').open);
   document.querySelector('[data-action="apply-project-state"][data-remove="no"]').click();assert.equal(p.lifecycle,'paused');assert.deepEqual(t,before);assert(saves>=2);
+  detail.open('task',t.id);assert.equal(document.querySelector('[data-choice-field="status"]'),null);
+  const taskBefore=structuredClone(t);let reminder=document.querySelector('[data-task-reminder]');reminder.checked=true;reminder.dispatchEvent(new window.Event('change',{bubbles:true}));assert(t.remindFrom);
+  reminder=document.querySelector('[data-task-reminder]');reminder.checked=false;reminder.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(t.remindFrom,null);assert.deepEqual({...t,remindFrom:taskBefore.remindFrom},taskBefore);
+  document.querySelector('#detail').close();
   let opened=null;window.addEventListener('work-open-project',e=>opened=e.detail);detail.open('project',p.id);assert.equal(opened,p.id);assert.equal(document.querySelector('#detail').open,false);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });

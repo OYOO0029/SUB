@@ -78,7 +78,11 @@ html{scrollbar-gutter:stable}
 #app .tt-table .tt-due,#app .tt-table td:first-child,#app .tt-table td:last-child{text-align:center}
 #app .pl-table th{text-align:center;vertical-align:middle}
 
-/* List headers reserve their chevron slot, revealing it without moving text. */
+/* Center the label itself; chevrons and filter dots sit outside its width. */
+#app :is(.tt-column,.pl-column){position:relative;gap:0;width:max-content;max-width:100%;margin-inline:auto}
+#app :is(.tt-column,.pl-column)>.icon{position:absolute;left:calc(100% + 4px);right:auto;top:50%;transform:translateY(-50%)}
+#app :is(.tt-column,.pl-column)>.tt-filter-dot{position:absolute;left:calc(100% + 18px);right:auto;top:50%;transform:translateY(-50%)}
+#app :is(.tt-table,.pl-table) th:has(.tt-column,.pl-column){padding-inline:24px}
 #app :is(.tt-column,.pl-column)>.icon{opacity:0;transition:opacity .12s ease}
 #app :is(.tt-column,.pl-column):is(:hover,:focus-visible,[aria-expanded=true])>.icon{opacity:1}
 @media(hover:none){#app :is(.tt-column,.pl-column)>.icon{opacity:1}}
@@ -104,3 +108,16 @@ html{scrollbar-gutter:stable}
 #app :is(.tt-table,.pl-table) th:not(:last-child),
 #app .tt-table td:not(:last-child):not([colspan]),
 #app .pl-table:not(.pl-project-table) td:not(:last-child):not([colspan]){border-right:1px solid var(--line)}
+
+.task-reminder{display:flex;align-items:center;gap:8px;min-height:32px}
+.task-reminder input{width:16px;height:16px;accent-color:var(--accent);margin:0}
+#detail .detail-extra>summary{font-size:12px;color:var(--muted);padding:8px 0}
+
+#detail.minimal-task .property-row{grid-template-columns:84px minmax(0,1fr);margin-bottom:4px;gap:8px}
+#detail.minimal-task .property-row dt .icon{display:none}
+#detail.minimal-task .property-row dt{font-size:12px}
+#detail.minimal-task .detail-body{padding-top:16px;padding-bottom:16px}
+#detail.minimal-task .detail-title-input{font-size:20px}
+#detail.minimal-task .inline-memo{min-height:54px;height:54px}
+#detail.minimal-task .check-section{margin-top:12px}
+#detail.minimal-task .detail-extra{margin-top:16px}
