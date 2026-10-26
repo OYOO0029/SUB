@@ -1,4 +1,4 @@
-import {createTodayTable} from './today-table.js?v=20261026-controls-1';
+import {createTodayTable} from './today-table.js?v=20261026-task-edit-1';
 import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261026-controls-1';
 import {executionSections,unfinished} from './workflow.js?v=20261026-controls-1';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261026-controls-1';
