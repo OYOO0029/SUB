@@ -11,7 +11,7 @@
 .tt-status [aria-pressed=true]{background:#33433f;color:var(--text)}
 .tt-table-wrap{border:1px solid var(--line);border-radius:8px;overflow:auto}
 .tt-table{width:100%;table-layout:fixed;border-collapse:collapse;text-align:left}
-.tt-table .tt-c-check{width:44px}.tt-table .tt-c-project{width:144px}.tt-table .tt-c-due{width:82px}.tt-table .tt-c-focus{width:48px}
+.tt-table .tt-c-check{width:44px}.tt-table .tt-c-project{width:144px}.tt-table .tt-c-due{width:82px}.tt-table .tt-c-focus{width:80px}
 .tt-table th{height:40px;font-size:12px;line-height:18px;font-weight:400;color:var(--muted);background:var(--panel);padding:0 10px;position:sticky;top:0}
 .tt-table td{height:48px;padding:0 10px;vertical-align:middle;line-height:20px;border-top:1px solid var(--line);font-size:13px}
 .tt-table tr:hover,.tt-table tr.is-selected{background:var(--panel)}

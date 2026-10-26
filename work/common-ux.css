@@ -17,9 +17,17 @@ html{scrollbar-gutter:stable}
 #app .flow-nav-link:nth-child(2){width:74px}
 #app .flow-nav-link:nth-child(3){width:64px}
 #app .view-tab{min-width:64px}
-#app .ux-tools>.tt-button{width:var(--ux-control);height:var(--ux-control);min-height:var(--ux-control)}
+#app .ux-tools>.tt-button{display:inline-flex;align-items:center;justify-content:center;padding:0;width:var(--ux-control);height:var(--ux-control);min-height:var(--ux-control)}
 #app .tt-presets>.tt-button{min-height:var(--ux-control)}
-.tt-status{display:flex;align-items:center;gap:4px;min-height:32px;margin-bottom:12px}
+.tt-status{display:flex;align-items:center;gap:4px;min-height:32px;margin:0}
+.tt-toolbar>.tt-toolbar-right{display:flex;align-items:center;gap:12px}
+#app .ux-view-tabs>.ux-view-icon{width:var(--ux-control);min-width:var(--ux-control);height:var(--ux-control);padding:0}
+.ux-view-icon .icon{width:16px;height:16px;display:block;flex:none}
+.tt-remaining{margin-top:24px;padding-top:24px;border-top:1px solid var(--line);min-width:0}
+.tt-remaining>h2{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;line-height:20px;margin:0 0 12px}
+.tt-remaining>h2>span{font-size:12px;font-weight:400;color:var(--muted)}
+.tt-today{display:inline-flex;align-items:center;justify-content:center;min-height:var(--ux-control);padding:0 4px;background:transparent;color:var(--muted);font-size:12px;white-space:nowrap;border-radius:6px}
+.tt-today:hover{background:var(--panel);color:var(--text)}
 #app .tt-status>.tt-button{line-height:20px;display:inline-flex;align-items:center;justify-content:center}
 .project-list-toolbar{min-height:32px;margin-bottom:12px}
 .new-workspace>.workspace-content:has(.project-overview){padding-top:16px}
@@ -49,10 +57,16 @@ html{scrollbar-gutter:stable}
  .new-workspace>.workspace-nav .workspace-actions{margin-left:auto}
  .focus-event-content{grid-template-columns:minmax(0,1fr) 32px}
 }
+@media(max-width:580px){
+ .tt-toolbar{flex-wrap:wrap;row-gap:8px}
+ .tt-toolbar>.tt-toolbar-right{display:contents}
+ .tt-toolbar-right>.ux-tools{margin-left:auto}
+ .tt-toolbar-right>.tt-status{order:3;flex-basis:100%}
+}
 @media(pointer:coarse){
  #app{--ux-control:44px}
  #app :is(.flow-nav-link,.tt-focus,.tt-status>.tt-button,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button){min-height:44px}
  #app :is(.tt-focus,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button){width:44px}
- .tt-table .tt-c-focus{width:60px}
+ .tt-table .tt-c-focus{width:80px}
  .focus-event-content{grid-template-columns:minmax(0,1fr) 44px}
 }

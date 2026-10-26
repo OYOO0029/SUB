@@ -1,4 +1,4 @@
-import {createFocusView} from './focus-view.js?v=20261027-common-ux-1';
+import {createFocusView} from './focus-view.js?v=20261027-remaining-1';
 import {appStorage} from '../schedule-storage.mjs';
 import {createWorkflowUI} from './workflow-ui.js?v=20261018-workflow-3';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
