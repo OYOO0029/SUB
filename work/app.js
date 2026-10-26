@@ -1,12 +1,12 @@
 import {workImages} from './image-store.mjs';
-import {createFocusView} from './focus-view.js?v=20261026-deadline-1';
+import {createFocusView} from './focus-view.js?v=20261026-status-1';
 import {appStorage} from '../schedule-storage.mjs';
-import {createWorkflowUI} from './workflow-ui.js?v=20261026-project-clean-1';
+import {createWorkflowUI} from './workflow-ui.js?v=20261026-status-1';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
 import {createItem,changeCheck} from './editing.js?v=20261026-storage-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-list-ux-1';
 import {createReminderCenter} from './reminders.js?v=20261026-focus-1';
-import {createDetailUI} from './detail-ui.js?v=20261026-work-detail-1';
+import {createDetailUI} from './detail-ui.js?v=20261026-status-1';
 import {activeChecks} from './editing.js?v=20261026-storage-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261018-workflow';
 import {startWorkCloud} from './integration.js?v=20261026-storage-2';
@@ -172,7 +172,7 @@ function render({keepMenus=false}={}){
   if(menus.length)surfaces.restore(menus);reminders.refresh();window.dispatchEvent(new Event('my-week-render'));
 }
 function property(label,i,value){return `<div class="property-row"><dt>${icon(i)}${label}</dt><dd>${value||'<span class="muted">미정</span>'}</dd></div>`;}
-function openDetail(type,id){if(type==='project'){if($('#detail').open)$('#detail').close();ui.detail=null;ui.tab='projects';ui.projectPage=id;ui.projectPageTab='tasks';ui.projectTaskFilter='active';ui.projectDetailQuery='';ui.projectDetailDue='';ui.projectAdd=null;ui.search='';render();return;}detailUI.open(type,id);}
+function openDetail(type,id){if(type==='project'){if($('#detail').open)$('#detail').close();ui.detail=null;ui.tab='projects';ui.projectPage=id;ui.projectPageTab='tasks';ui.projectTaskFilter='all';ui.projectDetailQuery='';ui.projectDetailDue='';ui.projectAdd=null;ui.search='';render();return;}detailUI.open(type,id);}
 function renderDetail(){detailUI.render();}
 function inputField(label,name,value='',type='text',attrs=''){return `<label class="form-field"><span>${label}</span><input name="${name}" type="${type}" value="${esc(value)}" ${attrs}></label>`;}
 function selectField(label,name,options){return `<label class="form-field"><span>${label}</span><select name="${name}">${options}</select></label>`;}
@@ -251,7 +251,8 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('change',async event=>{
   const el=event.target;
-  if(el.matches('[data-calendar-layer]')){ui[el.dataset.calendarLayer]=el.checked;render();}
+  if(el.matches('[data-project-task-status]')){ui.projectTaskFilter=el.value;render();document.querySelector('[data-project-task-status]')?.focus();}
+  else if(el.matches('[data-calendar-layer]')){ui[el.dataset.calendarLayer]=el.checked;render();}
   else if(el.matches('[data-complete]')){const t=findTask(el.dataset.complete),before=structuredClone(t);complete(t,today());persist(t.status==='done'?'완료했습니다.':'다시 할 일로 바꿨어요.',()=>{Object.assign(t,before);persist('완료 변경을 되돌렸어요.');});}
   else if(el.matches('[data-check]')){changeCheck(data,el.dataset.taskId,el.dataset.check,{done:el.checked});persist('확인사항을 저장했어요.');}
   else if(el.id==='show-completed'){ui.completed=el.checked;ui.status=el.checked?'all':'active';render();}

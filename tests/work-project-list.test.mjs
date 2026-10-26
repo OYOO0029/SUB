@@ -10,7 +10,7 @@ test('project tables keep direct and grouped ownership, count only completed wor
  const data=emptyWorkState(),p=createItem(data,'project','Project'),w=createItem(data,'work','Group',{projectId:p.id});
  const direct=createItem(data,'task','Direct',{projectId:p.id}),grouped=createItem(data,'task','Grouped',{workId:w.id}),done=createItem(data,'task','Done',{workId:w.id}),cancelled=createItem(data,'task','Cancelled',{workId:w.id});done.status='done';cancelled.status='cancelled';
  const before=structuredClone(data),ui={projectPage:p.id},flow=createWorkflowUI({getData:()=>data,ui,esc,icon:()=>'',button,passes:()=>true});
- let dom=new JSDOM(flow.projectPage());
+ let dom=new JSDOM(flow.projectPage());assert.equal(dom.window.document.querySelector('[data-project-task-status]').value,'all');assert(dom.window.document.querySelector(`[data-tt-row="${done.id}"]`));
  assert.equal(dom.window.document.querySelectorAll('[data-flow-add]').length,0);
  assert.match(dom.window.document.querySelector('.pl-page-toolbar').textContent,/1\/3/);
  assert.equal(dom.window.document.querySelectorAll(`[data-tt-row="${direct.id}"]`).length,1);

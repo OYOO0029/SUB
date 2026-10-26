@@ -152,3 +152,12 @@ html{scrollbar-gutter:stable}
 .wd-memo{margin-top:20px}.wd-memo .inline-memo{margin-top:8px;min-height:64px}
 #detail.minimal-work .detail-extra{margin-top:16px}
 @media(hover:none){#detail .wd-table .pl-column>.icon{opacity:1}}
+/* Shared task status selection: one compact control across lists. */
+.ux-status-filter{height:32px;min-width:78px;max-width:110px;padding:0 8px;border:1px solid var(--border,#353c47);border-radius:8px;background:var(--surface,#272c35);color:inherit;font:inherit;font-size:12px;cursor:pointer;color-scheme:dark}
+.ux-status-filter:focus-visible{outline:2px solid var(--accent,#8ecbd0);outline-offset:2px}
+#detail.minimal-work .wd-simple-header{display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:center;gap:8px;padding:20px 24px}
+#detail.minimal-work .wd-simple-header h2{margin:0;min-width:0}
+#detail.minimal-work .wd-simple-header #inline-error{grid-column:1/-1;margin:0}
+#detail.minimal-work .wd-tasks{margin-top:0}
+#detail.minimal-work .wd-tasks .ux-tools{display:flex;align-items:center;gap:8px}
+#detail.minimal-work .pl-table-wrap{max-height:calc(100dvh - 220px)}
