@@ -1,4 +1,4 @@
-import {createFocusView} from './focus-view.js?v=20261026-focus-1';
+import {createFocusView} from './focus-view.js?v=20261027-table-1';
 import {appStorage} from '../schedule-storage.mjs';
 import {createWorkflowUI} from './workflow-ui.js?v=20261018-workflow-3';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261018-workflow';
@@ -34,7 +34,7 @@ const findTask=id=>data.tasks.find(t=>t.id===id);
 const flow=createWorkflowUI({getData:()=>data,ui,esc,icon,button,passes});
 let toastTimer,undoFn=null;
 let projectListScroll={owner:null,top:0};
-const focus=createFocusView({getData:()=>data,getScope:()=>workAccount.owner,ui,esc,icon,flow,passes,render,persist,notify:toast,storage:appStorage,filters:()=>workspaceActions(true)});
+const focus=createFocusView({getData:()=>data,getScope:()=>workAccount.owner,ui,esc,icon,flow,passes,render,persist,notify:toast,storage:appStorage,save:()=>{const ok=saveState(data);ui.saveWarning=ok?'':'저장하지 못했습니다. 현재 입력을 유지합니다.';if(!ok)toast(ui.saveWarning);return ok;},filters:()=>workspaceActions(true)});
 function toast(message,undo=null){clearTimeout(toastTimer);undoFn=undo;$('#toast').innerHTML=`${icon('check')}<span>${esc(message)}</span>${undo?button('되돌리기','undo','','text-button'):''}`;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),6000);}
 function persist(message,undo,keepMenus=false){const ok=saveState(data);ui.saveWarning=ok?'':'기기에 저장하지 못했습니다. 내보내기로 현재 내용을 보관해 주세요.';render({keepMenus});if(ui.detail&&$('#detail').open)renderDetail();toast(ok?message:'저장 공간을 확인해 주세요. 입력 내용은 현재 창에 유지됩니다.',undo);}
 function taskCard(task,{compact=false,showPlan=false,listMode=false,movable=false}={}){
@@ -251,7 +251,7 @@ document.addEventListener('change',async event=>{
   }
 });
 document.addEventListener('input',event=>{if(event.target.id==='search'){ui.search=event.target.value;$('.workspace-content').innerHTML=bodyScreen();const clear=$('[data-action="clear-search"]');clear.setAttribute('aria-label',ui.search?'검색어 지우기':'검색 닫기');clear.title=ui.search?'검색어 지우기':'검색 닫기';}});
-document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'&&!document.querySelector('dialog[open]')){event.preventDefault();ui.mode='work';ui.searchOpen=true;render();$('#search').focus();}if(event.key==='Escape'&&event.target.id==='search'){ui.searchOpen=false;ui.search='';render();$('[data-action="toggle-search"]').focus();}if(event.key==='n'&&!/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)&&!$('#detail').open&&!$('#editor').open)editEntity(ui.tab==='works'?'work':ui.tab==='projects'?'project':'task');});
+document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'&&!document.querySelector('dialog[open]')){event.preventDefault();ui.mode='work';ui.searchOpen=true;render();$('#search').focus();}if(event.key==='Escape'&&event.target.id==='search'){ui.searchOpen=false;ui.search='';render();$('[data-action="toggle-search"]').focus();}if(event.key==='n'&&!event.target.isContentEditable&&!/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)&&!$('#detail').open&&!$('#editor').open)editEntity(ui.tab==='works'?'work':ui.tab==='projects'?'project':'task');});
 $('#detail').addEventListener('close',()=>{ui.detail=null;});
 for(const dialog of [$('#detail'),$('#editor')])dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 function moveTask(id,before){

@@ -57,12 +57,12 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     view=createFocusView({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',flow:{row:t=>esc(t.title)},passes:()=>true,render,persist(){saves++;render()},notify(){},storage:dom.window.localStorage});
     const click=s=>{const e=document.querySelector(s);assert(e,'Missing '+s);e.click()};
     const submit=s=>document.querySelector(s).dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
-    render();assert.equal(document.querySelectorAll('.focus-task').length,2);
-    assert.equal(document.querySelector('.focus-context').textContent,'프로젝트 > 업무 묶음');
-    assert.equal(document.querySelector('.focus-due').textContent,'16:00까지');
-    assert(!document.querySelector('.focus-task').textContent.includes('상세에서만 확인'));
-    assert.equal(document.querySelector('.focus-progress').getAttribute('stroke-dasharray'),'100 100');
-    click(`[data-focus="select"][data-id="${task.id}"]`);click('[data-focus="start"]');
+    render();assert.equal(document.querySelectorAll('.tt-table tbody tr').length,2);
+    assert.equal(document.querySelector('.tt-project').textContent,'프로젝트');
+    assert.equal(document.querySelector('.tt-due').textContent,'오늘');
+    assert(!document.querySelector('.tt-table tbody tr').textContent.includes('상세에서만 확인'));
+    assert.equal(document.querySelector('.focus-ring'),null);
+    click(`[data-tt="focus"][data-id="${task.id}"]`);click('[data-tt="start"]');
     const savedTimer=dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account');
     ui.view='timeline';render();assert.equal(document.querySelectorAll('[data-tick]').length,67);
     const history=document.querySelector('.focus-history');if(history)assert.equal(history.open,false);
