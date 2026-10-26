@@ -76,7 +76,7 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     assert.equal(task.blocks.length,0);assert.equal(JSON.stringify(task.plans),originalPlan);
     click(`[data-focus="plan"][data-id="${task.id}"]`);
     while(document.querySelector('[data-focus="block-prev"]:not([disabled])'))click('[data-focus="block-prev"]');
-    click('[data-minute="480"]');assert.match(document.querySelector('.focus-range').textContent,/08:00–08:10 · 10분/);
+    click('[data-minute="480"]');assert.match(document.querySelector('.focus-selection').textContent,/08:00 → 08:1010분/);
     click('[data-minute="510"]');submit('[data-focus-plan-form]');
     assert.equal(task.blocks[0].start,'08:00');assert.equal(task.blocks[0].end,'08:40');assert.equal(saves,1);
     assert.equal(task.due,originalDue);assert.equal(task.workId,originalWork);assert.equal(task.checks.length,1);
@@ -86,6 +86,20 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     submit('[data-focus-add]');assert.equal(data.tasks.length,3);assert.equal(saves,2);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     assert.equal(taskContext(data,task).project.id,p.id);
+    click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');
+    const search=document.querySelector('[data-focus-search]');search.value='새 배치 업무';search.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+    assert.equal(document.querySelector('[data-focus-search]'),search,'search input survives Korean composition');
+    assert.equal(document.querySelectorAll('.focus-hour-row').length,11);assert.equal(document.querySelectorAll('.focus-block').length,66);
+    assert(document.querySelector('[data-focus-plan-form] button[type="submit"]').disabled);
+    click('[data-focus="new-task"]');const beforeCancel=JSON.stringify(data);click('[data-focus="close-picker"]');assert.equal(JSON.stringify(data),beforeCancel);
+    click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');
+    const newSearch=document.querySelector('[data-focus-search]');newSearch.value='새 배치 업무';newSearch.dispatchEvent(new dom.window.Event('input',{bubbles:true}));click('[data-focus="new-task"]');
+    const project=document.querySelector('[data-focus-new-project]');project.value=p.id;project.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+    click('[data-minute="890"]');click('[data-minute="850"]');submit('[data-focus-plan-form]');
+    assert.equal(data.tasks.length,4);const created=data.tasks.at(-1);assert.equal(created.title,'새 배치 업무');assert.equal(created.projectId,p.id);
+    assert.equal(created.blocks[0].start,'14:10');assert.equal(created.blocks[0].end,'15:00');assert.equal(created.plans[0].start,date);assert.equal(saves,3);
+    click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');click(`[data-focus="pick-task"][data-id="${second.id}"]`);
+    click('[data-minute="900"]');submit('[data-focus-plan-form]');assert.equal(data.tasks.length,4);assert.equal(second.due,date);assert.equal(second.blocks[0].start,'15:00');assert.equal(second.plans[0].start,date);
     owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.tt-panel'),null);assert.equal(document.querySelector('.tt-mini'),null);assert.equal(document.querySelector('.focus-ring'),null);
   }finally{view?.destroy();dom.window.close();for(const key of keys){const d=originals.get(key);if(d)Object.defineProperty(globalThis,key,d);else delete globalThis[key];}}
 });
