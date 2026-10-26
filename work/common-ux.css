@@ -173,3 +173,7 @@ button.ux-status-filter{display:flex;align-items:center;justify-content:space-be
 .ux-col-resize:hover::after,.ux-col-resize:focus-visible::after{background:#8ecbd0}
 .resizing-table,.resizing-table *{cursor:col-resize!important;user-select:none!important}
 table[data-resizable] th{position:sticky}table[data-resizable] th:last-child .ux-col-resize{right:0}
+/* Compact header tools; badge width follows the count. */
+#app .new-header .header-actions{gap:0;align-items:center}
+#app .new-header .header-actions>.icon-button{width:32px;height:32px;min-width:32px;padding:0}
+#app .new-header .reminder-count{top:0;right:0;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border:1px solid var(--canvas,#191c23);border-radius:7px;font-size:9px;font-weight:600;line-height:12px;font-variant-numeric:tabular-nums;pointer-events:none}
