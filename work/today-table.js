@@ -1,10 +1,10 @@
 import {statusFilter} from './status-filter.js?v=20261026-controls-1';
-import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261027-task-flow-3';
+import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261027-inline-entry-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261027-task-flow-3';
-import {taskContext,uid,today,taskStart} from './model.js?v=20261027-task-flow-3';
-import {executionSections} from './workflow.js?v=20261027-task-flow-3';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261027-inline-entry-1';
+import {taskContext,uid,today,taskStart} from './model.js?v=20261027-inline-entry-1';
+import {executionSections} from './workflow.js?v=20261027-inline-entry-1';
 import {orderedTasks} from './work-view.js?v=20261026-controls-1';
 
 // This surface only consumes existing task records; filters never reschedule tasks.
@@ -53,7 +53,7 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
  function scopeTasks(){const all=getData().tasks.filter(t=>!t.deletedAt&&t.status!=='cancelled');return scope==='today'?executionSections(getData(),ui.date,true).planned:all.filter(t=>scope==='all'||(scope==='future'?taskStart(t)>ui.date:!taskStart(t)));}
  function screen(addHTML=''){
   const sections=executionSections(getData(),ui.date,true),all=scopeTasks(),done=all.filter(t=>t.status==='done').length,xs=items();
-  return `<section class="focus-screen tt-screen"><div class="tt-toolbar"><div>${viewTabs()}<details class="batch-choice tt-scope"><summary>${{today:'오늘',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}[scope]}${icon('down')}</summary><div class="batch-options">${Object.entries({today:'오늘',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}).map(([key,label])=>btn(label,'scope',`data-value="${key}"`)).join('')}</div></details></div><div class="tt-toolbar-right">${statusFilter(status,'data-today-status','오늘 할 일 상태')}<div class="ux-tools">${btn(icon('sort'),'menu','data-key="sort" data-scope="today" aria-label="정렬" title="정렬" aria-expanded="'+(menu==='sort'&&menuScope==='today')+'"')}<button class="tt-button" data-focus="add" aria-label="할 일 추가" title="할 일 추가">${icon('plus')}</button></div></div></div>${addHTML}<div class="tt-table-wrap"><table class="tt-table" aria-label="${{today:'오늘 할 일',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}[scope]}"><colgroup><col class="tt-c-check"><col class="tt-c-project"><col><col class="tt-c-due"><col class="tt-c-focus"></colgroup><thead><tr><th aria-label="완료"></th>${header('project','프로젝트')}${header('title','할 일')}${header('due','마감')}<th scope="col">집중</th></tr></thead><tbody>${xs.map(t=>row(t)).join('')||`<tr><td colspan="5" class="tt-empty">${all.length?'조건에 맞는 할 일이 없습니다.':'표시할 할 일이 없습니다.'}${all.length?btn('필터 해제','clear'):''}</td></tr>`}</tbody></table></div>${menuScope==='today'?menuView():''}${scope==='today'?remainingView(sections):''}${panelView()}${miniView()}</section>`;
+  return `<section class="focus-screen tt-screen"><div class="tt-toolbar"><div>${viewTabs()}</div><div class="tt-toolbar-right"><details class="batch-choice tt-scope"><summary>${{today:'오늘',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}[scope]}${icon('down')}</summary><div class="batch-options">${Object.entries({today:'오늘',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}).map(([key,label])=>btn(label,'scope',`data-value="${key}"`)).join('')}</div></details>${statusFilter(status,'data-today-status','오늘 할 일 상태')}<div class="ux-tools">${btn(icon('sort'),'menu','data-key="sort" data-scope="today" aria-label="정렬" title="정렬" aria-expanded="'+(menu==='sort'&&menuScope==='today')+'"')}<button class="tt-button" data-focus="add" aria-label="할 일 추가" title="할 일 추가">${icon('plus')}</button></div></div></div>${addHTML}<div class="tt-table-wrap"><table class="tt-table" aria-label="${{today:'오늘 할 일',future:'시작 예정',unscheduled:'시작일 미정',all:'전체 할 일'}[scope]}"><colgroup><col class="tt-c-check"><col class="tt-c-project"><col><col class="tt-c-due"><col class="tt-c-focus"></colgroup><thead><tr><th aria-label="완료"></th>${header('project','프로젝트')}${header('title','할 일')}${header('due','마감')}<th scope="col">집중</th></tr></thead><tbody>${xs.map(t=>row(t)).join('')||`<tr><td colspan="5" class="tt-empty">${all.length?'조건에 맞는 할 일이 없습니다.':'표시할 할 일이 없습니다.'}${all.length?btn('필터 해제','clear'):''}</td></tr>`}</tbody></table></div>${menuScope==='today'?menuView():''}${scope==='today'?remainingView(sections):''}${panelView()}${miniView()}</section>`;
  }
  function positionMenu(){const p=document.querySelector('.tt-menu'),a=document.querySelector(`[data-tt="menu"][data-key="${menu}"][data-scope="${menuScope}"]`);if(!p||!a)return;const r=a.getBoundingClientRect();p.style.left=Math.max(8,Math.min(r.left,window.innerWidth-248))+'px';p.style.top=Math.max(8,Math.min(r.bottom+6,window.innerHeight-p.offsetHeight-8))+'px';}
  function repaint(){render();positionMenu();hydrateWorkImages(document,images);}
@@ -71,5 +71,5 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
 
  // Prevent imported HTML or files from bypassing the controlled clipboard path.
  document.addEventListener('drop',e=>{if(e.target.closest('[data-tt-memo]'))e.preventDefault()});
- return {screen,tick,viewTabs,remainingView,panelView,miniView,reset(){dueDialog?.close();projectDialog?.close();panel=menu=null;scope='today';filters.today=blank();filters.remaining=blank();menuScope='today';status='all';addCheck=false;checkDraft=''},busy:()=>!!panel&&panel.tab===ui.tab||!!menu&&ui.tab==='tasks',items};
+ return {addContext:()=>({date:scope==='today'?ui.date:null}),screen,tick,viewTabs,remainingView,panelView,miniView,reset(){dueDialog?.close();projectDialog?.close();panel=menu=null;scope='today';filters.today=blank();filters.remaining=blank();menuScope='today';status='all';addCheck=false;checkDraft=''},busy:()=>!!panel&&panel.tab===ui.tab||!!menu&&ui.tab==='tasks',items};
 }

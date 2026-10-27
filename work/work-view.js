@@ -1,4 +1,4 @@
-import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261027-task-flow-3';
+import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261027-inline-entry-1';
 
 export function automaticOrder(tasks,date){
   const start=t=>t.blocks.filter(b=>b.date===date).map(b=>b.start).sort()[0];

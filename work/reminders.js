@@ -1,4 +1,4 @@
-import {today,reminderTasks,taskContext,isPlanned} from './model.js?v=20261027-task-flow-3';
+import {today,reminderTasks,taskContext,isPlanned} from './model.js?v=20261027-inline-entry-1';
 
 // The view date never controls notifications. A visit is recorded only once
 // account data is ready; waiting for sync must not consume today's first visit.

@@ -219,3 +219,57 @@ table[data-resizable] th{position:sticky}table[data-resizable] th:last-child .ux
 .batch-clear{width:24px;height:28px;border:0;background:none;color:var(--muted);padding:4px;margin-left:-8px}.batch-clear .icon{width:12px;height:12px}
 #detail.minimal-task .check-add-trigger{opacity:1}#detail.minimal-task .detail-footer{padding:12px 24px}
 #detail.minimal-task .detail-eyebrow{display:none}#detail.minimal-task .detail-nav{justify-content:flex-end}#detail.minimal-task .inline-save-state{font-size:11px;font-weight:400}
+/* Inline creation and unified task detail — shared list controls */
+.row-detail,.row-delete{width:32px!important;height:32px!important;min-width:32px!important;padding:8px!important;display:inline-flex!important;align-items:center;justify-content:center}
+.row-detail .icon,.row-delete .icon{width:16px!important;height:16px!important}
+.table-add-edge{height:0;position:relative;z-index:3}
+.table-add-edge>button{position:absolute;left:12px;top:-13px;display:flex;align-items:center;gap:4px;height:26px;padding:0 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel,#22272e);color:var(--muted);font:inherit;font-size:12px;opacity:0;pointer-events:none}
+.tt-table-wrap:hover+.table-add-edge>button,.pl-table-wrap:hover+.table-add-edge>button,.table-add-edge:hover>button,.table-add-edge:focus-within>button{opacity:1;pointer-events:auto}
+.table-add-edge .icon{width:14px;height:14px}
+.task-entry-row>td{padding:0!important;text-align:left!important}
+.task-entry-row .task-composer{margin:0;border:0;border-radius:0;padding:8px;background:transparent;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.task-entry-row .batch-context{grid-column:1/-1;gap:4px}
+.task-entry-row .batch-context>.icon-button{margin-left:auto}
+.task-entry-row textarea{grid-column:1/-1;min-height:36px;height:36px;field-sizing:content;max-height:140px;padding:8px;resize:vertical;border:0;background:transparent;color:#fff;font-size:13px;font-weight:400}
+.task-entry-row .batch-footer{grid-column:1/-1;min-height:24px}
+.task-entry-row .batch-footer label{font-size:11px}
+.task-entry-row .form-error{grid-column:1/-1}
+.task-entry-row .batch-choice summary,.task-entry-row .batch-date{height:28px;min-height:28px;padding:0 8px;font-size:12px}
+#detail.minimal-task{width:420px;max-width:calc(100vw - 24px);height:calc(100dvh - 32px);max-height:calc(100dvh - 32px);inset:16px 16px 16px auto;margin:0;border:1px solid var(--line);border-radius:8px}
+#detail.minimal-task .detail-header{padding:20px 24px 16px;position:relative}
+#detail.minimal-task .detail-nav{position:absolute;right:16px;top:16px;margin:0}
+#detail.minimal-task .inline-save-state,#detail.minimal-task .detail-nav [data-action=detail-back]{display:none}
+#detail.minimal-task .task-detail-title{padding-right:32px;margin:0;align-items:flex-start;gap:12px}
+#detail.minimal-task .detail-title-input{font-size:18px;line-height:1.5}
+#detail.minimal-task .detail-complete{margin-top:5px}
+#detail.minimal-task .detail-body{padding:20px 24px}
+#detail.minimal-task .properties{margin:0}
+#detail.minimal-task .property-row{min-height:36px;padding:0;grid-template-columns:80px minmax(0,1fr);gap:8px}
+#detail.minimal-task .inline-value{min-height:32px;height:auto;background:transparent;border-color:transparent;text-align:left;padding:4px 0}
+#detail.minimal-task .check-section,#detail.minimal-task .task-memo-section,#detail.minimal-task .detail-extra{margin-top:20px}
+#detail.minimal-task h3{font-size:13px;font-weight:500;margin:0}
+#detail.minimal-task .detail-check-heading{display:flex;align-items:center;gap:8px;min-height:32px}
+#detail.minimal-task .detail-check-heading .check-add-trigger{margin-left:auto}
+#detail.minimal-task .inline-memo{margin-top:8px;min-height:120px;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;box-sizing:border-box;resize:vertical}
+#detail.minimal-task .detail-extra{border-top:1px solid var(--line);padding-top:12px}
+#detail.minimal-task .detail-extra summary{font-size:12px;color:var(--muted);padding:8px 0}
+@media(hover:none){.table-add-edge>button{opacity:1;pointer-events:auto}}
+@media(max-width:580px){#detail.minimal-task{width:calc(100vw - 24px);inset:12px;height:calc(100dvh - 24px);max-height:calc(100dvh - 24px)}.task-entry-row .batch-context{gap:2px}}
+.task-entry-row .task-composer{grid-template-columns:minmax(100px,144px) minmax(160px,1fr) 32px 32px;column-gap:4px;row-gap:4px;align-items:center}
+.task-entry-row .task-composer>.batch-choice{grid-column:1;grid-row:1;min-width:0}
+.task-entry-row .task-composer>.batch-choice summary{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.task-entry-row .task-composer>textarea{grid-column:2;grid-row:1;margin:0}
+.task-entry-row .batch-submit{grid-column:3;grid-row:1}
+.task-entry-row .batch-close{grid-column:4;grid-row:1}
+.task-entry-row .batch-context{grid-row:2;grid-column:1/4}
+.task-entry-row .batch-footer{grid-row:3;grid-column:1/-1;min-height:20px}
+.task-entry-row .batch-footer [role=status]:empty{display:none}
+@media(max-width:580px){.task-entry-row .task-composer{grid-template-columns:100px minmax(100px,1fr) 32px 32px}}
+.task-entry-row .task-composer{padding-left:calc(var(--entry-check,0px) + 8px);grid-template-columns:var(--entry-project,144px) minmax(160px,1fr) 32px 32px}
+.task-entry-row .batch-context{grid-column:1/3}
+.task-entry-row .batch-footer{grid-row:2;grid-column:3/5;justify-content:flex-end}
+.task-entry-row .batch-footer label{white-space:nowrap;gap:4px}
+.task-entry-row .batch-footer [role=status]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.task-entry-row textarea{resize:none}
+.task-entry-row .batch-options{top:auto;bottom:calc(100% + 4px);max-height:180px;overflow:auto}
+.task-entry-row input[type=checkbox]{width:12px!important;height:12px!important;min-width:12px!important;margin:0!important}

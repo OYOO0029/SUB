@@ -1,5 +1,5 @@
-import {uid,planToday,today} from './model.js?v=20261027-task-flow-3';
-import {validate} from './repository.js?v=20261027-task-flow-3';
+import {uid,planToday,today} from './model.js?v=20261027-inline-entry-1';
+import {validate} from './repository.js?v=20261027-inline-entry-1';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];

@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261027-task-flow-3';
+import {today,addDays,addMonths} from './model.js?v=20261027-inline-entry-1';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);

@@ -46,3 +46,19 @@ test('single task detail edits text and checks without losing memo attachments o
  setTime(t,'2026-11-10','09:00','10:00');assert.equal(t.startDate,'2026-11-04');assert.equal(t.due,'2026-11-14');
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });
+test('inline composer mounts last without idle space, defaults today, preserves draft and resets dates per context',()=>{
+ const dom=new JSDOM('<main class="workspace-content"></main>',{url:'https://fixture.invalid'}),keys=['window','document','FormData'],old=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
+ for(const k of keys)Object.defineProperty(globalThis,k,{value:dom.window[k],configurable:true,writable:true});
+ try{const data=emptyWorkState(),p=createItem(data,'project','Project'),w=createItem(data,'work','Work',{projectId:p.id});let composer;
+ const render=()=>{document.querySelector('main').innerHTML='<section class="tt-screen"><div class="tt-table-wrap"><table><thead><tr><th></th><th>project</th><th>title</th><th>due</th><th>focus</th></tr></thead><tbody><tr class="existing"><td colspan="5">existing</td></tr></tbody></table></div></section>';composer.mount();};
+ composer=createTaskComposer({getData:()=>data,getScope:()=> 'a',getContext:()=>({date:'2026-10-27',target:'main'}),render,save:()=>true,esc:v=>String(v??''),icon:()=>'',notify(){}});render();assert.equal(document.querySelectorAll('.task-entry-row').length,0);
+ document.querySelector('[data-batch-edge]').click();assert(document.querySelector('tbody>tr:last-child [data-task-composer]'));assert(document.querySelector('[data-batch-date=startDate]').textContent.match(/오늘|10\/27/));
+ const input=text=>{const el=document.querySelector('textarea');el.value=text;el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));return el;};
+ input('draft');document.body.click();render();assert.equal(document.querySelector('textarea').value,'draft');composer.open();assert.equal(document.querySelector('textarea').value,'draft');
+ document.querySelector('[data-batch-clear=startDate]').click();input('No date').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(data.tasks[0].startDate,null);assert(document.querySelector('[data-batch-date=startDate]').textContent.match(/오늘|10\/27/));
+ input('Today').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(data.tasks[1].startDate,'2026-10-27');assert.equal(data.tasks[1].due,null);
+ composer.reset();composer.open({workId:w.id,date:null});input('Project A\nProject B').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert(data.tasks.slice(2).every(t=>t.workId===w.id&&data.works.find(x=>x.id===t.workId).projectId===p.id&&t.startDate===null));
+ const before=data.tasks.length;const el=input('한글');el.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));assert.equal(data.tasks.length,before);el.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(document.querySelector('textarea').value,'한글');
+ input('').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(document.querySelectorAll('.task-entry-row').length,0);
+ }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
+});

@@ -1,8 +1,8 @@
-import {createTodayTable} from './today-table.js?v=20261027-task-flow-3';
-import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261027-task-flow-3';
-import {executionSections,unfinished} from './workflow.js?v=20261027-task-flow-3';
+import {createTodayTable} from './today-table.js?v=20261027-inline-entry-1';
+import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261027-inline-entry-1';
+import {executionSections,unfinished} from './workflow.js?v=20261027-inline-entry-1';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261026-controls-1';
-import {createItem,conflicts} from './editing.js?v=20261027-task-flow-3';
+import {createItem,conflicts} from './editing.js?v=20261027-inline-entry-1';
 import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
 import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
@@ -105,5 +105,5 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   const interval=setInterval(updateTimer,1000);
   window.addEventListener('storage',event=>{if(event.key?.startsWith('my-work-focus-timer-v1:')){timer.reload();updateTimer();}});
   function rollover(){const next=today();if(next!==lastDay){if(ui.tab==='tasks'&&ui.date===lastDay)ui.date=next;lastDay=next;}}
-  return {screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
+  return {addContext:()=>ui.view==='timeline'?{date:ui.date}:table.addContext(),screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
 }
