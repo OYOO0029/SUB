@@ -1,13 +1,13 @@
 import {installTableResize} from './table-resize.js?v=20261026-controls-1';
 import {workImages} from './image-store.mjs';
-import {createFocusView} from './focus-view.js?v=20261026-task-edit-1';
+import {createFocusView} from './focus-view.js?v=20261027-inline-1';
 import {appStorage} from '../schedule-storage.mjs';
-import {createWorkflowUI} from './workflow-ui.js?v=20261026-task-edit-1';
+import {createWorkflowUI} from './workflow-ui.js?v=20261027-inline-1';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261026-controls-1';
-import {createItem,changeCheck} from './editing.js?v=20261026-controls-1';
+import {createItem,changeCheck,updateItem,trashItem,restoreItem} from './editing.js?v=20261026-controls-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-controls-1';
 import {createReminderCenter} from './reminders.js?v=20261026-controls-1';
-import {createDetailUI} from './detail-ui.js?v=20261026-task-edit-1';
+import {createDetailUI} from './detail-ui.js?v=20261027-inline-1';
 import {activeChecks} from './editing.js?v=20261026-controls-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261026-controls-1';
 import {startWorkCloud} from './integration.js?v=20261026-controls-1';
@@ -113,7 +113,7 @@ function workCard(w){
 function worksScreen(){const list=data.works.filter(w=>!w.deletedAt&&(!ui.project||(ui.project==='standalone'?!w.projectId:w.projectId===ui.project))&&(!ui.work||w.id===ui.work)).filter(w=>[w.title,w.notes,...w.tags].join(' ').toLowerCase().includes(ui.search.toLowerCase()));return `<div class="work-project-groups">${projectGroups(list,workCard,'work-grid',w=>data.projects.find(p=>p.id===w.projectId))||'<p class="list-empty">표시할 업무가 없습니다.</p>'}</div>${button(icon('plus'),'add-work','aria-label="업무 추가" title="업무 추가"','quick-add')}`;}
 function projectCard(p){
  const state=PROJECT_STATES.find(([v])=>v===projectState(p))[1],works=projectActiveWorks(data,p.id),rows=works.length?works:[null],span=rows.length;
- return rows.map((w,i)=>`<tr>${i?'':`<td rowspan="${span}" class="pl-status-cell"><span class="pl-status-badge" data-state="${projectState(p)}"><i aria-hidden="true"></i>${state}</span><select data-project-status="${esc(p.id)}" aria-label="${esc(p.title)} 현황" title="현황 변경">${PROJECT_STATES.map(([v,l])=>`<option value="${v}" ${projectState(p)===v?'selected':''}>${l}</option>`).join('')}</select></td><td rowspan="${span}" class="pl-text">${button(esc(p.title),'detail',`data-type="project" data-id="${esc(p.id)}" title="${esc(p.title)}"`,'pl-name')}</td>`}<td class="pl-text">${w?button(esc(w.title),'detail',`data-type="work" data-id="${esc(w.id)}" title="${esc(w.title)}"`,'pl-name'):'<span class="ux-empty">-</span>'}</td><td title="${esc(w?.due||'')}">${w?.due?short(w.due):'<span class="ux-empty">-</span>'}</td>${i?'':`<td rowspan="${span}" class="pl-end-cell" title="${esc(p.end||'')}">${p.end?short(p.end):'<span class="ux-empty">-</span>'}</td>`}</tr>`).join('');
+ return rows.map((w,i)=>`<tr>${i?'':`<td rowspan="${span}" class="pl-status-cell"><span class="pl-status-badge" data-state="${projectState(p)}"><i aria-hidden="true"></i>${state}</span><select data-project-status="${esc(p.id)}" aria-label="${esc(p.title)} 현황" title="현황 변경">${PROJECT_STATES.map(([v,l])=>`<option value="${v}" ${projectState(p)===v?'selected':''}>${l}</option>`).join('')}</select></td><td rowspan="${span}" class="pl-text"><div class="tt-task-cell">${button(esc(p.title),'detail',`data-type="project" data-id="${esc(p.id)}" title="${esc(p.title)}"`,'pl-name')}${button(icon('trash'),'delete-project',`data-id="${esc(p.id)}" aria-label="${esc(p.title)} 삭제" title="삭제"`,'icon-button row-delete')}</div></td>`}<td class="pl-text">${w?button(esc(w.title),'detail',`data-type="work" data-id="${esc(w.id)}" title="${esc(w.title)}"`,'pl-name'):'<span class="ux-empty">-</span>'}</td><td title="${esc(w?.due||'')}">${w?.due?short(w.due):'<span class="ux-empty">-</span>'}</td>${i?'':`<td rowspan="${span}" class="pl-end-cell" title="${esc(p.end||'')}">${p.end?short(p.end):'<span class="ux-empty">-</span>'}</td>`}</tr>`).join('');
 }
 function projectsScreen(){
  let ps=projectList(data.projects,ui.projectStates,['due','work'].includes(ui.projectSort)?'added':ui.projectSort,ui.projectDirection);
@@ -243,6 +243,7 @@ document.addEventListener('click',event=>{
   else if(a==='time')timeEditor(id);
   else if(a==='remove-time'){removeTime(findTask(id),ui.date);$('#editor').close();persist('시간 배치를 해제했어요. 할 일은 그대로 유지됩니다.');}
   else if(a==='plan'){const t=findTask(id),before=structuredClone(t);planToday(t,ui.date);persist('선택한 날짜의 일정에 추가했습니다.',()=>{Object.assign(t,before);persist('이전 계획으로 되돌렸어요.');});}
+  else if(a==='delete-project'){trashItem(data,'project',id);if(ui.projectPage===id){ui.projectPage=null;ui.detail=null;}persist('프로젝트를 휴지통으로 옮겼어요. 연결된 항목은 유지됩니다.',()=>{restoreItem(data,'project',id);persist('프로젝트를 복구했어요.');});}
   else if(a==='delete-task'){const t=findTask(id);t.deletedAt=new Date().toISOString();$('#detail').close();ui.detail=null;persist('휴지통으로 옮겼어요.',()=>{t.deletedAt=null;persist('할 일을 복구했어요.');});}
   else if(a==='restore'){findTask(id).deletedAt=null;persist('할 일을 복구했어요.');trash();}
   else if(a==='settings')settings();else if(a==='trash')trash();else if(a==='export')download();else if(a==='tracker')tracker();
@@ -328,3 +329,8 @@ document.addEventListener('input',event=>{if(!event.target.matches('[data-projec
 document.addEventListener('input',event=>{const el=event.target;if(el.matches('[data-project-work-query],[data-project-detail-query]')){ui[el.matches('[data-project-work-query]')?'projectWorkQuery':'projectDetailQuery']=el.value;render({keepMenus:true});document.querySelector(el.matches('[data-project-work-query]')?'[data-project-work-query]':'[data-project-detail-query]')?.focus();}});
 
 document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-project-status]'))return;const p=data.projects.find(p=>p.id===el.dataset.projectStatus);if(!p)return;const value=el.value;el.value=projectState(p);try{detailUI.changeProjectState(p.id,value);}catch(error){toast(error.message);}});
+
+// Inline titles retain their ordinary text appearance and commit on blur/Enter.
+document.addEventListener('focusin',e=>{if(e.target.matches('[data-list-title]'))e.target.dataset.original=e.target.value;});
+document.addEventListener('focusout',e=>{const el=e.target;if(!el.matches('[data-list-title]'))return;const t=findTask(el.dataset.listTitle);if(!t||t.deletedAt)return;try{updateItem(data,'task',t.id,{title:el.value});if(!saveState(data))toast('저장하지 못했습니다. 현재 창의 입력은 유지됩니다.');el.value=t.title;el.setAttribute('aria-label',t.title+' 제목');}catch(error){el.value=t.title;toast(error.message);}});
+document.addEventListener('keydown',e=>{if(!e.target.matches('[data-list-title]')||e.isComposing||e.keyCode===229)return;if(e.key==='Enter'){e.preventDefault();e.target.blur();}else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();e.target.value=e.target.dataset.original||e.target.value;e.target.blur();}},true);

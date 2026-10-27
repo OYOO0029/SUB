@@ -179,3 +179,10 @@ table[data-resizable] th{position:sticky}table[data-resizable] th:last-child .ux
 #app .new-header .reminder-count{top:0;right:0;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border:1px solid var(--canvas,#191c23);border-radius:7px;font-size:9px;font-weight:600;line-height:12px;font-variant-numeric:tabular-nums;pointer-events:none}
 .tt-task-cell{display:flex;align-items:center;gap:8px;min-width:0}.tt-task-cell .tt-title{flex:1;min-width:0}.tt-task-menu{position:relative;flex:none}.tt-task-cell .tt-task-menu>[data-menu-toggle]{opacity:0}tr:hover .tt-task-menu>[data-menu-toggle],.tt-task-menu:focus-within>[data-menu-toggle],.tt-task-menu>[aria-expanded=true]{opacity:1}.tt-task-menu .surface-menu{min-width:120px;right:0;z-index:100}.tt-panel header{gap:8px}.tt-panel header .tt-edit-title{flex:1;min-width:0;width:0;border:1px solid transparent;border-radius:6px;padding:6px;background:transparent;color:inherit;font:inherit;font-size:16px;font-weight:600}.tt-edit-title:hover{border-color:#424a57!important}.tt-edit-title:focus{outline:1px solid #8ecbd0}.tt-panel header .tt-task-menu{margin-left:auto}
 @media(hover:none){.tt-task-cell .tt-task-menu>[data-menu-toggle]{opacity:1}}
+/* Editable task titles look like ordinary list text. */
+#app .list-title-edit,#detail .list-title-edit{width:100%;min-width:0;flex:1;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0;background:transparent!important;color:inherit;font:inherit;font-weight:500;padding:0;margin:0;text-align:left;cursor:text}
+#app .tt-edit-title:hover,#app .tt-edit-title:focus{border-color:transparent!important;outline:none!important;box-shadow:none!important}
+.is-done .list-title-edit{color:var(--muted);text-decoration:line-through}
+.row-delete{opacity:0;flex:none}tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible{opacity:1}.row-delete:hover,.ux-delete:hover{color:#e49c9c!important}
+.tt-task-cell>.pl-name{flex:1;min-width:0}.tt-task-cell>small{flex:none;color:var(--muted);font-size:10px}
+@media(hover:none){.row-delete{opacity:1}}
