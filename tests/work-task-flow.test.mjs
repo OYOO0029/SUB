@@ -30,7 +30,7 @@ test('continuous composer retains project, batches lines, preserves failed-save 
  try{const data=emptyWorkState(),p=createItem(data,'project','Project');let composer,ok=true,owner='a';const render=()=>document.querySelector('#app').innerHTML=composer.view();
  composer=createTaskComposer({getData:()=>data,getScope:()=>owner,render,save:()=>ok,esc:v=>String(v??''),icon:()=>'',notify(){}});composer.open({projectId:p.id});
  const submit=text=>{const el=document.querySelector('textarea');el.value=text;el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));el.form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};
- submit('A\nB');assert.equal(data.tasks.length,2);assert(data.tasks.every(t=>t.projectId===p.id&&t.startDate===null&&t.plans.length===0));assert.equal(document.querySelector('textarea').value,'');assert(document.querySelector('summary').textContent.includes('Project'));
+ submit('A\nB');assert.equal(data.tasks.length,2);assert(data.tasks.every(t=>t.projectId===p.id&&t.startDate===null&&t.plans.length===0));assert.equal(document.querySelector('textarea').value,'');assert(document.querySelector('[data-batch-field=projectId]').value===p.id);
  ok=false;submit('C');assert.equal(data.tasks.length,3);assert.equal(document.querySelector('textarea').value,'C');assert(document.querySelector('[role=alert]').textContent.includes('저장하지 못'));
  ok=true;submit('C');assert.equal(data.tasks.length,3);assert.equal(document.querySelector('textarea').value,'');owner='b';submit('다른 계정');assert.equal(data.tasks.length,3);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}

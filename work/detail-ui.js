@@ -1,11 +1,11 @@
-import {statusFilter} from './status-filter.js?v=20261026-controls-1';
-import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261027-inline-entry-1';
+import {statusFilter} from './status-filter.js?v=20261027-ux-contract-1';
+import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261027-ux-contract-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
-import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261027-inline-entry-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261027-inline-entry-1';
+import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261027-ux-contract-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261027-ux-contract-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 import {deadlineConflict} from './work-view.js?v=20261026-controls-1';
-import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261027-inline-entry-1';
+import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261027-ux-contract-1';
 
 export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무',project:'프로젝트'};

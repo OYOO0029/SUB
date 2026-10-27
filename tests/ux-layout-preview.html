@@ -1,0 +1,30 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>공통 UX 로컬 검수</title>
+<style>body{margin:0;background:#101318;color:white;font:12px sans-serif}nav{display:flex;gap:6px;padding:6px;flex-wrap:wrap}button{padding:6px 10px}iframe{display:block;border:0;height:720px;margin:auto}pre{margin:4px 8px;max-height:70px;overflow:auto;white-space:pre-wrap}</style>
+<nav aria-label="화면 너비"><button data-width="1280">1280px</button><button data-width="390">390px</button><button data-width="320">320px</button></nav>
+<nav aria-label="검수 화면"><button data-page="tasks">오늘 목록</button><button data-page="timeline">타임라인</button><button data-page="projects">프로젝트 목록</button><button data-page="project-detail">프로젝트 상세</button><button data-page="work">업무 상세</button><button data-page="task">할 일 상세</button><button data-page="calendar">캘린더</button><button data-page="add">행 추가</button><button data-page="menu">선택 메뉴</button></nav>
+<pre id="metrics"></pre><iframe title="검수용 업무 화면" style="width:1280px"></iframe>
+<script>
+if(!['localhost','127.0.0.1'].includes(location.hostname)){document.querySelector('iframe').remove();throw Error('Local fixture only');}
+const frame=document.querySelector('iframe');frame.src='/work/index.html?embedded=1&v=ux-contract';
+const click=s=>frame.contentDocument.querySelector(s)?.click();
+const tick=()=>new Promise(r=>requestAnimationFrame(r));
+document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>{frame.style.width=b.dataset.width+'px';});
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=async()=>{const p=b.dataset.page,d=frame.contentDocument;
+ if(p==='menu'){click('.tt-toolbar [aria-label="오늘 할 일 상태"]');return;}
+ if(p==='add'){click('[data-focus=add]');return;}
+ click('#detail[open] [data-action=close-detail]');
+ const tab=['task','timeline'].includes(p)?'tasks':['project-detail','work'].includes(p)?'projects':p;
+ click(`[data-action=navigate][data-value="${tab}"]`);await tick();
+ if(p==='timeline')click('[data-focus=view][data-value=timeline], [data-action=view][data-value=timeline]');
+ if(p==='tasks'||p==='task')click('[data-focus=view][data-value=list], [data-action=view][data-value=list]');
+ if(p==='project-detail')click('.pl-project-table [data-action=detail][data-type=project]');
+ if(p==='work')click('.pl-project-table [data-action=detail][data-type=work]');
+ if(p==='task')click('.tt-table .row-detail');
+});
+function measure(){const d=frame.contentDocument,w=frame.contentWindow;if(!d?.querySelector('#app'))return;
+ const style=e=>w.getComputedStyle(e),rect=e=>{const r=e.getBoundingClientRect();return {w:Math.round(r.width),h:Math.round(r.height)}};
+ const visible=e=>e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0;
+ const labels=[...d.querySelectorAll('th .tt-column>span,th .pl-column>span')].filter(visible).map(e=>{const a=e.getBoundingClientRect(),b=e.closest('th').getBoundingClientRect();return Math.round(Math.abs(a.x+a.width/2-b.x-b.width/2)*10)/10;});
+ document.querySelector('#metrics').textContent=JSON.stringify({width:w.innerWidth,overflow:d.documentElement.scrollWidth>w.innerWidth,headerMaxOffset:Math.max(0,...labels),tabs:[...d.querySelectorAll('.flow-nav-link')].map(e=>rect(e)),icons:[...d.querySelectorAll('.row-detail .icon,.row-delete .icon')].filter(visible).slice(0,4).map(e=>rect(e)),cells:[...d.querySelectorAll('table td')].filter(visible).slice(0,3).map(e=>({padding:style(e).paddingLeft,weight:style(e).fontWeight,height:rect(e).h})),nativeSelects:[...d.querySelectorAll('select')].filter(e=>visible(e)&&!e.hidden).length,dialog:[...d.querySelectorAll('dialog[open]')].map(e=>({...rect(e),within:e.getBoundingClientRect().right<=w.innerWidth&&e.getBoundingClientRect().left>=0})),errors:[...d.querySelectorAll('[role=alert]')].map(e=>e.textContent).filter(Boolean)});
+}setInterval(measure,300);
+</script></html>

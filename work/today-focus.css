@@ -73,7 +73,7 @@
 .focus-events{min-width:0;padding-bottom:8px}
 .focus-event{display:block;width:100%;min-height:78px;padding:10px 12px;background:none;text-align:left;border-radius:7px}
 .focus-event.is-now,.focus-gap.is-now{background:var(--mint-soft)}
-.focus-event-content{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.focus-event-content {display: grid; gap: 10px; align-items: center;}
 .focus-event-title{display:block;font-size:16px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
 .focus-plan-time{display:block;margin-top:4px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .focus-event.is-past .focus-event-content,.focus-event.is-future .focus-event-content{opacity:var(--focus-dim)}
