@@ -64,7 +64,7 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
   function open(options){
     const start=options.start||'',end=options.end||start;
     draft={...options,start,end,range:!!(options.allowRange&&(options.range||end&&end!==start)),active:'start',month:(start||today()).slice(0,7)+'-01',includeTime:!!options.time,time:options.time||'',reminder:options.reminder||null,reminderChanged:false,format:options.format||'absolute',error:'',saved:false,waiting:false};
-    dialog.className='notion-date-picker';render();if(!dialog.open)dialog.showModal();position();
+    dialog.className='notion-date-picker';dialog.classList.toggle('calendar-navigation',!!options.simple);render();if(!dialog.open)dialog.showModal();position();
     dialog.querySelector(`[data-calendar-day="${start||today()}"]`)?.focus({preventScroll:true});
   }
   dialog.addEventListener('click',event=>{
@@ -76,10 +76,10 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
       if(d.range&&d.active==='start'){d.start=day;d.end=day;d.active='end';d.waiting=true;d.saved=false;d.error='';}
       else if(d.range){d.end=day;if(d.end<d.start)[d.start,d.end]=[d.end,d.start];d.waiting=false;d.active='start';commit();}
       else{d.start=day;d.end=day;commit();}
-      d.month=day.slice(0,7)+'-01';render(day);return;
+      d.month=day.slice(0,7)+'-01';if(d.simple&&d.saved){dialog.close();return;}render(day);return;
     }
     if(a==='prev'||a==='next'){d.month=addMonths(d.month,a==='prev'?-1:1);render();dialog.querySelector(`[data-calendar-action="${a}"]`).focus();}
-    else if(a==='today'){d.month=today().slice(0,7)+'-01';render(today());}
+    else if(a==='today'){if(d.simple){d.start=today();d.end=d.start;if(commit()){dialog.close();return;}}d.month=today().slice(0,7)+'-01';render(today());}
     else if(a==='range'){d.range=!d.range;d.end=d.start;d.active=d.range&&d.start?'end':'start';d.waiting=!!(d.range&&d.start);d.error='';if(!d.range&&d.start)commit();render();}
     else if(a==='time'){d.includeTime=!d.includeTime;if(!d.includeTime){d.time='';if(d.start)commit();}render();if(d.includeTime)dialog.querySelector('[data-calendar-time]').focus();}
     else if(a==='clear'){const previous={...d};d.start='';d.end='';d.time='';d.waiting=false;if(commit())dialog.close();else{const error=d.error;draft={...previous,error};render();}}

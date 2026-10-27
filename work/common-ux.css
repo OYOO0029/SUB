@@ -195,3 +195,15 @@ table[data-resizable] th{position:sticky}table[data-resizable] th:last-child .ux
 :is(#app,#detail) :is(.tt-table,.pl-table) :is(.pl-task-title,.pl-work-title){font-weight:400;color:#fff}
 :is(#app,#detail) .pl-table td.pl-add-cell{padding:0 8px}
 :is(#app,#detail) :is(.tt-table,.pl-table) th:has(.tt-column,.pl-column){padding-inline:8px}
+/* Shared calendar navigation and filter menu surfaces. */
+#navigation-date-picker.calendar-navigation :is(.calendar-date-fields,.calendar-settings,.calendar-feedback,.calendar-footer){display:none}
+#navigation-date-picker{color:#fff;font-weight:400}
+#app .date-navigation button.date-label{background:transparent;border:0;min-height:32px;padding:0 8px;color:#fff;font-size:13px;font-weight:400;border-radius:6px}
+#app .date-navigation button.date-label:hover{background:#343c47}
+#app .surface-menu{padding:6px;border:1px solid #353c47;border-radius:8px;background:#272c35;box-shadow:0 8px 24px #0005}
+#app .surface-menu :is(.menu-option,.menu-parent){min-height:32px;box-sizing:border-box;padding:6px 8px;border-radius:5px;color:#fff;font-size:12px;font-weight:400;line-height:20px}
+#app .surface-menu :is(.menu-option,.menu-parent):is(:hover,:focus-visible,[aria-expanded=true]){background:#343c47}
+#app .surface-menu :is(.menu-option,.menu-parent).selected{background:#8ecbd014;color:#fff}
+#app .filter-menu{min-width:144px}
+#app .menu-parent .icon{width:12px;height:12px;flex:none;margin-left:16px;color:#a5adb8}
+#app .filter-toggle:focus{outline:none}#app .filter-toggle:focus-visible{outline:1px solid #8ecbd0;outline-offset:2px}
