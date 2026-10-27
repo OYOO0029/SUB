@@ -1,11 +1,11 @@
-import {choiceSelect} from './ui-components.js?v=20261027-ux-contract-1';
-import {statusFilter} from './status-filter.js?v=20261027-ux-contract-1';
-import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261027-ux-contract-1';
+import {choiceSelect} from './ui-components.js?v=20261027-entry-align-2';
+import {statusFilter} from './status-filter.js?v=20261027-entry-align-2';
+import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261027-entry-align-2';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261027-ux-contract-1';
-import {taskContext,uid,today,taskStart} from './model.js?v=20261027-ux-contract-1';
-import {executionSections} from './workflow.js?v=20261027-ux-contract-1';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261027-entry-align-2';
+import {taskContext,uid,today,taskStart} from './model.js?v=20261027-entry-align-2';
+import {executionSections} from './workflow.js?v=20261027-entry-align-2';
 import {orderedTasks} from './work-view.js?v=20261026-controls-1';
 
 // This surface only consumes existing task records; filters never reschedule tasks.

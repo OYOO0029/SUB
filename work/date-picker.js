@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261027-ux-contract-1';
+import {today,addDays,addMonths} from './model.js?v=20261027-entry-align-2';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
