@@ -13,7 +13,7 @@ import {createReminderCenter} from './reminders.js?v=20261026-controls-1';
 import {createDetailUI} from './detail-ui.js?v=20261027-click-add-1';
 import {activeChecks} from './editing.js?v=20261027-click-add-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261027-click-add-1';
-import {startWorkCloud} from './integration.js?v=20261026-controls-1';
+import {startWorkCloud} from './integration.js?v=20261027-auth-recover-1';
 import {loadState,saveState,validate,workAccount} from './repository.js?v=20261027-click-add-1';
 import {automaticOrder,orderedTasks,taskSections,taskFilter,searchEntities,moveToDay,deadlineConflict,countdown} from './work-view.js?v=20261026-controls-1';
 import {installTaskDrag} from './task-drag.js';
@@ -153,7 +153,7 @@ function workspaceActions(compact=false){
  const filtered=ui.project||ui.work||ui.status!=='active'||ui.group!=='none';
  return `<div class="workspace-actions"><div data-dropdown>${button(icon('filter')+(filtered?'<i class="filter-dot"></i>':''),'menu','data-menu-toggle aria-haspopup="menu" aria-expanded="false" aria-controls="filter-menu" aria-label="필터 옵션"','filter-toggle')}${workspaceOptions(compact)}</div></div>`;
 }
-function bodyScreen(){if(!workAccount.owner)return '<div class="list-empty">로그인하면 계정에 저장된 업무가 표시됩니다.</div>';return ui.mode==='personal'?personalScreen():ui.search.trim()?searchScreen():ui.tab==='works'?worksScreen():ui.tab==='projects'?(ui.projectPage?flow.projectPage():projectsScreen()):taskScreen();}
+function bodyScreen(){if(!workAccount.owner)return '<div class="list-empty" data-account-state>로그인 상태를 확인하는 중…</div>';return ui.mode==='personal'?personalScreen():ui.search.trim()?searchScreen():ui.tab==='works'?worksScreen():ui.tab==='projects'?(ui.projectPage?flow.projectPage():projectsScreen()):taskScreen();}
 function updateCountdown(){const el=$('#leave-count');if(el)el.textContent=countdown();}
 function render({keepMenus=false}={}){
  focus.rollover();
@@ -305,7 +305,7 @@ function saveReminderChange(message,undo){const ok=saveState(data);if(!ok){ui.sa
 render();
 window.addEventListener('click',event=>{if(!workAccount.owner&&event.target.closest('.workspace-content')){event.preventDefault();event.stopImmediatePropagation();window.dispatchEvent(new Event('my-week-login-request'));}},true);
 const workCloud=startWorkCloud({save:()=>saveState(data),getData:()=>data,replaceData:value=>{data=value;ui.saveWarning='';render();},notify:toast,
- onStatus(kind){ui.cloudStatus=kind;document.querySelectorAll('[data-save-state]').forEach(el=>el.textContent=kind==='online'?'저장됨':kind==='error'?'동기화 실패 · 재시도 필요':kind==='offline'?'기기에 저장됨 · 연결 후 동기화':kind==='conflict'?'다른 기기 변경 확인 필요':kind==='waiting'?'기기에 저장됨 · 동기화 대기':'동기화 중');if(workAccount.owner&&['online','error','offline','conflict'].includes(kind))reminderAccountReady=true;reminders.refresh();},
+ onStatus(kind,message){ui.cloudStatus=kind;const accountState=document.querySelector('[data-account-state]');if(accountState)accountState.textContent=message||'로그인 상태를 확인하는 중…';document.querySelectorAll('[data-save-state]').forEach(el=>el.textContent=kind==='online'?'저장됨':kind==='error'?'동기화 실패 · 재시도 필요':kind==='offline'?'기기에 저장됨 · 연결 후 동기화':kind==='conflict'?'다른 기기 변경 확인 필요':kind==='waiting'?'기기에 저장됨 · 동기화 대기':'동기화 중');if(workAccount.owner&&['online','error','offline','conflict'].includes(kind))reminderAccountReady=true;reminders.refresh();},
  resetEditors(){focus.resetPanels();composer.reset();reminderAccountReady=false;reminders.close();clearTimeout(toastTimer);undoFn=null;ui.detail=null;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';document.querySelectorAll('dialog[open]:not(#cloud-dialog)').forEach(dialog=>{dialog.dataset.skipCloseSave='true';dialog.close();});document.body.classList.remove('task-dragging','dragging-reminders');},
  download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 });

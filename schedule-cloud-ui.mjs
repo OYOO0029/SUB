@@ -92,9 +92,9 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
    }else await engine.reconcile();
   }catch(error){if(current===generation)report(error);}
  }
- async function connect(restore=true){
+ async function connect(restore=true,force=false){
   if(connecting)return connecting;
-  if(client&&(!restore||sessionChecked))return client;
+  if(client&&(!restore||sessionChecked&&!force))return client;
   connecting=(async()=>{
    restorePending=true;status('waiting','저장된 로그인 상태를 확인하는 중');
    if(!client){
@@ -125,14 +125,14 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
     const verified=await client.auth.getUser();if(verified.error)throw verified.error;
     if(!disposed&&restoring===generation&&verified.data.user)await activate(verified.data.user);
    }
-   if(!disposed&&restoring===generation){sessionChecked=true;restorePending=false;if(!user)status('offline','로그인해 주세요');}
+   if(!disposed&&restoring===generation){sessionChecked=true;restorePending=false;if(!data.session&&user)signedOut();else if(!user)status('offline','로그인해 주세요');}
    return client;
   })();
   try{return await connecting;}finally{connecting=null;}
  }
  function recover(){
   if(disposed||connecting||working)return;
-  if(!sessionChecked)connect().catch(restoreError);
+  if(!sessionChecked||!user||!engine)connect(true,true).catch(restoreError);
   else engine?.reconcile();
  }
  listen(loginForm.elements.rememberEmail,'change',()=>{
@@ -223,7 +223,11 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  listen(window,'offline',()=>{if(user)status('offline','오프라인 · 연결되면 다시 동기화합니다');});
  listen(document,'visibilitychange',()=>{if(!document.hidden)recover();});
  listen(window,'focus',recover);
+ listen(window,'message',event=>{
+  if(event.origin===window.location.origin&&event.source===window.parent&&event.data?.type==='planner-active'&&event.data.active)recover();
+ });
  listen(window,'storage',event=>{
+  if(event.key==='my-week.supabase.auth.v1'||event.key===null){connect(true,true).catch(restoreError);return;}
   if(event.key===emailKey){
    const email=storage.getItem(emailKey)||'';
    loginForm.elements.rememberEmail.checked=!!email;
@@ -247,5 +251,5 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
   if(revision!==generation||user?.id!==account.id)throw Error('계정이 변경되었습니다. 다시 시도해 주세요.');return data;
  }
  paint();const ready=connect().catch(restoreError);
- return {ready,protect(data,reason){if(!engine||!user)throw Error('로그인해 주세요.');engine.backup(data,reason);},files:{upload:(path,blob)=>storageFile('upload',path,blob),download:path=>storageFile('download',path)},get status(){return statusKind;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
+ return {ready,protect(data,reason){if(!engine||!user)throw Error('로그인해 주세요.');engine.backup(data,reason);},files:{upload:(path,blob)=>storageFile('upload',path,blob),download:path=>storageFile('download',path)},get status(){return statusKind;},get statusText(){return statusText;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }

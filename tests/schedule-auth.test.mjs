@@ -37,7 +37,7 @@ function setup({rows=new Map(),session=null,persistent=true,seed=[],invalid=fals
  const ui=startCloud(bridge,{storage,...(work?{slot:'myWorkV1',namespace:'my-work',autoInitialize:false}:{}),loadClient:async()=>({createClient:(_url,_key,options)=>{clientOptions=options;return client}})});
  const submit=email=>{const form=document.querySelector('form');form.elements.email.value=email;form.elements.password.value='test-password';form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};
  const click=action=>document.querySelector('[data-cloud="'+action+'"]').click();
- return{ui,dom,cache,rows,seen,submit,click,get clientOptions(){return clientOptions},get verifications(){return verifications},get state(){return state},get reads(){return reads},get writes(){return writes},status:()=>document.querySelector('#cloud-detail').textContent,close(){ui.destroy();dom.window.close();}};
+ return{ui,dom,cache,rows,seen,submit,click,setSession(value){session=value;},get clientOptions(){return clientOptions},get verifications(){return verifications},get state(){return state},get reads(){return reads},get writes(){return writes},status:()=>document.querySelector('#cloud-detail').textContent,close(){ui.destroy();dom.window.close();}};
 }
 const snapshot=amount=>{const state=initialState();state.budgets['2026-10']={total:amount,allocations:{}};return{state:{[CLOUD_SLOT]:{schema:1,revision:'r1',data:state}},updated_at:'1'};};
 test('temporary verification failure recovers the saved session on reconnect without another password',async()=>{
@@ -121,5 +121,19 @@ test('work imports into its own slot and account switches clear the first accoun
  try{await app.ui.ready;app.submit('a@example.test');await until(()=>app.status().includes('업무를 추가'));const incoming=emptyWorkState();incoming.workStages=['검토'];
  assert.equal(await app.ui.importData(incoming,()=>incoming),true);assert.deepEqual(app.rows.get('A').state.myWeekV1,before.state.myWeekV1);assert.deepEqual(app.rows.get('A').state.myWorkV1.data.workStages,['검토']);
  app.click('logout');await until(()=>app.status()==='로그인해 주세요');assert.deepEqual(app.state,emptyWorkState());await until(()=>!document.querySelector('button[type=submit]').disabled);app.submit('b@example.test');await until(()=>app.ui.account?.id==='B');assert.deepEqual(app.state,emptyWorkState());assert.equal(app.rows.get('B').state.myWorkV1,undefined);
+ }finally{app.close();}
+});
+
+for(const work of [false,true])test(`missed login event recovers ${work?'work':'personal'} on returning to the screen`,async()=>{
+ const row=snapshot(700);if(work)row.state.myWorkV1={schema:1,revision:'w1',data:emptyWorkState()};
+ const app=setup({work,rows:new Map([['A',row]])});
+ try{
+  await app.ui.ready;assert.equal(app.ui.account,null);
+  app.setSession({user:{id:'A',email:'a@example.test'}});
+  window.dispatchEvent(new Event('focus'));
+  await until(()=>app.ui.account?.id==='A'&&app.status()==='동기화됨');
+  assert.equal(app.writes,0);assert.equal(app.verifications,1);
+  app.setSession(null);window.dispatchEvent(new window.StorageEvent('storage',{key:'my-week.supabase.auth.v1'}));
+  await until(()=>app.ui.account===null);assert.deepEqual(app.state,work?emptyWorkState():initialState());
  }finally{app.close();}
 });

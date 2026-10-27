@@ -1,5 +1,5 @@
 import {createImageStore,configureWorkImages,workImages,hydrateWorkImages,migrateInlineImages} from './image-store.mjs';
-import {startCloud} from '../schedule-cloud-ui.mjs?v=20261026-controls-1';
+import {startCloud} from '../schedule-cloud-ui.mjs?v=20261027-auth-recover-1';
 import {appStorage} from '../schedule-storage.mjs';
 import {workAccount,validate} from './repository.js?v=20261027-click-add-1';
 import {mergeWorkData} from './work-account.mjs';
@@ -18,7 +18,7 @@ export function startWorkCloud({getData,replaceData,resetEditors,notify,download
   export:async()=>download(JSON.stringify(await workImages.portable(getData()),null,2),'what-to-do-work-backup.json'),download
  };
  function paint(){
-  if(cloud)onStatus(cloud.status);
+  if(cloud)onStatus(cloud.status,cloud.statusText);
   const box=document.getElementById('work-account-notice');if(!box)return;
   let staged;try{staged=workAccount.staged();}catch{message='가져올 파일을 읽지 못했습니다. 백업 파일을 다시 선택해 주세요.';}
   const account=cloud?.account,available=staged&&(!staged.owner||staged.owner===workAccount.owner);
