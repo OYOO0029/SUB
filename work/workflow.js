@@ -1,4 +1,4 @@
-import {addDays,isPlanned,isDuePast,isCarried,planToday,taskContext,uid} from './model.js?v=20261026-controls-1';
+import {addDays,isPlanned,isDuePast,isCarried,planToday,taskContext,uid} from './model.js?v=20261027-task-flow-3';
 export const unfinished=t=>!t.deletedAt&&!['done','cancelled'].includes(t.status);
 export function projectTasks(data,id){return data.tasks.filter(t=>!t.deletedAt&&taskContext(data,t).project?.id===id);}
 export function projectSummary(data,p){
@@ -9,9 +9,9 @@ export function projectSummary(data,p){
 }
 export function executionSections(data,date,showCompleted=false){
  const eligible=data.tasks.filter(t=>unfinished(t)||(showCompleted&&!t.deletedAt&&t.status==='done'));
- const planned=eligible.filter(t=>!t.excludedDates?.includes(date)&&(isPlanned(t,date)||t.due===date||t.status==='done'&&t.completedAt?.slice(0,10)===date));
- const overdue=eligible.filter(t=>unfinished(t)&&!planned.includes(t)&&isDuePast(t,date));
- const upcoming=eligible.filter(t=>unfinished(t)&&!planned.includes(t)&&!overdue.includes(t)&&(isCarried(t,date)||t.due>date&&t.due<=addDays(date,7)||t.plans.some(p=>p.state==='active'&&p.start>date&&p.start<=addDays(date,7))));
+ const planned=eligible.filter(t=>!t.excludedDates?.includes(date)&&(isPlanned(t,date)||!Object.hasOwn(t,'startDate')&&t.due===date||t.status==='done'&&t.completedAt?.slice(0,10)===date));
+ const overdue=eligible.filter(t=>unfinished(t)&&!planned.includes(t)&&!Object.hasOwn(t,'startDate')&&isDuePast(t,date));
+ const upcoming=eligible.filter(t=>unfinished(t)&&!planned.includes(t)&&!overdue.includes(t)&&!Object.hasOwn(t,'startDate')&&(isCarried(t,date)||t.due>date&&t.due<=addDays(date,7)||t.plans.some(p=>p.state==='active'&&p.start>date&&p.start<=addDays(date,7))));
  return {planned,overdue,upcoming};
 }
 export function removeFromDay(task,date){

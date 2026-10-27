@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261026-controls-1';
+import {today,addDays,addMonths} from './model.js?v=20261027-task-flow-3';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
@@ -48,7 +48,7 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
     const d=draft,days=calendarDays(d.month),month=d.month.slice(0,7),base=today();
     const field=(key,label)=>`<input class="calendar-date-input ${d.active===key?'active':''}" data-calendar-input="${key}" aria-label="${label}" value="${esc(dateInputLabel(d[key]))}" placeholder="YYYY. MM. DD." inputmode="numeric" autocomplete="off">`;
     const toggle=(action,label,on)=>`<button type="button" class="calendar-setting" data-calendar-action="${action}" role="switch" aria-checked="${on}" aria-label="${label}"><span>${label}</span><i class="calendar-switch ${on?'on':''}"></i></button>`;
-    dialog.innerHTML=`<h3 id="property-editor-title" class="sr-only">${esc(d.title)} 선택</h3>
+    dialog.innerHTML=`<h3 id="${dialog.id}-title" class="sr-only">${esc(d.title)} 선택</h3>
       <div class="calendar-date-fields">${field('start',d.allowRange?'시작일':'날짜')}${d.range?field('end','종료일'):''}</div>
       <div class="calendar-heading"><strong>${Number(month.slice(0,4))}년 ${Number(month.slice(5))}월</strong><button type="button" data-calendar-action="today">오늘</button><button type="button" data-calendar-action="prev" aria-label="이전 달">${icon('left')}</button><button type="button" data-calendar-action="next" aria-label="다음 달">${icon('chevron')}</button></div>
       <div class="calendar-weekdays" aria-hidden="true">${['일','월','화','수','목','금','토'].map(v=>`<span>${v}</span>`).join('')}</div>
@@ -64,7 +64,7 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
   function open(options){
     const start=options.start||'',end=options.end||start;
     draft={...options,start,end,range:!!(options.allowRange&&(options.range||end&&end!==start)),active:'start',month:(start||today()).slice(0,7)+'-01',includeTime:!!options.time,time:options.time||'',reminder:options.reminder||null,reminderChanged:false,format:options.format||'absolute',error:'',saved:false,waiting:false};
-    dialog.className='notion-date-picker';dialog.classList.toggle('calendar-navigation',!!options.simple);render();if(!dialog.open)dialog.showModal();position();
+    dialog.setAttribute('aria-labelledby',dialog.id+'-title');dialog.className='notion-date-picker';dialog.classList.toggle('calendar-navigation',!!options.simple);render();if(!dialog.open)dialog.showModal();position();
     dialog.querySelector(`[data-calendar-day="${start||today()}"]`)?.focus({preventScroll:true});
   }
   dialog.addEventListener('click',event=>{

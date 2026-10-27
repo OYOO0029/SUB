@@ -1,8 +1,8 @@
-import {createTodayTable} from './today-table.js?v=20261027-cell-edit-1';
-import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261026-controls-1';
-import {executionSections,unfinished} from './workflow.js?v=20261026-controls-1';
+import {createTodayTable} from './today-table.js?v=20261027-task-flow-3';
+import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261027-task-flow-3';
+import {executionSections,unfinished} from './workflow.js?v=20261027-task-flow-3';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261026-controls-1';
-import {createItem,conflicts} from './editing.js?v=20261026-controls-1';
+import {createItem,conflicts} from './editing.js?v=20261027-task-flow-3';
 import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
 import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
@@ -74,7 +74,7 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
     if(a==='select'){const t=find(id);if(t&&unfinished(t))timer.change('select',timer.read().taskId===id?null:id);render();return;}
     if(a==='timer-edit'){timerEditing=!timerEditing;timerDraft=String(timer.read().minutes);render();document.querySelector('[data-focus-timer-form] input')?.focus();return;}
     if(a==='timer-cancel'){timerEditing=false;render();return;}
-    if(a==='add'){addOpen=!addOpen;render();document.querySelector('[data-focus-add] input')?.focus();return;}
+    if(a==='add'){window.dispatchEvent(new CustomEvent('work-add-tasks'));return;}
     if(a==='cancel-add'){addOpen=false;addDraft='';render();return;}
     if(a==='gap'){let start=Number(b.dataset.start);const end=Number(b.dataset.end);if(event.detail>0){const box=b.getBoundingClientRect();if(box.height>0)start+=Math.max(0,Math.min((end-start)/10-1,Math.round((event.clientY-box.top-14)/box.height*((end-start)/10))))*10;}openPicker(eligible().some(t=>t.id===timer.read().taskId)?timer.read().taskId:null,start,Math.min(end,start+60));return;}
     if(a==='plan'){openPicker(id);return;}

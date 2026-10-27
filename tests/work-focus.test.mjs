@@ -41,7 +41,7 @@ test('timeline covers 08–19 without duplicated ticks, retains exact legacy min
 
 test('focus UI connects existing tasks, keeps timer and drafts, and saves only explicit 10-minute plans',()=>{
   const dom=new JSDOM('<div id="app"></div>',{pretendToBeVisual:true,url:'https://fixture.invalid'});
-  const keys=['window','document','FormData'],originals=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
+  const keys=['window','document','FormData','CustomEvent'],originals=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
   for(const key of keys)Object.defineProperty(globalThis,key,{value:dom.window[key],configurable:true,writable:true});
   let view;
   try{
@@ -81,9 +81,8 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     assert.equal(task.blocks[0].start,'08:00');assert.equal(task.blocks[0].end,'08:40');assert.equal(saves,1);
     assert.equal(task.due,originalDue);assert.equal(task.workId,originalWork);assert.equal(task.checks.length,1);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
-    click('[data-focus="add"]');const input=document.querySelector('[data-focus-add] input');input.value='추가 중인 초안';input.dispatchEvent(new dom.window.Event('input',{bubbles:true}));render();
-    assert.equal(document.querySelector('[data-focus-add] input').value,'추가 중인 초안');assert(view.busy());
-    submit('[data-focus-add]');assert.equal(data.tasks.length,3);assert.equal(saves,2);
+    let addRequested=false;window.addEventListener('work-add-tasks',()=>addRequested=true);
+    click('[data-focus="add"]');assert(addRequested);assert.equal(data.tasks.length,2);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     assert.equal(taskContext(data,task).project.id,p.id);
     click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');
@@ -96,10 +95,10 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     const newSearch=document.querySelector('[data-focus-search]');newSearch.value='새 배치 업무';newSearch.dispatchEvent(new dom.window.Event('input',{bubbles:true}));click('[data-focus="new-task"]');
     const project=document.querySelector('[data-focus-new-project]');project.value=p.id;project.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
     click('[data-minute="890"]');click('[data-minute="850"]');submit('[data-focus-plan-form]');
-    assert.equal(data.tasks.length,4);const created=data.tasks.at(-1);assert.equal(created.title,'새 배치 업무');assert.equal(created.projectId,p.id);
-    assert.equal(created.blocks[0].start,'14:10');assert.equal(created.blocks[0].end,'15:00');assert.equal(created.plans[0].start,date);assert.equal(saves,3);
+    assert.equal(data.tasks.length,3);const created=data.tasks.at(-1);assert.equal(created.title,'새 배치 업무');assert.equal(created.projectId,p.id);
+    assert.equal(created.blocks[0].start,'14:10');assert.equal(created.blocks[0].end,'15:00');assert.equal(created.plans[0].start,date);assert.equal(saves,2);
     click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');click(`[data-focus="pick-task"][data-id="${second.id}"]`);
-    click('[data-minute="900"]');submit('[data-focus-plan-form]');assert.equal(data.tasks.length,4);assert.equal(second.due,date);assert.equal(second.blocks[0].start,'15:00');assert.equal(second.plans[0].start,date);
+    click('[data-minute="900"]');submit('[data-focus-plan-form]');assert.equal(data.tasks.length,3);assert.equal(second.due,date);assert.equal(second.blocks[0].start,'15:00');assert.equal(second.plans[0].start,date);
     owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.tt-panel'),null);assert.equal(document.querySelector('.tt-mini'),null);assert.equal(document.querySelector('.focus-ring'),null);
   }finally{view?.destroy();dom.window.close();for(const key of keys){const d=originals.get(key);if(d)Object.defineProperty(globalThis,key,d);else delete globalThis[key];}}
 });
