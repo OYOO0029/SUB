@@ -3,7 +3,7 @@
 export function installSurfaceInteractions(){
   const panelFor=button=>document.getElementById(button.getAttribute('aria-controls'));
   const triggerFor=panel=>document.querySelector(`[aria-controls="${panel.id}"]`);
-  const entries=panel=>[...panel.children].flatMap(el=>el.matches('button')?[el]:[...el.children].filter(child=>child.matches('button'))).filter(el=>!el.disabled&&!el.hidden);
+  const entries=panel=>panel.classList.contains('task-project-menu')?[...panel.querySelectorAll('input')].filter(e=>!e.closest('[hidden]')):[...panel.children].flatMap(el=>el.matches('button')?[el]:[...el.children].filter(child=>child.matches('button'))).filter(el=>!el.disabled&&!el.hidden);
   function close(panel,focus=false){
     if(!panel)return;
     panel.querySelectorAll('[data-menu-panel]').forEach(child=>{child.hidden=true;triggerFor(child)?.setAttribute('aria-expanded','false');});
@@ -16,7 +16,7 @@ export function installSurfaceInteractions(){
     const panel=panelFor(button);if(!panel)return;
     closeAll(panel);panel.hidden=false;button.setAttribute('aria-expanded','true');
     panel.classList.remove('opens-left');panel.style.removeProperty('--menu-shift-y');
-    if(button.closest('.pl-table,.tt-table,.ux-select')){
+    if(button.closest('.pl-table,.tt-table,.ux-select,.task-project-manage')){
       const anchor=button.getBoundingClientRect();panel.style.position='fixed';panel.style.transform='none';panel.style.right='auto';panel.style.maxHeight=Math.max(100,innerHeight-24)+'px';panel.style.overflowY='auto';
       panel.style.left=Math.max(12,Math.min(anchor.left,innerWidth-panel.offsetWidth-12))+'px';panel.style.top=Math.max(12,Math.min(anchor.bottom+6,innerHeight-panel.offsetHeight-12))+'px';
       if(focus)entries(panel)[0]?.focus();return;

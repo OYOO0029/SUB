@@ -1,17 +1,18 @@
-import {createTodayTable} from './today-table.js?v=20261027-entry-align-2';
-import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261027-entry-align-2';
-import {executionSections,unfinished} from './workflow.js?v=20261027-entry-align-2';
+import {createTodayTable} from './today-table.js?v=20261027-project-tabs-1';
+import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261027-project-tabs-1';
+import {executionSections,unfinished} from './workflow.js?v=20261027-project-tabs-1';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261026-controls-1';
-import {createItem,conflicts} from './editing.js?v=20261027-entry-align-2';
+import {createItem,conflicts} from './editing.js?v=20261027-project-tabs-1';
 import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
 import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
 export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render,persist,notify,storage,save=()=>persist(''),filters=()=>''}){
   const timer=createFocusTimer({storage,getScope});
   const table=createTodayTable({getData,getScope,ui,esc,icon,timer,render,save,notify,flow});
+  window.addEventListener('task-project-context',()=>{picker=null;});
   let picker=null,addOpen=false,addDraft='',timerEditing=false,timerDraft='60',lastView='',lastDay=today();
   const find=id=>getData().tasks.find(t=>t.id===id&&!t.deletedAt);
-  const eligible=()=>executionSections(getData(),ui.date).planned.filter(unfinished);
+  const eligible=()=>executionSections(getData(),ui.date).planned.filter(unfinished).filter(table.matchesProject);
   const currentClock=()=>ui.date<today()?1440:ui.date>today()?-1:koreaClock();
   const phase=(start,end)=>end<=currentClock()?'past':start<=currentClock()&&currentClock()<end?'now':'future';
   const action=(label,name,attrs='',cls='focus-button')=>`<button type="button" class="${cls}" data-focus="${name}" ${attrs}>${label}</button>`;
@@ -42,13 +43,13 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
     const task=find(id),block=task?.blocks.find(b=>b.date===ui.date);
     const initial=start??(block?minute(block.start):Math.ceil(koreaClock()/10)*10);
     const s=Math.max(DAY_START,Math.min(DAY_END-10,Math.floor(initial/10)*10)),e=Math.max(s+10,Math.min(DAY_END,Math.ceil((end??(block?minute(block.end):s+60))/10)*10));
-    picker={taskId:task?.id||'',date:ui.date,start:s,end:e,anchor:null,query:'',choosing:!task,newTitle:'',projectId:''};
+    picker={taskId:task?.id||'',date:ui.date,start:s,end:e,anchor:null,query:'',choosing:!task,newTitle:'',projectId:table.addContext().projectId||''};
     render();const grid=document.querySelector('.focus-hours');if(grid){const row=grid.querySelectorAll('.focus-hour-row')[Math.max(0,Math.floor(s/60)-9)];if(row)grid.scrollTop=row.offsetTop-grid.querySelector('.focus-hour-row').offsetTop};document.querySelector('[data-focus-search]')?.focus();
   }
   function pickerView(){
     const p=picker,t=find(p.taskId),existing=t?.blocks.find(b=>b.date===p.date),busy=conflicts(getData(),p.taskId,p.date,time(p.start),time(p.end));
     const sections=executionSections(getData(),p.date,true),all=[...new Map([...sections.planned,...sections.overdue,...sections.upcoming].filter(unfinished).map(t=>[t.id,t])).values()],q=p.query.trim();
-    const results=all.filter(t=>(t.title+' '+context(t)).toLowerCase().includes(q.toLowerCase()));
+    const results=all.filter(table.matchesProject).filter(t=>(t.title+' '+context(t)).toLowerCase().includes(q.toLowerCase()));
     const chooser=p.choosing?`<div class="focus-task-picker"><input data-focus-search type="search" maxlength="160" aria-label="할 일 검색 또는 새로 입력" placeholder="할 일 검색 또는 새로 입력" value="${esc(p.query)}" autocomplete="off"><div class="focus-task-results">${results.map(t=>action(`<span>${esc(t.title)}</span><small>${esc(context(t))}</small>`,'pick-task',`data-id="${esc(t.id)}"`,'focus-task-option')).join('')}${q?action(icon('plus')+'<span>“'+esc(q)+'” 추가</span>','new-task','','focus-task-option focus-new-task'):''}${!results.length&&!q?'<span class="focus-no-results">할 일 이름을 입력하세요.</span>':''}</div></div>`:action(`<span>${esc(t?.title||p.newTitle)}</span>${icon('down')}`,'choose-task','aria-label="배치할 할 일 변경"','focus-chosen-task');
     return `<form data-focus-plan-form class="focus-picker"><div class="focus-picker-heading"><h2>시간 배치</h2>${action(icon('close'),'close-picker','aria-label="시간 배치 닫기"')}</div>${chooser}${p.newTitle&&!p.choosing?`<select data-focus-new-project aria-label="새 할 일 프로젝트"><option value="">프로젝트 없음</option>${getData().projects.filter(p=>!p.deletedAt).map(x=>`<option value="${esc(x.id)}" ${p.projectId===x.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select>`:''}<output class="focus-selection" aria-live="polite"><strong>${time(p.start)} → ${time(p.end)}</strong><span>${p.end-p.start}분</span></output><div class="focus-hours" role="group" aria-label="시작과 마지막 10분 블록">${Array.from({length:(DAY_END-DAY_START)/60},(_,h)=>DAY_START+h*60).map(hour=>`<div class="focus-hour-row"><span>${hour/60}시</span><div class="focus-hour-buttons">${Array.from({length:6},(_,i)=>hour+i*10).map(m=>{const occupied=conflicts(getData(),p.taskId,p.date,time(m),time(m+10)),selected=m>=p.start&&m<p.end;return action(time(m).slice(3),'block',`data-minute="${m}" aria-pressed="${selected}" title="${time(m)}–${time(m+10)}${occupied.length?' · '+occupied.map(x=>esc(x.title)).join(', '):''}" aria-label="${time(m)}부터 ${time(m+10)}까지${occupied.length?', 다른 일정 있음':''}"`,'focus-block'+(occupied.length?' is-busy':'')+(m+10<=currentClock()?' is-past':'')+(m<=currentClock()&&currentClock()<m+10?' is-current':'')+(selected?' in-range':'')+(m===p.start?' range-start':'')+(m===p.end-10?' range-end':''));}).join('')}</div></div>`).join('')}</div>${busy.length?`<p class="focus-warning" role="status">겹치는 일정: ${esc([...new Set(busy.map(b=>b.title))].join(', '))}</p>`:''}${t&&deadlineConflict(t,p.date,time(p.end))?'<p class="focus-warning">마감 이후에 끝나는 일정입니다.</p>':''}${existing&&(minute(existing.start)%10||minute(existing.end)%10)?'<p class="focus-warning">저장 시 10분 단위로 맞춰집니다.</p>':''}<p class="form-error" role="alert"></p><div class="focus-picker-actions">${existing?action('배치 해제','remove-plan','','focus-remove'):''}<button type="submit" class="small-button" ${p.choosing||(!t&&!p.newTitle)?'disabled':''}>${existing?'변경 저장':'배치 저장'}</button></div></form>`;
   }
@@ -56,9 +57,9 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
     if(ui.view==='list')return table.screen(addOpen?`<form data-focus-add class="focus-add"><input name="title" value="${esc(addDraft)}" placeholder="새로운 할 일" maxlength="160" required aria-label="새로운 할 일"><button type="submit" class="small-button">추가</button>${action('취소','cancel-add')}<p class="form-error" role="alert"></p></form>`:'');
     const viewKey=`${ui.tab}/${ui.view}/${ui.date}`;
     if(lastView&&lastView!==viewKey)picker=null;lastView=viewKey;
-    const s=executionSections(getData(),ui.date,true),planned=orderedTasks(getData(),s.planned.filter(t=>unfinished(t)&&passes(t)),ui.date),done=s.planned.filter(t=>t.status==='done'&&passes({...t,status:ui.status==='active'?'todo':t.status}));
+    const s=executionSections(getData(),ui.date,true),planned=orderedTasks(getData(),table.filterTasks(s.planned).filter(t=>unfinished(t)&&passes(t)),ui.date),done=table.filterTasks(s.planned).filter(t=>t.status==='done'&&passes({...t,status:ui.status==='active'?'todo':t.status}));
     const fold=(label,key,tasks)=>tasks.length?`<details class="focus-fold" data-fold="${key}"><summary>${label} ${tasks.length}개</summary>${tasks.map(t=>flow.row(t,{carry:true})).join('')}</details>`:'';
-    return `<section class="focus-screen tt-screen"><div class="focus-layout"><section class="focus-work" aria-label="오늘 할 일"><div class="tt-toolbar">${table.viewTabs()}<div class="ux-tools">${filters()}${action(icon('plus'),'add','aria-label="오늘 할 일 추가" title="오늘 할 일 추가" aria-expanded="'+addOpen+'"')}</div></div>${addOpen?`<form data-focus-add class="focus-add"><input name="title" value="${esc(addDraft)}" placeholder="새로운 할 일" maxlength="160" required aria-label="새로운 할 일"><button type="submit" class="small-button">추가</button>${action('취소','cancel-add')}<p class="form-error" role="alert"></p></form>`:''}${picker?pickerView():ui.view==='timeline'?timeline(planned):planned.map(row).join('')||(done.length?'':ui.project||ui.work||ui.status!=='active'?'<p class="focus-empty">조건에 맞는 할 일이 없습니다. <button type="button" class="text-button" data-action="clear-filters">필터 초기화</button></p>':'<p class="focus-empty">오늘 할 일이 없습니다. +로 추가하세요.</p>')}${picker?'':table.remainingView({...s,overdue:s.overdue.filter(passes),upcoming:s.upcoming.filter(passes)})+(done.length?`<details class="focus-fold" data-fold="focus-done"><summary>완료한 일 ${done.length}개</summary>${done.map(row).join('')}</details>`:'')}</section></div>${table.panelView()}${table.miniView()}</section>`;
+    return `<section class="focus-screen tt-screen"><div class="focus-layout"><section class="focus-work" aria-label="오늘 할 일">${table.toolbar(true)}${table.projectTabs()}${table.toolbarMenu()}${addOpen?`<form data-focus-add class="focus-add"><input name="title" value="${esc(addDraft)}" placeholder="새로운 할 일" maxlength="160" required aria-label="새로운 할 일"><button type="submit" class="small-button">추가</button>${action('취소','cancel-add')}<p class="form-error" role="alert"></p></form>`:''}${picker?pickerView():ui.view==='timeline'?timeline(planned):planned.map(row).join('')||(done.length?'':ui.project||ui.work||ui.status!=='active'?'<p class="focus-empty">조건에 맞는 할 일이 없습니다. <button type="button" class="text-button" data-action="clear-filters">필터 초기화</button></p>':'<p class="focus-empty">오늘 할 일이 없습니다. +로 추가하세요.</p>')}${picker?'':table.remainingView({...s,overdue:s.overdue.filter(passes),upcoming:s.upcoming.filter(passes)})+(done.length?`<details class="focus-fold" data-fold="focus-done"><summary>완료한 일 ${done.length}개</summary>${done.map(row).join('')}</details>`:'')}</section></div>${table.panelView()}${table.miniView()}</section>`;
   }
   function updateTimer(){
     const ended=timer.tick();table.tick();const s=timer.read(),clock=document.querySelector('.focus-clock');
@@ -105,5 +106,5 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   const interval=setInterval(updateTimer,1000);
   window.addEventListener('storage',event=>{if(event.key?.startsWith('my-work-focus-timer-v1:')){timer.reload();updateTimer();}});
   function rollover(){const next=today();if(next!==lastDay){if(ui.tab==='tasks'&&ui.date===lastDay)ui.date=next;lastDay=next;}}
-  return {addContext:()=>ui.view==='timeline'?{date:ui.date}:table.addContext(),screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
+  return {addContext:()=>({...table.addContext(),...(ui.view==='timeline'?{date:ui.date}:{})}),screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
 }

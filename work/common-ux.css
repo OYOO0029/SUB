@@ -53,7 +53,7 @@ html {scrollbar-gutter: stable;}
 #app .tt-table th {text-align: center; vertical-align: middle;}
 #app .tt-column {justify-content: center; margin-inline: auto;}
 #app .tt-table td {vertical-align: middle;}
-#app .tt-table .tt-due,#app .tt-table td:first-child,#app .tt-table td:last-child {text-align: center;}
+#app .tt-table .tt-due,#app .tt-table .tt-focus-cell,#app .tt-table td:first-child,#app .tt-table td:last-child {text-align: center;}
 #app .pl-table th {text-align: center; vertical-align: middle;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-column,.pl-column) {position: relative; gap: 0; width: max-content; max-width: 100%; margin-inline: auto;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-column,.pl-column)>.tt-filter-dot {position: absolute; left: calc(100% + 18px); right: auto; top: 50%; transform: translateY(-50%);}
@@ -189,19 +189,9 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #app .filter-toggle:focus {outline: none;}
 #app .filter-toggle:focus-visible {outline: 1px solid #8ecbd0; outline-offset: 2px;}
 .task-composer {margin: 0 0 16px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: #fff; font-size: 12px;}
-.batch-context,.batch-footer {display: flex; align-items: center; gap: 8px; flex-wrap: wrap;}
-.batch-context>.icon-button {margin-left: auto;}
-.batch-footer {margin-top: 8px;}
-.batch-footer label {display: flex; align-items: center; gap: 6px;}
-.batch-footer [role=status] {margin-left: auto; color: var(--muted);}
 .task-composer textarea {width: 100%; box-sizing: border-box; resize: vertical; min-height: 56px; margin-top: 10px; background: var(--canvas); border: 1px solid var(--line); border-radius: 6px; color: #fff; font: inherit; padding: 8px;}
-.batch-date {display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 8px; color: #fff; background: transparent; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; list-style: none; font: inherit;}
-.batch-date .icon {width: 12px; height: 12px; flex: none;}
-.batch-date span {color: var(--muted);}
 #detail .wd-table td.pl-text {display: flex; align-items: center; gap: 6px;}
 .task-composer .form-error:empty {display: none;}
-.batch-clear {width:20px; height:28px; border:0; background:none; color:var(--muted); padding:4px; flex:none;}
-.batch-clear .icon {width: 12px; height: 12px;}
 #detail.minimal-task .check-add-trigger {opacity: 1;}
 #detail.minimal-task .detail-footer {padding: 12px 24px;}
 #detail.minimal-task .detail-eyebrow {display: none;}
@@ -234,17 +224,12 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #detail.minimal-task .detail-extra summary {font-size: 12px; color: var(--muted); padding: 8px 0;}
 .task-entry-row .batch-close {grid-column:var(--entry-end); grid-row:1; align-self:center; justify-self:center;}
 .task-entry-row .task-composer {margin:0; border:0; border-radius:0; padding:0; background:transparent; display:grid; grid-template-columns:44px 144px minmax(160px,1fr) 110px 64px; gap:0; align-items:stretch; --entry-title:3; --entry-due:4; --entry-end:5;}
-.task-entry-row .batch-context {grid-column:2/-1; grid-row:2; gap:8px; padding:6px 8px 8px; border-top:1px solid var(--line);}
 .task-entry-row textarea {margin:0; min-width:0; min-height:40px; height:40px; field-sizing:content; max-height:140px; padding:8px 0; resize:none; border:0; background:transparent; color:#fff; font-size:13px; font-weight:400;}
-.task-entry-row input[type=checkbox] {width: 12px !important; height: 12px !important; min-width: 12px !important; margin: 0 !important;}
 :is(#app,#detail) .list-title-edit {font-weight: 400;}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus {width: var(--ux-control); height: var(--ux-control); padding: 0; display: inline-flex; align-items: center; justify-content: center; position: relative; border: 0; background: transparent;}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus::before {content: ''; position: absolute; width: var(--ux-check); height: var(--ux-check); box-sizing: border-box; border: 1px solid var(--line); border-radius: 3px; left: 50%; top: 50%; transform: translate(-50%,-50%);}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus>.icon {width: 10px; height: 10px; position: relative; border: 0; padding: 0;}
 :is(#app,#detail) :is(.tt-table,.pl-table) input[type=checkbox] {width: var(--ux-check); height: var(--ux-check); min-width: var(--ux-check); margin: 0;}
-.task-entry-row .ux-status-filter {min-width: 0; max-width: 100%; width: 100%; height: 32px; gap: 8px; padding: 0 8px;}
-.task-entry-row .ux-status-filter>span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-.task-entry-row .batch-context .ux-select {max-width: 160px;}
 .ux-select {position: relative; max-width: 100%; vertical-align: middle;}
 .ux-project-state .ux-status-filter {gap: 4px; padding: 0 6px; white-space: nowrap; min-width: 0; font-weight: 400; background: rgba(107,156,207,.12); color: #9fbfdf; border: 0;}
 .ux-project-state[data-state=done] .ux-status-filter {background: rgba(100,176,143,.12); color: #93c8b0;}
@@ -260,19 +245,31 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .task-entry-row .batch-title textarea {flex:1;}
 .task-entry-row .batch-title .batch-submit {flex:none;}
 .task-entry-row .batch-due {grid-column:var(--entry-due); grid-row:1; display:flex; align-items:center; justify-content:center; border-right:1px solid var(--line); min-width:0;}
-.task-entry-row .batch-due .batch-date {padding:0 4px; gap:4px; border:0;}
-.batch-date-group {display:inline-flex; align-items:center; min-width:0;}
-.batch-keep {display:flex; align-items:center; gap:6px; color:var(--muted); white-space:nowrap;}
-.batch-context [role=status] {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%);}
-.task-entry-row [data-entry-target=work] .batch-project,.task-entry-row [data-entry-target=project] .batch-project {padding:0; border:0; max-width:160px;}
-.task-entry-row [data-entry-target=project] .batch-context {grid-column:1/-1;}
 div.task-entry-row .task-composer {grid-template-columns:minmax(0,1fr) minmax(0,1fr) 80px 32px; --entry-end:4;}
 div.task-entry-row .batch-title {grid-column:1/4;}
 div.task-entry-row .batch-project {grid-column:1/3; grid-row:2;}
 div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
-div.task-entry-row .batch-context {grid-column:1/-1; grid-row:3;}
 .table-add-edge>button:focus-visible {outline:none;}
 .table-add-edge>button:focus-visible .icon {outline:1px solid var(--accent,#8ecbd0); border-radius:4px;}
+.task-project-nav {display:flex; align-items:center; gap:8px; margin:0 0 12px; min-width:0;}
+.task-project-tabs {display:flex; gap:4px; overflow-x:auto; scrollbar-width:thin; min-width:0;}
+.task-project-tabs>button {height:32px; flex:none; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:0; border-radius:var(--ux-radius); padding:0 12px; background:transparent; color:var(--muted); font:inherit; font-size:12px; font-weight:400; cursor:pointer;}
+.task-project-tabs>button[aria-pressed=true] {background:var(--ux-menu-selected); color:#fff;}
+.task-project-tabs>button:hover {background:var(--ux-menu-hover);}
+.task-project-manage {position:relative; flex:none;}
+.task-project-menu {position:absolute; top:100%; left:0; width:260px; max-width:calc(100vw - 24px); z-index:15;}
+.task-project-menu input[type=search] {width:100%; box-sizing:border-box; height:32px; padding:0 8px; font:inherit; font-size:12px; background:var(--canvas,#1c2027); color:#fff; border:1px solid var(--line); border-radius:6px;}
+.task-project-options {max-height:256px; overflow:auto; margin-top:4px;}
+.task-project-options label {display:flex; align-items:center; gap:8px; min-height:32px; padding:4px 8px; font-size:12px; font-weight:400; color:#fff; cursor:pointer; border-radius:5px;}
+.task-project-options label:hover {background:var(--ux-menu-hover);}
+.task-project-options label[hidden] {display:none;}
+.task-project-options input {width:16px; height:16px; margin:0; flex:none; accent-color:var(--accent,#8ecbd0);}
+.task-project-options span {overflow-wrap:anywhere;}
+.tt-c-actions {width:80px;}
+.tt-row-actions {display:flex; align-items:center; justify-content:flex-end; gap:0;}
+.tt-row-actions .row-detail,.tt-row-actions .row-delete {margin:0;}
+.task-entry-row .batch-project>span {display:block; padding:8px 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted);}
+.batch-status {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%);}
 @media (max-width:580px) {
 .new-workspace>.workspace-nav {display: flex; flex-wrap: wrap;}
 .new-workspace>.workspace-nav .date-navigation {position: static; transform: none; order: -1; flex-basis: 100%; justify-content: center;}

@@ -20,7 +20,7 @@ test('today table filters, unified detail entry, remaining separation and timer 
   const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   view=createTodayTable({images:{async upload(file){return {bucket:'work-images',path:'test/image.png',mime:file.type,size:file.size}},async url(){return 'blob:fixture'}},getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer,render,save:()=>{validate(data);saves++},notify(){},flow:{row:()=>''}});
   const click=s=>{assert(document.querySelector(s),s);document.querySelector(s).click()},change=(s,v)=>{const el=document.querySelector(s);el.value=v;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))};
-  render();assert.deepEqual([...document.querySelectorAll('th')].map(t=>t.textContent.trim()),['','프로젝트','할 일','마감','집중']);
+  render();assert.deepEqual([...document.querySelectorAll('th')].map(t=>t.textContent.trim()),['','프로젝트','할 일','마감','집중','']);
   assert.equal(view.addContext().date,date);for(const scope of ['future','unscheduled','all']){change('[data-task-scope]',scope);assert.equal(view.addContext().date,null);}change('[data-task-scope]','today');
   assert.equal(document.querySelector('[data-today-status]').value,'all');b.status='done';render();assert.equal(view.items().length,2);change('[data-today-status]','done');assert.deepEqual(view.items().map(t=>t.id),[b.id]);change('[data-today-status]','active');assert.deepEqual(view.items().map(t=>t.id),[a.id]);view.reset();render();assert.equal(document.querySelector('[data-today-status]').value,'all');assert.equal(view.items().length,2);b.status='todo';render();
   click('[data-key="project"]');change('[data-tt-filter="project"]',p.id);assert.equal(view.items().length,1);assert.equal(view.items()[0].id,a.id);
@@ -43,4 +43,23 @@ test('deadline labels show weekday, cross-year date and relative calendar days',
  assert.equal(deadlineLabel('2026-10-26','relative','2026-10-26'),'오늘');
  assert.equal(deadlineLabel('2026-10-29','relative','2026-10-26'),'D-3');
  assert.equal(deadlineLabel('2026-10-25','relative','2026-10-26'),'D+1');
+});
+
+import {createTaskComposer} from '../work/task-composer.js';
+test('project tabs filter work-linked tasks, inherit new tasks and isolate drafts, preferences and records',()=>{
+ const dom=new JSDOM('<main id="app" class="workspace-content"></main>',{url:'https://fixture.invalid'}),keys=['window','document','FormData','CustomEvent'],old=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
+ for(const k of keys)Object.defineProperty(globalThis,k,{value:dom.window[k],writable:true,configurable:true});
+ try{let owner='a',table,composer;const data=emptyWorkState(),date=today(),ui={date,view:'list'},a=createItem(data,'project','Alpha'),b=createItem(data,'project','Beta'),w=createItem(data,'work','Linked',{projectId:a.id});
+ const linked=createItem(data,'task','Linked task',{date,workId:w.id}),other=createItem(data,'task','Other task',{date,projectId:b.id}),original=JSON.stringify(data);
+ const render=()=>{document.querySelector('main').innerHTML=table.screen();composer?.mount();},esc=v=>String(v??'');
+ table=createTodayTable({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer:createFocusTimer({storage:dom.window.localStorage,getScope:()=>owner}),render,save:()=>true,notify(){}});
+ composer=createTaskComposer({getContext:()=>({target:'main',...table.addContext()}),getData:()=>data,getScope:()=>owner,render,save:()=>true,esc,icon:()=>'',notify(){}});render();
+ const choose=id=>document.querySelector(`[data-task-project="${id}"]`).click(),input=text=>{const e=document.querySelector('textarea');e.value=text;e.dispatchEvent(new window.Event('input',{bubbles:true}));return e;},submit=()=>document.querySelector('form[data-task-composer]').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));
+ choose(a.id);assert.deepEqual(table.items().map(t=>t.id),[linked.id]);assert.equal(document.querySelectorAll('th[data-column=project]').length,0);assert.equal(table.addContext().projectId,a.id);assert.equal(JSON.stringify(data),original);
+ composer.open();assert.equal(document.querySelectorAll('[data-batch-field],[data-batch-date],.batch-context,.batch-project').length,0);input('A draft');choose(b.id);assert(!document.querySelector('textarea'));composer.open();input('B first\nB second');submit();assert(data.tasks.slice(2).every(t=>t.projectId===b.id&&t.startDate===date&&t.due===null));
+ choose(a.id);assert.equal(document.querySelector('textarea').value,'A draft');submit();assert.equal(data.tasks.at(-1).projectId,a.id);assert(!data.tasks.at(-1).workId);
+ const row=document.querySelector('[data-tt-row]');assert.equal(row.querySelector('.row-detail').closest('td'),row.lastElementChild);assert(row.querySelector('.row-delete').compareDocumentPosition(row.querySelector('.row-detail'))&window.Node.DOCUMENT_POSITION_FOLLOWING);
+ const pin=document.querySelector(`[data-project-pin="${a.id}"]`);pin.checked=false;pin.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(table.addContext().projectId,'');assert(document.querySelector('th[data-column=project]'));assert(!document.querySelector(`[data-task-project="${a.id}"]`));
+ table.reset();composer.reset();render();assert(!document.querySelector(`[data-task-project="${a.id}"]`));owner='b';table.reset();render();assert(document.querySelector(`[data-task-project="${a.id}"]`));assert.equal(data.tasks.find(t=>t.id===other.id).projectId,b.id);validate(data);
+ }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });

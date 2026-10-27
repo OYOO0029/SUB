@@ -1,7 +1,7 @@
-import {statusFilter} from './status-filter.js?v=20261027-entry-align-2';
-import {today,isPlanned,taskContext,isDuePast} from './model.js?v=20261027-entry-align-2';
+import {statusFilter} from './status-filter.js?v=20261027-project-tabs-1';
+import {today,isPlanned,taskContext,isDuePast} from './model.js?v=20261027-project-tabs-1';
 import {projectState,PROJECT_STATES} from './project-view.js';
-import {projectTasks,projectSummary,executionSections,unfinished} from './workflow.js?v=20261027-entry-align-2';
+import {projectTasks,projectSummary,executionSections,unfinished} from './workflow.js?v=20261027-project-tabs-1';
 import {orderedTasks,automaticOrder} from './work-view.js?v=20261026-controls-1';
 export function createWorkflowUI({getData,ui,esc,icon,button,passes,projectInfo=null}){
  const dateText=d=>d?d.replaceAll('-','.') : '';

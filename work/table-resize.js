@@ -1,6 +1,6 @@
 export function installTableResize(){
  const storageKey='work-table-widths-v1';let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')}catch{}
- const key=t=>t.getAttribute('aria-label'),persist=()=>{try{localStorage.setItem(storageKey,JSON.stringify(saved))}catch{}};
+ const key=t=>t.dataset.resizeKey||t.getAttribute('aria-label'),persist=()=>{try{localStorage.setItem(storageKey,JSON.stringify(saved))}catch{}};
  function set(t,widths){const cols=[...t.querySelectorAll('colgroup col')];widths.forEach((w,i)=>{if(cols[i])cols[i].style.width=w+'px'});t.style.width=widths.reduce((a,b)=>a+b,0)+'px';t.style.tableLayout='fixed';}
  function prepare(){document.querySelectorAll('table.tt-table,table.pl-table').forEach(t=>{
   if(t.dataset.resizable)return;t.dataset.resizable='true';const headers=[...t.querySelectorAll('thead tr:first-child th')];if(!headers.length||!key(t))return;
