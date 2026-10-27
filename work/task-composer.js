@@ -1,4 +1,4 @@
-import {createTaskBatch} from './editing.js?v=20261027-project-tabs-1';
+import {createTaskBatch} from './editing.js?v=20261027-click-add-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  let draft=null,resize=null;const drafts=new Map();
  function view(){if(!draft)return '';const project=getData().projects.find(p=>p.id===draft.projectId);
@@ -19,6 +19,9 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   for(const table of targets){
    const target=table.matches('.wd-table')?'work':table.matches('.pl-hierarchy')?'project':'main';
    const active=draft&&draft.target===target;
+   const empty=table.querySelector('td.tt-empty,td.pl-empty');
+   if(empty)empty.parentElement.hidden=!!active;
+   if(!active&&empty&&!empty.querySelector('button:not([data-batch-edge])')){empty.innerHTML=`<button type="button" class="table-empty-add" data-batch-edge="${target}" aria-label="할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;continue;}
    if(active){let body=[...table.tBodies].find(b=>draft.workId&&b.dataset.workGroup===draft.workId)||table.tBodies[table.tBodies.length-1]||table.createTBody();
     if(target==='project'&&!draft.workId){body=table.createTBody();body.className='task-entry-body';}
     const row=body.insertRow();row.className='task-entry-row';const cell=row.insertCell();cell.colSpan=table.tHead?.rows[0]?.cells.length||5;cell.innerHTML=view();const form=cell.querySelector('form');form.dataset.entryTarget=target;
@@ -26,7 +29,7 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
 
    }
    if(active)continue;
-   const edge=document.createElement('div');edge.className='table-add-edge';edge.innerHTML=`<button type="button" data-batch-edge="${target}" aria-label="목록 끝에 할 일 추가">${icon('plus')}</button>`;table.parentElement.after(edge);
+   const edge=document.createElement('div');edge.className='table-add-edge';edge.innerHTML=`<button type="button" data-batch-edge="${target}" aria-label="목록 끝에 할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;table.parentElement.after(edge);
   }
   if(draft&&!document.querySelector('[data-task-composer]')){const host=document.querySelector('.workspace-content');if(host){const row=document.createElement('div');row.className='task-entry-row';row.innerHTML=view();host.append(row);}}
  }

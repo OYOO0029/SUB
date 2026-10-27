@@ -1,4 +1,4 @@
-import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261027-project-tabs-1';
+import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261027-click-add-1';
 
 export function automaticOrder(tasks,date){
   const start=t=>t.blocks.filter(b=>b.date===date).map(b=>b.start).sort()[0];

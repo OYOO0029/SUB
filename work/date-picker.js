@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261027-project-tabs-1';
+import {today,addDays,addMonths} from './model.js?v=20261027-click-add-1';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
