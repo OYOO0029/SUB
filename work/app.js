@@ -1,13 +1,13 @@
 import {installTableResize} from './table-resize.js?v=20261026-controls-1';
 import {workImages} from './image-store.mjs';
-import {createFocusView} from './focus-view.js?v=20261027-inline-1';
+import {createFocusView} from './focus-view.js?v=20261027-cell-edit-1';
 import {appStorage} from '../schedule-storage.mjs';
-import {createWorkflowUI} from './workflow-ui.js?v=20261027-inline-1';
+import {createWorkflowUI} from './workflow-ui.js?v=20261027-cell-edit-1';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261026-controls-1';
 import {createItem,changeCheck,updateItem,trashItem,restoreItem} from './editing.js?v=20261026-controls-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-controls-1';
 import {createReminderCenter} from './reminders.js?v=20261026-controls-1';
-import {createDetailUI} from './detail-ui.js?v=20261027-inline-1';
+import {createDetailUI} from './detail-ui.js?v=20261027-cell-edit-1';
 import {activeChecks} from './editing.js?v=20261026-controls-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261026-controls-1';
 import {startWorkCloud} from './integration.js?v=20261026-controls-1';
@@ -334,3 +334,5 @@ document.addEventListener('change',event=>{const el=event.target;if(!el.matches(
 document.addEventListener('focusin',e=>{if(e.target.matches('[data-list-title]'))e.target.dataset.original=e.target.value;});
 document.addEventListener('focusout',e=>{const el=e.target;if(!el.matches('[data-list-title]'))return;const t=findTask(el.dataset.listTitle);if(!t||t.deletedAt)return;try{updateItem(data,'task',t.id,{title:el.value});if(!saveState(data))toast('저장하지 못했습니다. 현재 창의 입력은 유지됩니다.');el.value=t.title;el.setAttribute('aria-label',t.title+' 제목');}catch(error){el.value=t.title;toast(error.message);}});
 document.addEventListener('keydown',e=>{if(!e.target.matches('[data-list-title]')||e.isComposing||e.keyCode===229)return;if(e.key==='Enter'){e.preventDefault();e.target.blur();}else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();e.target.value=e.target.dataset.original||e.target.value;e.target.blur();}},true);
+
+window.addEventListener('work-cell-updated',()=>{if(document.querySelector('#detail')?.open)detailUI.render();});
