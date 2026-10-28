@@ -6,6 +6,10 @@ paths.week='M4 5h16v14H4ZM9 5v14M15 5v14';paths.more='M5 12h.01M12 12h.01M19 12h
 paths.filter='M3 6h7m4 0h7M3 18h11m4 0h3M10 3v6M14 15v6M3 12h3m4 0h11M6 9v6';paths.grip='M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01';
 export function icon(name,cls=''){return `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${['clock','info'].includes(name)?'<circle cx="12" cy="12" r="9"/>':''}<path d="${paths[name]||paths.note}"/></svg>`;}
 export const button=(label,action,attrs='',cls='button')=>`<button class="${cls}" data-action="${action}" ${attrs} ${!attrs.includes('title=')&&attrs.match(/aria-label="([^"]+)"/) ? 'title="'+attrs.match(/aria-label="([^"]+)"/)[1]+'"' : ''}>${label}</button>`;
+export function taskRowActions(task){
+ const id=escapeHTML(task.id),name=escapeHTML(task.title);
+ return `<div class="tt-row-actions">${button(icon('trash'),'delete-task',`data-id="${id}" aria-label="${name} 삭제" title="삭제"`,'icon-button row-delete')}${button(icon('note'),'detail',`data-type="task" data-id="${id}" aria-label="${name} 상세 보기" title="상세 보기"`,'icon-button row-detail')}</div>`;
+}
 
 export function choiceSelect(value,options,attribute,label){
  return `<select ${attribute} aria-label="${escapeHTML(label)}">${options.map(([v,l])=>`<option value="${escapeHTML(v)}" ${value===v?'selected':''}>${escapeHTML(l)}</option>`).join('')}</select>`;
@@ -16,7 +20,7 @@ export function selectSurface(select,id){
 }
 export function installSelectControls(){
  let serial=0;
- const roots='#app select:not([hidden]),#detail select:not([hidden]),#editor select:not([hidden]),#property-editor select:not([hidden])';
+ const roots='#app select:not([hidden]),#detail select:not([hidden]),#editor select:not([hidden]),#property-editor select:not([hidden]),.notion-date-picker select:not([hidden])';
  function prepare(){document.querySelectorAll(roots).forEach(select=>{
   if(select.multiple||select.size>1||select.closest('.ux-select')||select.matches('[data-native-select]'))return;
   const host=document.createElement('div');host.className='ux-status ux-select';host.setAttribute('data-dropdown','');

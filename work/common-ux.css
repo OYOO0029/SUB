@@ -53,7 +53,7 @@ html {scrollbar-gutter: stable;}
 #app .tt-table th {text-align: center; vertical-align: middle;}
 #app .tt-column {justify-content: center; margin-inline: auto;}
 #app .tt-table td {vertical-align: middle;}
-#app .tt-table .tt-due,#app .tt-table .tt-focus-cell,#app .tt-table td:first-child,#app .tt-table td:last-child {text-align: center;}
+#app .tt-table .tt-start,#app .tt-table .tt-due,#app .tt-table .tt-focus-cell,#app .tt-table td:first-child,#app .tt-table td:last-child {text-align: center;}
 #app .pl-table th {text-align: center; vertical-align: middle;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-column,.pl-column) {position: relative; gap: 0; width: max-content; max-width: 100%; margin-inline: auto;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-column,.pl-column)>.tt-filter-dot {position: absolute; left: calc(100% + 18px); right: auto; top: 50%; transform: translateY(-50%);}
@@ -190,7 +190,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #app .filter-toggle:focus-visible {outline: 1px solid #8ecbd0; outline-offset: 2px;}
 .task-composer {margin: 0 0 16px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: #fff; font-size: 12px;}
 .task-composer textarea {width: 100%; box-sizing: border-box; resize: vertical; min-height: 56px; margin-top: 10px; background: var(--canvas); border: 1px solid var(--line); border-radius: 6px; color: #fff; font: inherit; padding: 8px;}
-#detail .wd-table td.pl-text {display: flex; align-items: center; gap: 6px;}
+#detail .wd-table td.pl-text {text-align:left;}
 .task-composer .form-error:empty {display: none;}
 #detail.minimal-task .check-add-trigger {opacity: 1;}
 #detail.minimal-task .detail-footer {padding: 12px 24px;}
@@ -198,8 +198,9 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #detail.minimal-task .inline-save-state {font-size: 11px; font-weight: 400;}
 .row-detail,.row-delete {width: var(--ux-control); height: var(--ux-control); min-width: var(--ux-control); padding: 8px; display: inline-flex; align-items: center; justify-content: center; flex: none; background: transparent; color: var(--muted);}
 .row-detail .icon,.row-delete .icon {width: var(--ux-icon); height: var(--ux-icon);}
-.table-add-edge {margin-top:4px;}
-.table-add-edge>button {width:100%; height:32px; padding:0 8px; display:flex; gap:8px; justify-content:flex-start; align-items:center; border:0; border-radius:6px; background:transparent; color:var(--muted); font:inherit; font-size:12px; font-weight:400; cursor:pointer;}
+.table-add-edge {position:relative; height:0; z-index:2;}
+.table-add-edge>button {position:absolute; top:0; opacity:0; width:100%; height:24px; padding:0 8px; display:flex; gap:8px; justify-content:flex-start; align-items:center; border:0; border-radius:6px; background:transparent; color:var(--muted); font:inherit; font-size:12px; font-weight:400; cursor:pointer;}
+.table-add-edge>button:is(:hover,:focus-visible) {opacity:1;}
 .table-add-edge>button:hover,.table-empty-add:hover {background:var(--ux-menu-selected); color:#fff;}
 .table-add-edge .icon,.table-empty-add .icon {width:16px; height:16px; flex:none;}
 .task-entry-row>td {padding: 0 !important; text-align: left !important;}
@@ -222,7 +223,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #detail.minimal-task .inline-memo {min-height: 120px; height: 54px; margin-top: 8px; width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; box-sizing: border-box; resize: vertical;}
 #detail.minimal-task .detail-extra {margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;}
 #detail.minimal-task .detail-extra summary {font-size: 12px; color: var(--muted); padding: 8px 0;}
-.task-entry-row .batch-close {grid-column:var(--entry-end); grid-row:1; align-self:center; justify-self:center;}
+.task-entry-row .batch-actions {grid-column:var(--entry-end); grid-row:1; display:flex; align-items:center; justify-content:flex-end; padding:0 8px;}
 .task-entry-row .task-composer {margin:0; border:0; border-radius:0; padding:0; background:transparent; display:grid; grid-template-columns:44px 144px minmax(160px,1fr) 110px 64px; gap:0; align-items:stretch; --entry-title:3; --entry-due:4; --entry-end:5;}
 .task-entry-row textarea {margin:0; min-width:0; min-height:40px; height:40px; field-sizing:content; max-height:140px; padding:8px 0; resize:none; border:0; background:transparent; color:#fff; font-size:13px; font-weight:400;}
 :is(#app,#detail) .list-title-edit {font-weight: 400;}
@@ -242,7 +243,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .task-entry-row .batch-project {grid-column:2; grid-row:1; padding:4px 8px; min-width:0; border-right:1px solid var(--line);}
 .task-entry-row .batch-title {grid-column:var(--entry-title); grid-row:1; display:flex; align-items:center; min-width:0; padding:0 8px; border-right:1px solid var(--line);}
 .task-entry-row .batch-title textarea {flex:1;}
-.task-entry-row .batch-title .batch-submit {flex:none;}
+.task-entry-row .batch-actions>button {flex:none;}
 .task-entry-row .batch-due {grid-column:var(--entry-due); grid-row:1; display:flex; align-items:center; justify-content:center; border-right:1px solid var(--line); min-width:0;}
 div.task-entry-row .task-composer {grid-template-columns:minmax(0,1fr) minmax(0,1fr) 80px 32px; --entry-end:4;}
 div.task-entry-row .batch-title {grid-column:1/4;}
@@ -263,6 +264,7 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .task-project-options label[hidden] {display:none;}
 .task-project-options input {width:16px; height:16px; margin:0; flex:none; accent-color:var(--accent,#8ecbd0);}
 .task-project-options span {overflow-wrap:anywhere;}
+.tt-c-start {width:104px;}
 .tt-c-actions {width:80px;}
 .tt-row-actions {display:flex; align-items:center; justify-content:flex-end; gap:0;}
 .tt-row-actions .row-detail,.tt-row-actions .row-delete {margin:0;}
@@ -270,6 +272,10 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .batch-status {position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%);}
 .table-empty-add {display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:120px; border:0; background:transparent; color:var(--muted); font:inherit; font-size:13px; font-weight:400; cursor:pointer;}
  :is(#app,#detail) :is(.tt-table,.pl-table) td:has(>.table-empty-add) {padding:0;}
+@media (hover:none) {
+.table-add-edge {height:44px;}
+.table-add-edge>button {opacity:1;height:44px;}
+}
 @media (max-width:580px) {
 .new-workspace>.workspace-nav {display: flex; flex-wrap: wrap;}
 .new-workspace>.workspace-nav .date-navigation {position: static; transform: none; order: -1; flex-basis: 100%; justify-content: center;}

@@ -4,7 +4,7 @@ import {createItem,createTaskBatch,updateItem,updateMemo} from '../work/editing.
 import {emptyWorkState} from '../work/work-account.mjs';
 import {validate} from '../work/repository.js';
 import {executionSections} from '../work/workflow.js';
-import {isPlanned,planToday,taskStart} from '../work/model.js';
+import {isPlanned,planToday,taskStart,today} from '../work/model.js';
 import {calendarWeeks,workCalendarDays} from '../work/calendar-layout.js';
 test('batch creation is atomic and inherits relationships without assigning today',()=>{
  const d=emptyWorkState(),p=createItem(d,'project','프로젝트'),w=createItem(d,'work','업무',{projectId:p.id});
@@ -30,7 +30,7 @@ test('continuous composer retains project, batches lines, preserves failed-save 
  try{const data=emptyWorkState(),p=createItem(data,'project','Project');let composer,ok=true,owner='a';const render=()=>document.querySelector('#app').innerHTML=composer.view();
  composer=createTaskComposer({getData:()=>data,getScope:()=>owner,render,save:()=>ok,esc:v=>String(v??''),icon:()=>'',notify(){}});composer.open({projectId:p.id});
  const submit=text=>{const el=document.querySelector('textarea');el.value=text;el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));el.form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};
- submit('A\nB');assert.equal(data.tasks.length,2);assert(data.tasks.every(t=>t.projectId===p.id&&t.startDate===null&&t.plans.length===0));assert.equal(document.querySelector('textarea').value,'');assert.equal(document.querySelector('.batch-project').textContent,'Project');
+ submit('A\nB');assert.equal(data.tasks.length,2);assert(data.tasks.every(t=>t.projectId===p.id&&t.startDate===today()&&t.plans.length===0));assert.equal(document.querySelector('textarea').value,'');assert.equal(document.querySelector('.batch-project').textContent,'Project');
  ok=false;submit('C');assert.equal(data.tasks.length,3);assert.equal(document.querySelector('textarea').value,'C');assert(document.querySelector('[role=alert]').textContent.includes('저장하지 못'));
  ok=true;submit('C');assert.equal(data.tasks.length,3);assert.equal(document.querySelector('textarea').value,'');owner='b';submit('다른 계정');assert.equal(data.tasks.length,3);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
@@ -57,7 +57,7 @@ test('inline composer mounts last without idle space, defaults today, preserves 
  input('draft');document.body.click();render();assert.equal(document.querySelector('textarea').value,'draft');composer.open();assert.equal(document.querySelector('textarea').value,'draft');
  input('Today default').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(data.tasks[0].startDate,'2026-10-27');
  input('Today').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(data.tasks[1].startDate,'2026-10-27');assert.equal(data.tasks[1].due,null);
- composer.reset();composer.open({workId:w.id,date:null});input('Project A\nProject B').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert(data.tasks.slice(2).every(t=>t.workId===w.id&&data.works.find(x=>x.id===t.workId).projectId===p.id&&t.startDate===null));
+ composer.reset();composer.open({workId:w.id,date:null});input('Project A\nProject B').form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert(data.tasks.slice(2).every(t=>t.workId===w.id&&data.works.find(x=>x.id===t.workId).projectId===p.id&&t.startDate===today()));
  const before=data.tasks.length;const el=input('한글');el.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));assert.equal(data.tasks.length,before);el.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(document.querySelector('textarea').value,'한글');
  input('').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(document.querySelectorAll('.task-entry-row').length,0);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
