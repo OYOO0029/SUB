@@ -20,7 +20,11 @@ html {scrollbar-gutter: stable;}
 #app .ux-tools>.tt-button {display: inline-flex; align-items: center; justify-content: center; padding: 0; width: var(--ux-control); height: var(--ux-control); min-height: var(--ux-control);}
 #app .tt-presets>.tt-button {min-height: var(--ux-control);}
 .tt-status {display: flex; align-items: center; gap: 4px; min-height: 32px; margin: 0;}
-.tt-toolbar>.tt-toolbar-right {display: flex; align-items: center; gap: 12px;}
+.tt-toolbar>.tt-toolbar-right {display:flex; align-items:center; gap:8px; flex:none;}
+.tt-toolbar>.task-project-nav {flex:1; min-width:0; margin:0; gap:4px;}
+.tt-toolbar-right .ux-status-filter {min-width:72px; max-width:104px; padding:0 8px; gap:12px;}
+.tt-toolbar-right .ux-status-filter>span {overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.flow-nav>.ux-view-tabs {margin-left:auto;}
 #app .ux-view-tabs>.ux-view-icon {width: var(--ux-control); min-width: var(--ux-control); height: var(--ux-control); padding: 0;}
 .ux-view-icon .icon {width: 16px; height: 16px; display: block; flex: none;}
 .tt-remaining {margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0;}
@@ -282,7 +286,8 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .new-workspace>.workspace-nav .workspace-actions {margin-left: auto;}
 .focus-event-content {grid-template-columns: minmax(0,1fr) 32px;}
 .tt-toolbar {flex-wrap: wrap; row-gap: 8px;}
-.tt-toolbar>.tt-toolbar-right {display: contents;}
+.tt-toolbar>.task-project-nav {flex-basis:100%;}
+.tt-toolbar>.tt-toolbar-right {margin-left:auto;}
 .tt-toolbar-right>.ux-tools {margin-left: auto;}
 .tt-toolbar-right>.tt-status {order: 3; flex-basis: 100%;}
 #detail.minimal-task {width: calc(100vw - 24px); inset: 12px; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px);}

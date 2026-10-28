@@ -7,7 +7,7 @@ import {orderedTasks,automaticOrder} from './work-view.js?v=20261028-domain-rule
 export function createWorkflowUI({getData,ui,esc,icon,button,passes,projectInfo=null}){
  const dateText=d=>d?d.replaceAll('-','.') : '';
  const add=(projectId='',workId='')=>`<form class="flow-add" data-flow-add data-project-id="${esc(projectId)}" data-work-id="${esc(workId)}"><input name="title" aria-label="${workId?'업무 묶음':projectId?'프로젝트':'오늘'}에 새 할 일" placeholder="+ 할 일 추가" maxlength="160" required autocomplete="off"><button type="submit" class="small-button">추가</button><p class="form-error" role="alert"></p></form>`;
- function nav(){return `<nav class="flow-nav" aria-label="업무 주요 메뉴">${[['tasks','오늘 할 일'],['projects','프로젝트'],['calendar','캘린더']].map(([v,l])=>button(l,'navigate',`data-value="${v}" aria-current="${ui.tab===v?'page':'false'}"`,'flow-nav-link')).join('')}</nav>`;}
+ function nav(controls=''){return `<nav class="flow-nav" aria-label="업무 주요 메뉴">${[['tasks','오늘 할 일'],['projects','프로젝트'],['calendar','캘린더']].map(([v,l])=>button(l,'navigate',`data-value="${v}" aria-current="${ui.tab===v?'page':'false'}"`,'flow-nav-link')).join('')}${controls}</nav>`;}
  function row(t,{project=false,carry=false}={}){
   const data=getData(),{work,project:p}=taskContext(data,t),done=t.status==='done',date=ui.date,paused=p&&projectState(p)==='paused',pin=p?.nextTaskId===t.id;
   const due=t.due?`${dateText(t.due)}${isDuePast(t,today())&&!done?' 마감 지남':' 마감'}`:'';
