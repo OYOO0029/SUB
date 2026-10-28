@@ -1,13 +1,13 @@
 import {createProjectTabs} from './project-tabs.js?v=20261027-click-add-1';
 import {choiceSelect} from './ui-components.js?v=20261027-click-add-1';
 import {statusFilter} from './status-filter.js?v=20261027-click-add-1';
-import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261027-click-add-1';
+import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261028-domain-rules-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261028-data-safety-1';
-import {taskContext,uid,today,taskStart} from './model.js?v=20261027-click-add-1';
-import {executionSections} from './workflow.js?v=20261027-click-add-1';
-import {orderedTasks} from './work-view.js?v=20261026-controls-1';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261028-domain-rules-1';
+import {taskContext,uid,today,taskStart} from './model.js?v=20261028-domain-rules-1';
+import {executionSections} from './workflow.js?v=20261028-domain-rules-1';
+import {orderedTasks} from './work-view.js?v=20261028-domain-rules-1';
 
 // This surface only consumes existing task records; filters never reschedule tasks.
 export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save,notify,flow,images=workImages}){

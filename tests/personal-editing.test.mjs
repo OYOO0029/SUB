@@ -1,3 +1,4 @@
+import {commitSnapshot} from '../schedule-save.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -11,7 +12,7 @@ async function setup(){
  const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;\r?$/gm,'');
  const dom=new JSDOM(html.replace(/<script[\s\S]*?<\/script>/g,''),{url:'https://test.local/',runScripts:'outside-only'});
  const w=dom.window;
- Object.assign(w,{getHoliday,createAccountData,validateState,structuredClone,appStorage:{persistent:true,getItem:k=>w.localStorage.getItem(k),setItem:(k,v)=>w.localStorage.setItem(k,v),removeItem:k=>w.localStorage.removeItem(k),keys:()=>Object.keys(w.localStorage)}});
+ Object.assign(w,{commitSnapshot,getHoliday,createAccountData,validateState,structuredClone,appStorage:{persistent:true,getItem:k=>w.localStorage.getItem(k),setItem:(k,v)=>w.localStorage.setItem(k,v),removeItem:k=>w.localStorage.removeItem(k),keys:()=>Object.keys(w.localStorage)}});
  w.eval(script);w.myWeekSyncBridge.setAccount('test-account');
  return {w,d:w.document,close:()=>w.close()};
 }

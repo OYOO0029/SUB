@@ -1,10 +1,10 @@
 import {createImageStore,configureWorkImages,workImages,hydrateWorkImages,migrateInlineImages} from './image-store.mjs';
 import {startCloud} from '../schedule-cloud-ui.mjs?v=20261028-data-safety-1';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
-import {workAccount,validate} from './repository.js?v=20261028-data-safety-1';
+import {workAccount,validate} from './repository.js?v=20261028-domain-rules-1';
 import {mergeWorkData} from './work-account.mjs?v=20261028-data-safety-1';
 
-export function startWorkCloud({getData,replaceData,resetEditors,notify,download,save,onStatus=()=>{}}){
+export function startWorkCloud({getData,replaceData,resetEditors,notify,download,save,hasUnsaved=()=>false,onStatus=()=>{}}){
  let importing=false,message='',cloud;
  const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='application/json,.json';fileInput.dataset.workFile='';fileInput.hidden=true;document.body.append(fileInput);
  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,8 +13,8 @@ export function startWorkCloud({getData,replaceData,resetEditors,notify,download
   get storageKey(){return workAccount.storageKey;},
   setAccount(scope){workImages.clear();const empty=workAccount.deactivate();resetEditors();replaceData(empty);if(scope){try{replaceData(workAccount.activate(scope));}catch(error){replaceData(workAccount.deactivate());throw error;}}},
   apply(value){const next=workAccount.write(value);replaceData(next);},
-  unsaved:()=>!!document.querySelector('.save-warning'),
-  busy:()=>!!document.querySelector('.save-warning')||!!document.querySelector('#detail[open],#editor[open],#property-editor[open],[data-quick-task],[data-focus-add],[data-focus-plan-form],[data-focus-timer-form],[data-check-form]:not([hidden])')||document.body.classList.contains('task-dragging')||!!document.activeElement?.closest('[contenteditable=true]')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)&&!document.activeElement?.closest('#cloud-dialog'),
+  unsaved:hasUnsaved,
+  busy:()=>hasUnsaved()||!!document.querySelector('#detail[open],#editor[open],#property-editor[open],[data-quick-task],[data-focus-add],[data-focus-plan-form],[data-focus-timer-form],[data-check-form]:not([hidden])')||document.body.classList.contains('task-dragging')||!!document.activeElement?.closest('[contenteditable=true]')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)&&!document.activeElement?.closest('#cloud-dialog'),
   isPristine:()=>!workAccount.raw(),hasLegacy:()=>false,
   export:async()=>download(JSON.stringify(await workImages.portable(getData()),null,2),'what-to-do-work-backup.json'),download
  };

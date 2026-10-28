@@ -1,5 +1,6 @@
-import {uid,planToday,today} from './model.js?v=20261027-click-add-1';
-import {validate} from './repository.js?v=20261028-data-safety-1';
+import {assignTaskOwner} from './ownership.js?v=20261028-domain-rules-1';
+import {uid,planToday,today} from './model.js?v=20261028-domain-rules-1';
+import {validate} from './repository.js?v=20261028-domain-rules-1';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
@@ -21,7 +22,7 @@ export function conflicts(data,taskId,date,start,end){return data.tasks.filter(t
 export function createItem(data,type,title,{date=null,workId=null,projectId=null}={}){
   title=title.trim();if(!title||title.length>160)throw new Error('이름을 1~160자로 입력해 주세요.');
   const common={id:uid(),title,tags:[],people:[],notes:'',deletedAt:null};let item;
-  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};if(date)planToday(item,date);}
+  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};assignTaskOwner(data,item,{workId,projectId});if(date)planToday(item,date);}
   else if(type==='work')item={...common,projectId,stage:'',due:null};
   else item={...common,lifecycle:'active',subtitle:'',start:null,end:null,stage:'',stages:[...BASE_STAGES],budget:''};
   const draft=structuredClone(data);draft[collection(type)].push(item);validate(draft);data[collection(type)].push(item);return item;
@@ -31,7 +32,8 @@ export function updateItem(data,type,id,patch){
   const allowed={task:['startDate','title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom','remindUntil'],work:['title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
-  Object.assign(item,patch);
+  if(type==='task')assignTaskOwner(draft,item,patch);
+  Object.assign(item,Object.fromEntries(Object.entries(patch).filter(([k])=>type!=='task'||!['workId','projectId'].includes(k))));
   // A later explicit relation choice cancels any pending automatic reattachment.
   if(type==='task'&&('projectId' in patch||'workId' in patch))for(const parent of [...draft.works,...draft.projects]){if(parent.deletedAt){parent.detachedLinks=(parent.detachedLinks||[]).filter(l=>l.id!==id);parent.detachedTasks=(parent.detachedTasks||[]).filter(t=>t!==id);}}
   if(type==='work'&&'projectId' in patch)for(const parent of draft.projects)if(parent.deletedAt)parent.detachedLinks=(parent.detachedLinks||[]).filter(l=>l.id!==id);
@@ -40,15 +42,6 @@ export function updateItem(data,type,id,patch){
   item.title=item.title.trim();
   if(type==='task'){
     if(('startDate' in patch||'due' in patch)&&item.startDate&&item.due&&item.startDate>item.due)throw Error('마감은 작업 시작일 이후로 설정하세요.');
-    const previousWork=getItem(data,'work',getItem(data,'task',id).workId);
-    if('projectId' in patch){
-      if(item.projectId&&!draft.projects.some(p=>p.id===item.projectId&&!p.deletedAt))throw new Error('연결할 프로젝트를 확인해 주세요.');
-      if(previousWork&&(previousWork.projectId||null)!==(item.projectId||null))item.workId=null;
-    }
-    if('workId' in patch){
-      const work=draft.works.find(w=>w.id===item.workId);
-      item.projectId=work?null:(previousWork?.projectId||item.projectId||null);
-    }
     if(!item.due)item.dueTime='';
     if('status' in patch)item.completedAt=item.status==='done'?(item.completedAt||today()+'T'+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date())+'+09:00'):null;
     if(item.workId&&!draft.works.some(w=>w.id===item.workId&&!w.deletedAt))throw new Error('연결할 업무를 확인해 주세요.');

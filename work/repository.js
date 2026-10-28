@@ -1,10 +1,12 @@
+import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
 import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261028-data-safety-1';
 import {BASE_STATUSES,LEGACY_STATUS} from './detail-fields.js?v=20261026-controls-1';
 export const workAccount=createWorkAccount({storage:appStorage,validate});
 export function loadState(){return {state:emptyWorkState(),warning:''};}
-export function saveState(state){try{workAccount.write(state);window.dispatchEvent(new Event('my-week-local-save'));return true;}catch{return false;}}
+export let lastSaveError='';
+export function saveState(state){return commitSnapshot(state,{write:value=>workAccount.write(value),emit:()=>window.dispatchEvent(new Event('my-week-local-save')),onResult:result=>{lastSaveError=result.error;}}).ok;}
 export function validate(data){
   if(data?.schemaVersion!==1||!Array.isArray(data.tasks)||!Array.isArray(data.works)||!Array.isArray(data.projects)||!Array.isArray(data.personal)||typeof data.tracker!=='object'||!data.tracker)throw new Error('지원하는 미리보기 백업 파일이 아닙니다.');
   const date=v=>v===null||v===''||typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;

@@ -1,4 +1,4 @@
-import {createTaskBatch} from './editing.js?v=20261028-data-safety-1';
+import {createTaskBatch} from './editing.js?v=20261028-domain-rules-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  let draft=null,resize=null,contextToken=null;const drafts=new Map();
  function view(){if(!draft)return '';const project=getData().projects.find(p=>p.id===draft.projectId);

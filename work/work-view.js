@@ -1,4 +1,4 @@
-import {isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261027-click-add-1';
+import {taskDay,isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261028-domain-rules-1';
 
 export function automaticOrder(tasks,date){
   const start=t=>t.blocks.filter(b=>b.date===date).map(b=>b.start).sort()[0];
@@ -17,9 +17,7 @@ export function orderedTasks(state,tasks,date){
   return sorted.sort((a,b)=>(ranks.get(a.id)??Infinity)-(ranks.get(b.id)??Infinity));
 }
 export function taskSections(state,date,includeCompleted=false){
-  const visible=state.tasks.filter(t=>isVisible(t,date,includeCompleted));
-  const planned=visible.filter(t=>isPlanned(t,date)||t.status==='done'||!isDuePast(t,date));
-  return {planned:orderedTasks(state,planned,date),overdue:automaticOrder(visible.filter(t=>!planned.includes(t)&&isDuePast(t,date)),date)};
+  const sections={planned:[],overdue:[]};for(const t of state.tasks){const {listSection}=taskDay(t,date,includeCompleted);if(listSection)sections[listSection].push(t);}return {planned:orderedTasks(state,sections.planned,date),overdue:automaticOrder(sections.overdue,date)};
 }
 export function moveToDay(state,date,id,beforeId=null){
   const task=state.tasks.find(t=>t.id===id&&!t.deletedAt&&t.status!=='cancelled');

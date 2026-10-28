@@ -1,4 +1,4 @@
-import {addDays,isPlanned} from './model.js?v=20261027-click-add-1';
+import {addDays,isPlanned} from './model.js?v=20261028-domain-rules-1';
 
 // Work calendars start Sunday; personal calendar defaults stay independent.
 export function workCalendarDays(date,monthly=false){

@@ -1,11 +1,11 @@
 import {statusFilter} from './status-filter.js?v=20261027-click-add-1';
-import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261027-click-add-1';
+import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261028-domain-rules-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
-import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261027-click-add-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261028-data-safety-1';
+import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261028-domain-rules-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261028-domain-rules-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
-import {deadlineConflict} from './work-view.js?v=20261026-controls-1';
-import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261027-click-add-1';
+import {deadlineConflict} from './work-view.js?v=20261028-domain-rules-1';
+import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261028-domain-rules-1';
 
 export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무',project:'프로젝트'};
@@ -85,7 +85,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     if(type==='work'&&ui.detail?.id!==id)Object.assign(workQuery,{search:'',sort:'added',status:'all'});
     ui.detail={type,id};ui.inlineSaved='';$('#detail').classList.add('flow-drawer');render();if(!$('#detail').open)$('#detail').showModal();$('#detail').scrollTop=0;
   }
-  function persist(refresh=true,refreshList=true){save(refreshList);if(refresh)render();else if(ui.saveWarning)error(new Error(ui.saveWarning));const hint=$('[data-save-state]');if(hint)hint.textContent=ui.saveWarning?'저장 실패 · 입력 유지':'기기에 저장됨';}
+  function persist(refresh=true,refreshList=true){const ok=save(refreshList)!==false;if(refresh)render();else if(ui.saveWarning)error(new Error(ui.saveWarning));const hint=$('[data-save-state]');if(hint)hint.textContent=ok?'기기에 저장됨':'저장 실패 · 입력 유지';return ok;}
   function error(err){const out=$('#detail').open?$('#detail #inline-error'):$('#project-inline-error')||$('#inline-error');if(out)out.textContent=err.message;else notify(err.message);}
   function popover(title,body,cls=''){closeRelation();const el=$('#property-editor');el.className=cls;el.innerHTML=`<header><h3 id="property-editor-title">${title}</h3>${button(icon('close'),'close-property','aria-label="속성 닫기" type="button"','icon-button')}</header>${body}`;if(!el.open)el.showModal();}
   function focusRelation(field){$(`#detail [data-action="field-relation"][data-field="${field}"]`)?.focus();}
@@ -177,8 +177,8 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       else if(a==='remove-chip'){const field=el.dataset.field;updateItem(data,ui.detail.type,ui.detail.id,{[field]:chipValues(item(),field).filter((_,i)=>i!==Number(el.dataset.index))});persist();focusChip(field);}
       else if(a==='open-check-add'){const form=el.closest('.task-card,.check-section').querySelector('[data-check-form]');form.hidden=false;el.setAttribute('aria-expanded','true');form.querySelector('input').focus();}
       else if(a==='cancel-check-add')closeCheckForm(el.closest('[data-check-form]'));
-      else if(a==='delete-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:new Date().toISOString()});persist();notify('확인사항을 휴지통으로 이동했습니다.');}
-      else if(a==='trash-entity'){trashItem(data,ui.detail.type,ui.detail.id);if(ui.detail.type==='project'){ui.projectPage=null;ui.detail=null;}$('#detail').close();persist(false);notify('휴지통으로 이동했습니다. 연결된 항목은 유지됩니다.');}
+      else if(a==='delete-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:new Date().toISOString()});if(persist())notify('확인사항을 휴지통으로 이동했습니다.');}
+      else if(a==='trash-entity'){trashItem(data,ui.detail.type,ui.detail.id);if(ui.detail.type==='project'){ui.projectPage=null;ui.detail=null;}$('#detail').close();if(persist(false))notify('휴지통으로 이동했습니다. 연결된 항목은 유지됩니다.');}
       else if(a==='restore-entity'){restoreItem(data,el.dataset.type,el.dataset.id);persist(false);trash();}
       else if(a==='restore-check'){changeCheck(data,el.dataset.taskId,el.dataset.checkId,{deletedAt:null});persist(false);trash();}
       else if(a==='time-slot'){const scroll=$('.time-grid-scroll').scrollTop,index=Number(el.dataset.index);if(timeDraft.awaitingEnd){timeDraft.last=index;timeDraft.awaitingEnd=false;}else{timeDraft.first=index;timeDraft.last=index;timeDraft.awaitingEnd=true;}renderTime();$('.time-grid-scroll').scrollTop=scroll;$(`[data-action="time-slot"][data-index="${index}"]`)?.focus({preventScroll:true});}
@@ -221,7 +221,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       else if(form.hasAttribute('data-choice-form')){selectDetailOption(data,ui.detail.type,ui.detail.id,f.label,{add:true});persist();$('[data-choice-field]:checked')?.focus();}
       else if(form.hasAttribute('data-check-form')){if(!f.title.trim())return;const id=form.dataset.checkForm,inDetail=!!form.closest('#detail');changeCheck(data,id,null,{title:f.title.trim()});persist();const scope=inDetail?$('#detail'):$('#app');scope.querySelector(`[data-action="open-check-add"][data-task-id="${id}"]`)?.focus();}
       else if(form.hasAttribute('data-tag-form')){if(!f.tag.trim())return;updateItem(data,ui.detail.type,ui.detail.id,{tags:[...new Set([...item().tags,...f.tag.split(',').map(s=>s.trim()).filter(Boolean)])]});persist();$('[data-tag-form] input').focus();}
-      else{const type=form.dataset.createForm||'task',e=createItem(data,type,f.title,{date:form.hasAttribute('data-create-form')?(form.dataset.date||null):ui.date,workId:form.dataset.workId||null,projectId:form.dataset.projectId||null});if(form.hasAttribute('data-create-form')){$('#editor').close();persist(false);if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:e.id}));}else open(type,e.id);}else{persist(false);notify('추가했습니다.');}}
+      else{const type=form.dataset.createForm||'task',e=createItem(data,type,f.title,{date:form.hasAttribute('data-create-form')?(form.dataset.date||null):ui.date,workId:form.dataset.workId||null,projectId:form.dataset.projectId||null});if(form.hasAttribute('data-create-form')){$('#editor').close();persist(false);if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:e.id}));}else open(type,e.id);}else{if(persist(false))notify('추가했습니다.');}}
     }catch(err){const out=form.querySelector('.form-error,.property-error');if(out)out.textContent=err.message;else error(err);}
   },true);
   document.addEventListener('keydown',event=>{const el=event.target;if(el.closest('[data-choice-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeChoiceForm(el.closest('[data-choice-form]'));return;}if(el.matches('[data-inline-field],[data-check-title]')&&event.key==='Enter'&&!event.isComposing&&el.tagName!=='TEXTAREA'){event.preventDefault();el.blur();}if(el.closest('[data-check-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCheckForm(el.closest('[data-check-form]'));}if(el.matches('[data-quick-task] input')&&event.key==='Escape'){event.preventDefault();save();}});
