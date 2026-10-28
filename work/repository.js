@@ -1,6 +1,6 @@
 import {validMemoPart} from './image-schema.mjs';
-import {appStorage} from '../schedule-storage.mjs';
-import {createWorkAccount,emptyWorkState} from './work-account.mjs';
+import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
+import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261028-data-safety-1';
 import {BASE_STATUSES,LEGACY_STATUS} from './detail-fields.js?v=20261026-controls-1';
 export const workAccount=createWorkAccount({storage:appStorage,validate});
 export function loadState(){return {state:emptyWorkState(),warning:''};}

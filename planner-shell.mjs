@@ -18,9 +18,9 @@ function showMode(next) {
     const frame = document.createElement('iframe');
     frame.className = 'planner-view';
     frame.title = mode === 'personal' ? '개인 일정' : '업무 일정';
-    const url = new URL(mode === 'personal' ? './personal.html' : './work/index.html', location.href);
+    const url = new URL(mode === 'personal' ? './personal.html?v=20261028-data-safety-1' : './work/index.html?v=20261028-data-safety-1', location.href);
     url.searchParams.set('embedded','1');
-    url.searchParams.set('v','20261027-auth-recover-1');
+    url.searchParams.set('v','20261028-data-safety-1');
     frame.src = url.href;
     const frameMode = mode;
     frame.addEventListener('load', () => {

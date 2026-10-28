@@ -1,4 +1,5 @@
-import {writeBackup,pruneRoutineBackups} from './schedule-backups.mjs?v=20261026-storage-2';
+import {persistValue} from './schedule-storage.mjs?v=20261028-data-safety-1';
+import {writeBackup,pruneRoutineBackups} from './schedule-backups.mjs?v=20261028-data-safety-1';
 // This slot shares the existing user-owned row without replacing the older app's state.
 export const CLOUD_SLOT = 'myWeekV1';
 const copy = x => JSON.parse(JSON.stringify(x));
@@ -34,7 +35,7 @@ export class CloudSync {
   }else this.status('waiting','다른 창의 저장을 기다리는 중입니다. 해당 창의 변경 기록을 보존합니다.');
   return true;
  }
- checkpoint(explicit=false){if(!explicit&&this.holdOtherPending())return false;this.storage.setItem(this.key,JSON.stringify(this.meta));this.savedPending=copy(this.meta?.pending||null);return true;}
+ checkpoint(explicit=false){if(!explicit&&this.holdOtherPending())return false;persistValue(this.storage,this.key,JSON.stringify(this.meta));this.savedPending=copy(this.meta?.pending||null);return true;}
  backup(data,reason){writeBackup(this.storage,this.key,data,reason);}
  queue(fn){this.chain=this.chain.then(()=>this.active?fn():undefined).catch(err=>{if(this.active)this.status('error',err.message||'서버 연결을 확인해 주세요.');});return this.chain;}
  changed(){if(!this.active)return;this.seq++;if(!this.meta?.linked){this.status('waiting','로그인 후 처음 사용할 데이터를 선택해 주세요.');return;}this.meta.pending=copy(this.bridge.read());if(!this.checkpoint())return;this.status('saving','서버에 저장 중');clearTimeout(this.timer);this.timer=setTimeout(()=>this.reconcile(),500);}

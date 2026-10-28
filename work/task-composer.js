@@ -1,18 +1,27 @@
-import {createTaskBatch} from './editing.js?v=20261027-click-add-1';
+import {createTaskBatch} from './editing.js?v=20261028-data-safety-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
- let draft=null,resize=null;const drafts=new Map();
+ let draft=null,resize=null,contextToken=null;const drafts=new Map();
  function view(){if(!draft)return '';const project=getData().projects.find(p=>p.id===draft.projectId);
  return `<form class="task-composer" data-task-composer>${draft.target==='main'&&!draft.hideProject?`<div class="batch-project"><span>${esc(project?.title||'—')}</span></div>`:''}<div class="batch-title"><textarea name="titles" rows="1" ${draft.pending?'readonly':''} aria-label="추가할 할 일" placeholder="할 일 입력 후 Enter" required>${esc(draft.text)}</textarea><button type="submit" class="icon-button batch-submit" aria-label="할 일 저장">${icon('plus')}</button></div><div class="batch-due"><span class="ux-empty">-</span></div><button type="button" class="icon-button batch-close" data-batch-close aria-label="연속 추가 닫기">${icon('close')}</button><span class="batch-status" role="status">${esc(draft.message||'')}</span><p role="alert" class="form-error">${esc(draft.error||'')}</p></form>`;}
- function open(opts={}){opts={...getContext(),...Object.fromEntries(Object.entries(opts).filter(([,v])=>v!==undefined))};if(draft&&(draft.text.trim()||draft.pending||draft.target===(opts.target||'main')&&!opts.workId&&!opts.projectId)){draft.target=opts.target||'main';render();focusInput();return;}const w=getData().works.find(x=>x.id===opts.workId);draft={owner:getScope(),projectId:w?.projectId||opts.projectId||'',workId:w?.id||'',target:opts.target||'main',defaultDate:opts.date||null,startDate:opts.date||null,due:null,text:'',hideProject:!!opts.hideProject};render();focusInput();}
- function close(){if(draft?.target==='main')drafts.delete(draft.projectId||'');draft=null;render();}
+ const draftKey=d=>JSON.stringify([d.owner,d.target,d.projectId||'',d.workId||'']);
+ const contextKey=()=>{const c=getContext(),w=getData().works.find(x=>x.id===c.workId);return draftKey({owner:getScope(),target:c.target||'main',projectId:w?.projectId||c.projectId||'',workId:w?.id||''});};
+ function stash(){if(!draft)return;const key=draftKey(draft);if(draft.text.trim()||draft.pending)drafts.set(key,draft);else drafts.delete(key);}
+ function open(opts={}){
+  opts={...getContext(),...Object.fromEntries(Object.entries(opts).filter(([,v])=>v!==undefined))};
+  const w=getData().works.find(x=>x.id===opts.workId&&!x.deletedAt);
+  const next={owner:getScope(),projectId:w?.projectId||opts.projectId||'',workId:w?.id||'',target:opts.target||'main',defaultDate:opts.date||null,startDate:opts.date||null,due:null,text:'',hideProject:!!opts.hideProject};
+  contextToken=contextKey();stash();draft=drafts.get(draftKey(next))||next;draft.hideProject=next.hideProject;render();focusInput();
+ }
+ function close(){if(draft)drafts.delete(draftKey(draft));draft=null;render();}
  document.addEventListener('click',e=>{if(draft&&e.target.closest('[data-batch-close]'))close();});
- window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){if(draft.text.trim()||draft.pending)drafts.set(draft.projectId||'',draft);else drafts.delete(draft.projectId||'');draft=null;}const saved=drafts.get(e.detail||'');if(saved&&saved.owner===getScope()){draft=saved;draft.hideProject=!!e.detail;} });
+ window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){stash();draft=null;}const saved=drafts.get(draftKey({owner:getScope(),target:'main',projectId:e.detail||'',workId:''}));if(saved){draft=saved;draft.hideProject=!!e.detail;} });
  document.addEventListener('change',e=>{if(e.target.matches('[data-task-scope]')&&draft?.target==='main'&&!draft.pending){draft.defaultDate=getContext().date||null;draft.startDate=draft.defaultDate;}});
  document.addEventListener('input',e=>{if(e.target.matches('[data-task-composer] textarea')&&draft)draft.text=e.target.value;});
- document.addEventListener('submit',e=>{if(!e.target.matches('[data-task-composer]'))return;e.preventDefault();if(!draft||!getScope()||draft.owner!==getScope())return;try{const count=draft.pending||createTaskBatch(getData(),draft.text,draft).length;draft.pending=count;if(save()===false)throw Error('저장하지 못했습니다. 추가 버튼으로 다시 저장하세요.');draft.pending=null;draft.text='';draft.error='';draft.message=`${count}개 추가됨`;draft.startDate=draft.defaultDate;draft.due=null;render();focusInput();notify('할 일을 추가했습니다.');}catch(err){draft.error=err.message;render();}});
+ document.addEventListener('submit',e=>{if(!e.target.matches('[data-task-composer]'))return;e.preventDefault();if(!draft||!getScope()||draft.owner!==getScope())return;try{if(draft.projectId&&!getData().projects.some(p=>p.id===draft.projectId&&!p.deletedAt)||draft.workId&&!getData().works.some(w=>w.id===draft.workId&&!w.deletedAt&&(w.projectId||'')===draft.projectId))throw Error('추가할 프로젝트 또는 업무가 변경되었습니다. 입력을 보관하고 다시 열어 주세요.');const count=draft.pending||createTaskBatch(getData(),draft.text,draft).length;draft.pending=count;if(save()===false)throw Error('저장하지 못했습니다. 추가 버튼으로 다시 저장하세요.');draft.pending=null;draft.text='';draft.error='';draft.message=`${count}개 추가됨`;draft.startDate=draft.defaultDate;draft.due=null;render();focusInput();notify('할 일을 추가했습니다.');}catch(err){draft.error=err.message;render();}});
  document.addEventListener('keydown',e=>{if(!e.target.closest('[data-task-composer]'))return;if(e.key==='Enter'&&!e.shiftKey&&e.target.tagName==='TEXTAREA'){e.preventDefault();if(!e.isComposing&&e.keyCode!==229)e.target.form.requestSubmit();}else if(e.key==='Escape'&&!draft?.text.trim()){e.preventDefault();close();}});
  function focusInput(){const input=document.querySelector('[data-task-composer] textarea');input?.scrollIntoView?.({block:'nearest',inline:'nearest'});input?.focus({preventScroll:true});}
  function mount(){
+  const currentContext=contextKey();if(contextToken!==null&&contextToken!==currentContext){stash();draft=drafts.get(currentContext)||null;}contextToken=currentContext;
   resize?.disconnect();
   document.querySelectorAll('.task-entry-row,.table-add-edge,.task-entry-body').forEach(e=>e.remove());
   const targets=[...document.querySelectorAll('.tt-screen > .tt-table-wrap table,.pl-hierarchy,.wd-table')];
@@ -34,5 +43,5 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   if(draft&&!document.querySelector('[data-task-composer]')){const host=document.querySelector('.workspace-content');if(host){const row=document.createElement('div');row.className='task-entry-row';row.innerHTML=view();host.append(row);}}
  }
  document.addEventListener('click',e=>{const edge=e.target.closest('[data-batch-edge]');if(edge)open({target:edge.dataset.batchEdge});});
- return {view,open,mount,reset(){draft=null;drafts.clear();resize?.disconnect();}};
+ return {view,open,mount,reset(){draft=null;contextToken=null;drafts.clear();resize?.disconnect();}};
 }

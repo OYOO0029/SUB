@@ -1,7 +1,7 @@
-import {backupUsage} from './schedule-backups.mjs?v=20261026-storage-2';
-import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261026-storage-2';
+import {backupUsage} from './schedule-backups.mjs?v=20261028-data-safety-1';
+import {CloudSync,equalState,cloudValue,CLOUD_SLOT} from './schedule-cloud-core.mjs?v=20261028-data-safety-1';
 import {SYNC_CONFIG,SUPABASE_SDK} from './schedule-config.mjs';
-import {appStorage} from './schedule-storage.mjs';
+import {appStorage} from './schedule-storage.mjs?v=20261028-data-safety-1';
 import {authErrorMessage} from './schedule-auth-errors.mjs';
 
 export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPABASE_SDK),slot=CLOUD_SLOT,namespace='my-week',autoInitialize=true}={}){
@@ -240,8 +240,18 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
  });
  const interval=setInterval(()=>{if(!document.hidden&&navigator.onLine)recover();},15000);
  listen(window,'beforeunload',event=>{
-  if(engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
+  if(bridge.unsaved?.()||engine?.meta?.pending||user&&!storage.persistent&&!engine?.meta?.linked){event.preventDefault();event.returnValue='';}
  });
+ async function restoreData(value){
+  await connect();if(!user||!engine)throw Error('먼저 로그인해 주세요.');
+  const incoming=bridge.validate(value),owner=user.id,revision=generation,before=bridge.read();
+  if(bridge.unsaved?.())throw Error('현재 입력을 먼저 저장하거나 백업해 주세요.');
+  const counts=v=>`일정 ${v.events?.length||0}개 · 트래커 ${v.trackerDefs?.length||0}개 · 체크 기록 ${Object.values(v.trackerLogs||{}).reduce((n,logs)=>n+Object.values(logs).filter(Boolean).length,0)}개`;
+  if(!await confirmInPage(`개인 기록 전체를 교체합니다. 현재: ${counts(before)} / 가져올 기록: ${counts(incoming)}. 기존 기기·서버 기록을 보호 백업에 보관한 뒤 교체합니다. 계속할까요?`))return false;
+  if(user?.id!==owner||generation!==revision||!equalState(before,bridge.read()))throw Error('계정 또는 기록이 변경되었습니다. 다시 확인해 주세요.');
+  const ok=await engine.importData(incoming,(_current,source)=>source);
+  if(!ok)throw Error(statusText||'복원하지 못했습니다. 동기화 상태를 확인해 주세요.');return true;
+ }
  async function storageFile(method,path,blob){
   await connect();const account=user,revision=generation;
   if(!account||!path.startsWith(account.id+'/')||!/^[-A-Za-z0-9_]+\/[-A-Za-z0-9_]+\.(png|jpeg|webp|gif)$/.test(path))throw Error('현재 계정의 이미지 경로를 확인해 주세요.');
@@ -251,5 +261,5 @@ export function startCloud(bridge,{storage=appStorage,loadClient=()=>import(SUPA
   if(revision!==generation||user?.id!==account.id)throw Error('계정이 변경되었습니다. 다시 시도해 주세요.');return data;
  }
  paint();const ready=connect().catch(restoreError);
- return {ready,protect(data,reason){if(!engine||!user)throw Error('로그인해 주세요.');engine.backup(data,reason);},files:{upload:(path,blob)=>storageFile('upload',path,blob),download:path=>storageFile('download',path)},get status(){return statusKind;},get statusText(){return statusText;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
+ return {ready,restoreData,protect(data,reason){if(!engine||!user)throw Error('로그인해 주세요.');engine.backup(data,reason);},files:{upload:(path,blob)=>storageFile('upload',path,blob),download:path=>storageFile('download',path)},get status(){return statusKind;},get statusText(){return statusText;},get account(){return user?{id:user.id,email:user.email}:null;},async importData(value,merge){if(!user||!engine)throw Error('기존 일정과 같은 계정으로 먼저 로그인해 주세요.');const target=engine;const ok=await target.importData(value,merge);if(target!==engine)throw Error('계정이 변경되었습니다. 다시 확인해 주세요.');return ok;},destroy(){disposed=true;stop();clearInterval(interval);cleanups.forEach(fn=>fn());dialog.remove();}};
 }

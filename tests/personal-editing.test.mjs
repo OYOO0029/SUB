@@ -89,3 +89,11 @@ test('tracker check persists in account storage and returns across account reloa
   assert(d.querySelector(`[data-tracker-date="${date}"][data-tracker-id="${id}"]`).classList.contains('active'));
  }finally{close()}
 });
+test('personal save failure retains edited input, blocks incoming data and supports retry',async()=>{
+ const {w,d,close}=await setup();try{
+ const original=w.appStorage.setItem;w.appStorage.setItem=()=>false;let saves=0;w.addEventListener('my-week-local-save',()=>saves++);
+ const sleep=d.querySelector('[data-sleep-open=wake]');sleep.click();const input=d.querySelector('.inline-sleep-input');input.value='0618';input.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter'}));
+ assert.equal(w.myWeekSyncBridge.unsaved(),true);assert.equal(w.myWeekSyncBridge.busy(),true);assert.equal(saves,0);assert.equal(d.querySelector('[data-sleep-open=wake]').textContent,'06:18');assert.match(d.querySelector('#toastMessage').textContent,/기기에 저장하지 못/);
+ w.appStorage.setItem=original;d.querySelector('#retryLocalSave').click();assert.equal(w.myWeekSyncBridge.unsaved(),false);assert.equal(saves,1);
+ }finally{close();}
+});

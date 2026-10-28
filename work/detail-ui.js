@@ -2,7 +2,7 @@ import {statusFilter} from './status-filter.js?v=20261027-click-add-1';
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261027-click-add-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261027-click-add-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261027-click-add-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261028-data-safety-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 import {deadlineConflict} from './work-view.js?v=20261026-controls-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261027-click-add-1';

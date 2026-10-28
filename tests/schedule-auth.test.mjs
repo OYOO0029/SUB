@@ -137,3 +137,14 @@ for(const work of [false,true])test(`missed login event recovers ${work?'work':'
   await until(()=>app.ui.account===null);assert.deepEqual(app.state,work?emptyWorkState():initialState());
  }finally{app.close();}
 });
+test('personal restore requires confirmation and preserves both previous snapshots before replacement',async()=>{
+ const original=snapshot(700),app=setup({session:{user:{id:'A',email:'a@example.test'}},rows:new Map([['A',original]])});
+ try{await app.ui.ready;const incoming=snapshot(900).state[CLOUD_SLOT].data;
+ const cancel=app.ui.restoreData(incoming);await until(()=>document.querySelector('#cloud-confirm'));document.querySelector('#cloud-confirm button').click();assert.equal(await cancel,false);assert.equal(app.state.budgets['2026-10'].total,700);assert.equal(app.writes,0);
+ const restore=app.ui.restoreData(incoming);await until(()=>document.querySelector('#cloud-confirm'));document.querySelector('#cloud-confirm button:last-child').click();assert.equal(await restore,true);assert.equal(app.state.budgets['2026-10'].total,900);assert.equal(app.rows.get('A').state[CLOUD_SLOT].data.budgets['2026-10'].total,900);
+ const backups=[...app.cache].filter(([k])=>k.includes(':backup:')).map(([,v])=>JSON.parse(v));assert(backups.some(b=>b.reason==='before-import-local'&&b.data.budgets['2026-10'].total===700));assert(backups.some(b=>b.reason==='before-import-server'&&b.data.budgets['2026-10'].total===700));
+ }finally{app.close();}
+});
+test('account change during restore confirmation cannot apply the file to another account',async()=>{
+ const app=setup({session:{user:{id:'A',email:'a@example.test'}},rows:new Map([['A',snapshot(700)]])});try{await app.ui.ready;const restore=app.ui.restoreData(snapshot(900).state[CLOUD_SLOT].data);await until(()=>document.querySelector('#cloud-confirm'));app.click('logout');await until(()=>app.ui.account===null);document.querySelector('#cloud-confirm button:last-child').click();await assert.rejects(restore,/계정 또는 기록/);assert.equal(app.writes,0);}finally{app.close();}
+});

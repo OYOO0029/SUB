@@ -1,3 +1,4 @@
+import {persistValue} from './schedule-storage.mjs?v=20261028-data-safety-1';
 // Only routine, already-synced before-pull snapshots rotate. Conflict/import
 // recovery copies and pending journals are never retention candidates.
 export const ROUTINE_BACKUP_LIMIT=5;
@@ -12,7 +13,7 @@ export function writeBackup(storage,key,data,reason){
  const value=JSON.stringify({reason,at:new Date().toISOString(),data}),target=key+':backup:'+Date.now()+':'+crypto.randomUUID();
  if(routine&&(target.length+value.length)*2>ROUTINE_BACKUP_BYTES)return;
  if(routine){const candidates=entries.filter(e=>e.value.reason==='before-pull').sort((a,b)=>String(a.value.at).localeCompare(String(b.value.at)));let bytes=(target.length+value.length)*2+candidates.reduce((n,e)=>n+e.bytes,0);while(candidates.length&&(candidates.length>=ROUTINE_BACKUP_LIMIT||bytes>ROUTINE_BACKUP_BYTES)){const old=candidates.shift();storage.removeItem(old.key);bytes-=old.bytes;}}
- storage.setItem(target,value);
+ persistValue(storage,target,value);
 }
 export function backupUsage(storage,key){const entries=backupEntries(storage,key);return {count:entries.length,bytes:entries.reduce((n,e)=>n+e.bytes,0),protectedCount:entries.filter(e=>e.value.reason!=='before-pull').length};}
 

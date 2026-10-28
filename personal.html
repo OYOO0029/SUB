@@ -405,12 +405,12 @@ button:disabled{cursor:not-allowed;opacity:.45}
 </style>
 <link rel="stylesheet" href="./planner-ui.css?v=20261018-alignment-review">
 <link rel="stylesheet" href="./personal-ui.css?v=20261018-alignment-review">
-<script defer src="./planner-navigation.js?v=20261018-alignment-review"></script>
+<script defer src="./planner-navigation.js?v=20261028-data-safety-1"></script>
 </head>
 <body>
 <div class="app">
   <header class="header">
-      <div class="personal-brand"><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav></div>
+      <div class="personal-brand"><nav class="planner-switch" aria-label="개인 업무 전환"><a class="planner-mode active" data-value="personal" href="./schedule.html?v=20261028-data-safety-1" aria-current="page" aria-label="개인" title="개인"></a><a class="planner-mode" data-value="work" href="./work/" aria-label="업무" title="업무"></a></nav></div>
 
     <div class="header-actions">
       <button class="action-btn primary" id="quickAddBtn" aria-label="일정 추가" title="일정 추가"><svg class="header-action-svg" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -431,7 +431,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
     </div>
   </header>
 
-  <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다.</div>
+  <div class="storage-warning" id="storageWarning">이 환경에서는 영구 저장소를 사용할 수 없어 현재 세션에만 임시 저장됩니다. <button type="button" id="retryLocalSave">다시 저장</button> <button type="button" id="exportUnsaved">현재 기록 백업</button></div>
 
   <main class="personal-workspace" aria-label="개인 일정">
     <div class="personal-toolbar"><div class="personal-view-tabs" role="group" aria-label="보기 선택"><button type="button" data-personal-view="week">주간</button><button type="button" data-personal-view="month">월간</button></div><div class="personal-date-nav"><button class="date-step" id="toolbarPrevBtn" aria-label="이전 기간">‹</button>      <div class="selection-line">
@@ -726,8 +726,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
 
 <script type="module">
 import {getHoliday} from "./planner-calendar.mjs";
-import {appStorage} from "./schedule-storage.mjs";
-import {createAccountData} from "./schedule-account.mjs";
+import {appStorage} from "./schedule-storage.mjs?v=20261028-data-safety-1";
+import {createAccountData} from "./schedule-account.mjs?v=20261028-data-safety-1";
 import {validateState} from "./schedule-sync-core.mjs";
 (() => {
 "use strict";
@@ -820,6 +820,7 @@ function emptyState(){
 }
 const accounts=createAccountData({storage:appStorage,empty:emptyState,validate:v=>validateState(v?.version===5?v:normalizeLegacy(v))});
 let state=emptyState();
+let saveFailed=false;
 let focusDate=nowDate(),viewMode="week";
 let eventFormSnapshot="",dirtyCloseTarget=null;
 let pendingAction=null,pendingEvent=null;
@@ -831,16 +832,16 @@ let dragPayload=null;
 // ---------- helpers ----------
 function saveState(msg,undo){
   if(!accounts.owner){state=emptyState();render();window.dispatchEvent(new Event("my-week-login-request"));return}
-  accounts.write(state);syncStorageWarning();render();
+  try{accounts.write(state);saveFailed=false;}catch(error){saveFailed=true;render();syncStorageWarning();toast(error.message);return false;}syncStorageWarning();render();
   window.dispatchEvent(new Event('my-week-local-save'));
-  if(msg)toast(msg,undo);
+  if(msg)toast(msg,undo);return true;
 }
 function toast(msg,undo){
   const el=document.getElementById("toast"),m=document.getElementById("toastMessage"),a=document.getElementById("toastAction");
   m.textContent=msg;undoFn=typeof undo==="function"?undo:null;a.hidden=!undoFn;
   el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>{el.classList.remove("show");undoFn=null},3200);
 }
-function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",!appStorage.persistent)}
+function syncStorageWarning(){document.getElementById("storageWarning").classList.toggle("show",saveFailed||!appStorage.persistent)}
 function openModal(id){if(!accounts.owner&&id!=="settingsModal"){window.dispatchEvent(new Event("my-week-login-request"));return}document.getElementById(id).classList.add("open")}
 function closeModal(id){document.getElementById(id).classList.remove("open")}
 function trackerIcon(t){
@@ -1462,7 +1463,7 @@ function exportData(){
 }
 function importData(file){
   if(!accounts.owner){window.dispatchEvent(new Event("my-week-login-request"));return}
-  const importOwner=accounts.owner;const r=new FileReader();r.onload=()=>{if(accounts.owner!==importOwner)return;try{const raw=JSON.parse(r.result),p=validateState(raw?.version===5?raw:normalizeLegacy(raw));state=p;closeModal("settingsModal");saveState("백업을 불러왔어요.")}catch(e){toast("올바른 MY WEEK 백업 파일이 아닙니다.")}};r.readAsText(file);
+  const importOwner=accounts.owner;const r=new FileReader();r.onload=async()=>{if(accounts.owner!==importOwner)return;try{const raw=JSON.parse(r.result),p=validateState(raw?.version===5?raw:normalizeLegacy(raw));if(!window.myWeekCloud)throw Error('계정 연결을 확인한 뒤 다시 시도해 주세요.');closeModal("settingsModal");if(await window.myWeekCloud.restoreData(p))toast("백업을 불러왔어요.");}catch(e){toast(e.message||"백업을 불러오지 못했습니다.")}};r.readAsText(file);
 }
 
 // ---------- navigation / dirty ----------
@@ -1625,7 +1626,7 @@ function resetAccount(scope){
  for(const modal of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal)'))modal.classList.remove('open');
  for(const field of document.querySelectorAll('.modal-backdrop:not(#syncCloudModal) input,.modal-backdrop:not(#syncCloudModal) textarea')){if(!['checkbox','radio'].includes(field.type))field.value='';}
  clearTimeout(toast.t);document.getElementById('toast').classList.remove('show');undoFn=null;dragPayload=null;pendingAction=null;pendingEvent=null;settingsDraft=null;eventFormSnapshot='';dirtyCloseTarget=null;
- state=emptyState();render();state=scope?accounts.activate(scope):accounts.deactivate();render();syncStorageWarning();
+ saveFailed=false;state=emptyState();render();state=scope?accounts.activate(scope):accounts.deactivate();render();syncStorageWarning();
 }
 window.myWeekSyncBridge=Object.freeze({
  read:()=>clone(state),originalCache:null,
@@ -1639,13 +1640,16 @@ window.myWeekSyncBridge=Object.freeze({
  isPristine:()=>!accounts.raw(),
  export:()=>exportData(),
  download:(text,name)=>{const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},
- busy:()=>!!document.querySelector('.inline-sleep-input')||!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
+ unsaved:()=>saveFailed,
+ busy:()=>saveFailed||!!document.querySelector('.inline-sleep-input')||!!dragPayload||!!undoFn||!!document.querySelector('.modal-backdrop.open:not(#syncCloudModal)'),
  apply:incoming=>{
   const next=validateState(incoming),previous=state;
   try{state=next;render()}catch(error){state=previous;render();throw error}
   accounts.write(state);syncStorageWarning();
  }
 });
+document.getElementById('retryLocalSave').onclick=()=>saveState('기기에 저장했습니다.');
+document.getElementById('exportUnsaved').onclick=exportData;
 window.addEventListener('my-week-storage-limited',syncStorageWarning);
 window.dispatchEvent(new Event('my-week-ready'));
 render();
@@ -1660,5 +1664,5 @@ render();
  document.getElementById('workStatusBtn').innerHTML='<span>설정</span><svg class="header-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7h7m4 0h7M3 17h3m4 0h11"/><circle cx="12" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>';
  document.getElementById('settingsBtn').innerHTML='<span class="settings-filled-icon" aria-hidden="true"></span>';
 })();
-</script><script type="module" src="./schedule-sync.js?v=20261027-auth-recover-1"></script></body>
+</script><script type="module" src="./schedule-sync.js?v=20261028-data-safety-1"></script></body>
 </html>

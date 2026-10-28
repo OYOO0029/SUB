@@ -1,5 +1,5 @@
 import {uid,planToday,today} from './model.js?v=20261027-click-add-1';
-import {validate} from './repository.js?v=20261027-click-add-1';
+import {validate} from './repository.js?v=20261028-data-safety-1';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
@@ -32,6 +32,9 @@ export function updateItem(data,type,id,patch){
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
   Object.assign(item,patch);
+  // A later explicit relation choice cancels any pending automatic reattachment.
+  if(type==='task'&&('projectId' in patch||'workId' in patch))for(const parent of [...draft.works,...draft.projects]){if(parent.deletedAt){parent.detachedLinks=(parent.detachedLinks||[]).filter(l=>l.id!==id);parent.detachedTasks=(parent.detachedTasks||[]).filter(t=>t!==id);}}
+  if(type==='work'&&'projectId' in patch)for(const parent of draft.projects)if(parent.deletedAt)parent.detachedLinks=(parent.detachedLinks||[]).filter(l=>l.id!==id);
   if('people' in patch){if(typeof patch.people!=='string'&&(!Array.isArray(patch.people)||patch.people.some(p=>typeof p!=='string')))throw new Error('관련 인원을 확인해 주세요.');item.people=peopleValues(patch.people);}
   if(!item.title.trim()||item.title.length>160)throw new Error('이름을 1~160자로 입력해 주세요.');
   item.title=item.title.trim();
@@ -60,7 +63,7 @@ export function updateItem(data,type,id,patch){
     if(draft.works.some(w=>!w.deletedAt&&w.projectId===id&&w.stage&&!item.stages.includes(w.stage)))throw new Error('업무가 사용 중인 단계는 먼저 해당 업무에서 변경해 주세요.');
     if(!item.stages.includes(item.stage))item.stage='';
   }
-  validate(draft);Object.assign(getItem(data,type,id),item);return item;
+  validate(draft);Object.assign(getItem(data,type,id),item);for(const field of ['projects','works'])for(const parent of draft[field]){if(parent.deletedAt){const original=data[field].find(x=>x.id===parent.id);if(parent.detachedLinks)original.detachedLinks=parent.detachedLinks;if(parent.detachedTasks)original.detachedTasks=parent.detachedTasks;}}return item;
 }
 
 // Register and select together so a failed save cannot leave a partial option.
@@ -96,19 +99,19 @@ export function updatePlan(data,id,start,end){
 
 // Children keep their identity and records when a parent moves to Trash.
 export function trashItem(data,type,id){
-  const item=getItem(data,type,id);if(!item)return;
+  const item=getItem(data,type,id);if(!item||item.deletedAt)return;
   item.deletedAt=new Date().toISOString();item.detachedLinks=[];
   if(type==='project'){item.detachedTasks=[];for(const t of data.tasks.filter(t=>t.projectId===id)){item.detachedTasks.push(t.id);t.projectId=null;}}
   if(type==='project')for(const w of data.works.filter(w=>w.projectId===id)){item.detachedLinks.push({id:w.id,stage:w.stage});w.projectId=null;w.stage='';}
-  if(type==='work')for(const t of data.tasks.filter(t=>t.workId===id)){item.detachedLinks.push({id:t.id});t.workId=null;}
+  if(type==='work')for(const t of data.tasks.filter(t=>t.workId===id)){item.detachedLinks.push({id:t.id,projectId:t.projectId||null,detachedProjectId:item.projectId||t.projectId||null});t.workId=null;t.projectId=item.projectId||t.projectId||null;}
 }
 export function restoreItem(data,type,id){
-  const item=getItem(data,type,id);if(!item)return;item.deletedAt=null;
+  const item=getItem(data,type,id);if(!item||!item.deletedAt)return;item.deletedAt=null;
   for(const link of item.detachedLinks||[]){
     const child=getItem(data,type==='project'?'work':'task',link.id);
     if(!child)continue;
     if(type==='project'&&!child.projectId){child.projectId=id;child.stage=item.stages.includes(link.stage)?link.stage:'';}
-    if(type==='work'&&!child.workId)child.workId=id;
+    if(type==='work'&&!child.workId&&(Object.hasOwn(link,'detachedProjectId')?(child.projectId||null)===link.detachedProjectId:!child.projectId)){child.workId=id;child.projectId=link.projectId||null;}
   }
   if(type==='project')for(const taskId of item.detachedTasks||[]){const t=getItem(data,'task',taskId);if(t&&!t.projectId&&!t.workId)t.projectId=id;}
   item.detachedTasks=[];item.detachedLinks=[];

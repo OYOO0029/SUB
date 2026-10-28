@@ -1,3 +1,4 @@
+import {persistValue} from '../schedule-storage.mjs?v=20261028-data-safety-1';
 const copy=value=>structuredClone(value);
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 const same=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
@@ -23,12 +24,12 @@ export function createWorkAccount({storage,validate}){
   activate(scope){
    if(!scope)throw Error('계정을 확인해 주세요.');owner=scope;
    const [project,id]=scope.split('|'),meta=JSON.parse(storage.getItem('my-work.cloud.v1:'+project+':'+id)||'null');
-   const raw=storage.getItem(prefix+scope);return meta?.pending?normalize(meta.pending):raw?normalize(JSON.parse(raw)):emptyWorkState();
+   const raw=storage.getItem(prefix+scope);return raw?normalize(JSON.parse(raw)):meta?.pending?normalize(meta.pending):emptyWorkState();
   },
   raw(){return owner?storage.getItem(prefix+owner):null;},
   write(value){
    if(!owner)throw Error('기존 개인 일정과 같은 계정으로 로그인해 주세요.');
-   const next=normalize(value),key=prefix+owner,old=storage.getItem(key);if(old)storage.setItem(key+':previous',old);storage.setItem(key,JSON.stringify(next));return next;
+   const next=normalize(value),key=prefix+owner,old=storage.getItem(key);if(old)persistValue(storage,key+':previous',old);persistValue(storage,key,JSON.stringify(next));return next;
   },
   stage(value){const next={savedAt:new Date().toISOString(),state:normalize(value),owner:null},old=storage.getItem(stagingKey);if(old)storage.setItem(stagingKey+':previous',old);storage.setItem(stagingKey,JSON.stringify(next));return next;},
   staged(){const raw=storage.getItem(stagingKey);if(!raw)return null;const item=JSON.parse(raw);item.state=normalize(item.state);return item;},

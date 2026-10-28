@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {createSafeStorage} from '../schedule-storage.mjs';
+import {createAccountData} from '../schedule-account.mjs';
+import {createWorkAccount,emptyWorkState} from '../work/work-account.mjs';
+import {validate} from '../work/repository.js';
+import {createItem,trashItem,restoreItem,updateItem} from '../work/editing.js';
+import {taskContext} from '../work/model.js';
+import {createTaskComposer} from '../work/task-composer.js';
+import {writeBackup,backupEntries} from '../schedule-backups.mjs';
+import {CloudSync} from '../schedule-cloud-core.mjs';
+function disk(){const values={};let blocked=false;const backing={getItem:k=>values[k]??null,setItem(k,v){if(blocked)throw Error('quota');values[k]=String(v);backing[k]=String(v)},removeItem(k){delete values[k];delete backing[k]}};const storage=createSafeStorage(()=>backing);return{values,storage,block:v=>blocked=v};}
+function fixture(){const d=emptyWorkState(),a=createItem(d,'project','A'),b=createItem(d,'project','B'),w=createItem(d,'work','W',{projectId:a.id}),t=createItem(d,'task','T',{workId:w.id});t.notes='memo';t.due='2026-11-14';t.checks=[{id:'check',title:'child',done:true}];return{d,a,b,w,t};}
+test('durable account writes fail on quota, retain previous disk record and retry without reload',()=>{
+ for(const work of [false,true]){const f=disk(),account=work?createWorkAccount({storage:f.storage,validate}):createAccountData({storage:f.storage,empty:()=>({}),validate:x=>x});account.activate('server|user');const original=work?fixture().d:{value:'old'};account.write(original);const key=account.storageKey,before=f.values[key],next=structuredClone(original);if(work)next.tasks[0].title='new';else next.value='new';f.block(true);assert.throws(()=>account.write(next),/기기에 저장하지 못/);assert.equal(f.values[key],before);assert.equal(f.storage.getItem(key),before);f.block(false);account.write(next);assert.deepEqual(JSON.parse(f.values[key]),next);}
+});
+test('failed protected backup cannot be mistaken for a saved copy on retry',()=>{const f=disk();f.block(true);assert.throws(()=>writeBackup(f.storage,'sync',{value:1},'before-import-local'));assert.equal(backupEntries(f.storage,'sync').length,0);f.block(false);writeBackup(f.storage,'sync',{value:1},'before-import-local');assert.equal(backupEntries(f.storage,'sync').length,1);});
+test('work deletion preserves project, and restoration respects later explicit reassignment including same project',()=>{
+ for(const move of ['none','other','same','standalone']){const{d,a,b,w,t}=fixture(),before=structuredClone(t);trashItem(d,'work',w.id);assert.equal(taskContext(d,t).project.id,a.id);assert.equal(t.workId,null);if(move!=='none')updateItem(d,'task',t.id,{projectId:move==='other'?b.id:move==='same'?a.id:null});restoreItem(d,'work',w.id);assert.equal(t.workId,move==='none'?w.id:null);assert.equal(taskContext(d,t).project?.id??null,move==='other'?b.id:move==='standalone'?null:a.id);for(const key of ['id','notes','due','checks','plans','blocks'])assert.deepEqual(t[key],before[key]);validate(d);}
+});
+test('legacy trash metadata restores conservatively and repeated delete/restore preserves links',()=>{const{d,a,b,w,t}=fixture();trashItem(d,'work',w.id);const links=structuredClone(w.detachedLinks);trashItem(d,'work',w.id);assert.deepEqual(w.detachedLinks,links);w.detachedLinks=[{id:t.id}];t.projectId=b.id;restoreItem(d,'work',w.id);assert.equal(t.workId,null);assert.equal(t.projectId,b.id);restoreItem(d,'work',w.id);validate(d);});
+test('project restore does not reclaim a task or work explicitly unassigned after deletion',()=>{const{d,a,w}=fixture(),direct=createItem(d,'task','direct',{projectId:a.id});trashItem(d,'project',a.id);updateItem(d,'task',direct.id,{projectId:null});updateItem(d,'work',w.id,{projectId:null});restoreItem(d,'project',a.id);assert.equal(direct.projectId,null);assert.equal(w.projectId,null);});
+test('composer isolates project and work drafts, including failed-save retries and navigation',()=>{
+ const dom=new JSDOM('<main></main>'),old=new Map(['window','document'].map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));for(const k of old.keys())Object.defineProperty(globalThis,k,{value:dom.window[k],configurable:true});
+ try{const{d,a,b,w}=fixture();let ok=true,ctx={target:'project',projectId:a.id},composer;const render=()=>document.querySelector('main').innerHTML=composer.view();composer=createTaskComposer({getData:()=>d,getScope:()=> 'user',getContext:()=>ctx,render,save:()=>ok,esc:String,icon:()=>'',notify(){}});const type=v=>{const el=document.querySelector('textarea');el.value=v;el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));};const submit=()=>document.querySelector('form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+ composer.open();type('A draft');ctx={target:'project',projectId:b.id};composer.open();assert.equal(document.querySelector('textarea').value,'');type('B draft');ok=false;submit();const count=d.tasks.length;assert.equal(d.tasks.at(-1).projectId,b.id);ctx={target:'project',projectId:a.id};composer.open();assert.equal(document.querySelector('textarea').value,'A draft');ok=true;submit();assert.equal(d.tasks.at(-1).projectId,a.id);ctx={target:'project',projectId:b.id};composer.open();assert.equal(document.querySelector('textarea').value,'B draft');submit();assert.equal(d.tasks.length,count+1);
+ ctx={target:'work',workId:w.id};composer.open();type('work draft');submit();assert.equal(d.tasks.at(-1).workId,w.id);validate(d);
+ }finally{dom.window.close();for(const[k,v]of old)if(v)Object.defineProperty(globalThis,k,v);else delete globalThis[k];}
+});
+test('backup failure prevents import apply and server writes',async()=>{const f=disk();let state={value:'local'},writes=0;const engine=new CloudSync({storage:f.storage,key:'sync',api:{read:async()=>({state:{myWeekV1:{schema:1,revision:'1',data:{value:'server'}}}}),write:async()=>{writes++}},bridge:{read:()=>state,validate:x=>x,busy:()=>false,apply:v=>state=v},status(){}});f.block(true);await engine.importData({value:'new'},(_a,b)=>b);assert.deepEqual(state,{value:'local'});assert.equal(writes,0);engine.stop();});
+test('reload preserves a newer account cache when journal persistence failed',()=>{
+ for(const work of [false,true]){const f=disk(),account=work?createWorkAccount({storage:f.storage,validate}):createAccountData({storage:f.storage,empty:()=>({}),validate:x=>x});const old=work?fixture().d:{value:'old'},next=structuredClone(old);if(work)next.tasks[0].title='new';else next.value='new';account.activate('server|user');account.write(next);f.storage.setItem((work?'my-work':'my-week')+'.cloud.v1:server:user',JSON.stringify({linked:true,pending:old}));assert.deepEqual(account.activate('server|user'),next);assert.deepEqual(JSON.parse(f.storage.getItem((work?'my-work':'my-week')+'.cloud.v1:server:user')).pending,old);}
+});
