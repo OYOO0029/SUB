@@ -142,3 +142,8 @@
 - 기존 focus.css의 nav 없는 화면24px 상단 여백 규칙을 제거. 실제 오늘/프로젝트 모두 탭 위 간격15.99px, 체크 열43.99px 확인.
 - localhost 가상 계정에서 프로젝트 기본4개 후보/비활성 포함 후 보류·완료 후보 추가, 비모달 및 검색 확인. 시각 검수에서 배경 흐림 없음과 상태 투명 스타일 확인. 운영 데이터 수정 없음.
 - 자동134개 통과. 프로젝트 상태 후보 포함/검색/원본 무변경 검사 추가. 실제 터치 기기는 미검증.
+
+## 2026-10-30 · Task checkbox only
+- Removed task status column, detail selector and calendar status filter. Project lifecycle remains unchanged.
+- Preserved historical stored task fields; no production data migration.
+- npm test: 134/134 passed. Local fixture browser: today/remaining/overdue headers contain no status; task detail has completion checkbox, project, work period and memo, without status selector.

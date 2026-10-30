@@ -1,7 +1,7 @@
 // Embedded views retain their own state; the shell controls navigation.
 (() => {
  const embedded = new URLSearchParams(location.search).has('embedded');
- const shell = new URL('./schedule.html?v=20261030-compact-lists-3', document.currentScript.src);
+ const shell = new URL('./schedule.html?v=20261030-check-only-1', document.currentScript.src);
  if (!embedded) {
   shell.searchParams.set('mode', location.pathname.includes('/work/') ? 'work' : 'personal');
   location.replace(shell);

@@ -315,8 +315,8 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 #app .schedule-table .list-title-edit{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;}
 #app .schedule-table .cell-edit{font-size:13px;font-weight:400;color:var(--muted);}
 #app .schedule-table .tt-column.is-applied>.icon{opacity:1;color:var(--accent);}
-.schedule-table{min-width:880px;}
-#app .schedule-table:not(:has(.tt-project)){min-width:740px;}
+.schedule-table{min-width:780px;}
+#app .schedule-table:not(:has(.tt-project)){min-width:640px;}
 #app .schedule-table th:is(:hover,:focus-within) .tt-column>.icon{opacity:1;}
 #app .schedule-table .tt-column{font-size:12px;font-weight:500;}
 .schedule-check{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:0;}

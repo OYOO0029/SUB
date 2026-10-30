@@ -1,6 +1,6 @@
 import {activeProject} from './project-options.js';
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {createTaskBatch} from './editing.js?v=20261030-compact-lists-3';
+import {createTaskBatch} from './editing.js?v=20261030-check-only-1';
 import {today} from './model.js?v=20261030-explicit-schedule-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  let includeInactive=false;let draft=null,resize=null,contextToken=null,composing=false,compositionEnded=0;const drafts=new Map();

@@ -21,10 +21,10 @@ test('today table filters, unified detail entry, remaining separation and timer 
   view=createTodayTable({images:{async upload(file){return {bucket:'work-images',path:'test/image.png',mime:file.type,size:file.size}},async url(){return 'blob:fixture'}},getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',timer,render,save:()=>{validate(data);saves++},notify(){},flow:{row:()=>''}});
   const click=s=>{assert(document.querySelector(s),s);document.querySelector(s).click()},change=(s,v)=>{const el=document.querySelector(s);el.value=v;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))};
   a.todaySelected=true;b.todaySelected=true;
-  render();assert.deepEqual([...document.querySelectorAll('table[aria-label="오늘 할 일"] th')].map(t=>t.textContent.trim()),['','할 일','프로젝트','상태','작업일자','']);
+  render();assert.deepEqual([...document.querySelectorAll('table[aria-label="오늘 할 일"] th')].map(t=>t.textContent.trim()),['','할 일','프로젝트','작업일자','']);
   assert.equal(view.addContext().date,null);assert.equal(view.addContext().todaySelected,true);assert(!document.querySelector('[data-today-status],[data-task-scope]'));
   b.status='done';render();assert.deepEqual(view.items().map(t=>t.id),[a.id]);b.status='todo';render();
-  click('[data-list-menu="status"][data-list-key="today"]');change('[data-tt-filter="status"]','waiting');assert.deepEqual(view.items().map(t=>t.id),[a.id]);change('[data-tt-filter="status"]','');click('[data-tt="close-menu"]');
+  assert.equal(document.querySelector('[data-list-status],[data-list-menu="status"]'),null);
   assert(document.querySelector('[data-action="detail"][data-id="'+a.id+'"]'));
   const original=JSON.stringify(data);click('[data-tt="focus"][data-id="'+a.id+'"]');change('[data-tt-clock]','37');click('[data-tt="start"]');assert(timer.read().running);assert.equal(timer.read().minutes,37);click('[data-tt="focus"][data-id="'+b.id+'"]');click('[data-tt="start"]');assert.equal(timer.read().taskId,a.id);assert(document.querySelector('[data-tt-error]').textContent);assert.equal(JSON.stringify(data),original);
   view.reset();const past=createItem(data,'task','late',{projectId:p.id});past.due=addDays(date,-1);past.todaySelected=true;const undated=createItem(data,'task','undated'),future=createItem(data,'task','future');future.startDate=addDays(date,2);render();
