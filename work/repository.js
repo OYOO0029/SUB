@@ -1,4 +1,4 @@
-import {validatePeriod} from './schedule-rules.js?v=20261030-explicit-schedule-1';
+import {validatePeriod} from './schedule-rules.js?v=20261030-minimal-surface-1';
 import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';

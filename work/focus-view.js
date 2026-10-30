@@ -1,9 +1,9 @@
-import {executionBuckets} from './schedule-rules.js?v=20261030-explicit-schedule-1';
-import {createTodayTable} from './today-table.js?v=20261030-explicit-schedule-1';
+import {executionBuckets} from './schedule-rules.js?v=20261030-minimal-surface-1';
+import {createTodayTable} from './today-table.js?v=20261030-minimal-surface-1';
 import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261030-explicit-schedule-1';
 import {executionSections,unfinished} from './workflow.js?v=20261030-explicit-schedule-1';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
-import {createItem,conflicts} from './editing.js?v=20261030-explicit-schedule-1';
+import {createItem,conflicts} from './editing.js?v=20261030-minimal-surface-1';
 import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
 import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
@@ -37,7 +37,7 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   function timeline(tasks){
     const rows=timelineRows(tasks,ui.date,currentClock()),past=rows.filter(r=>r.end<=currentClock()),remaining=rows.filter(r=>r.end>currentClock());
     const unscheduled=tasks.filter(t=>!t.blocks.some(b=>b.date===ui.date)),outside=tasks.filter(t=>t.blocks.some(b=>b.date===ui.date&&(minute(b.end)<=DAY_START||minute(b.start)>=DAY_END)));
-    const extra=(title,items)=>items.length?`<details class="focus-fold" data-fold="focus-${title}"><summary>${title} ${items.length}개</summary>${items.map(t=>action(`<span class="focus-context">${esc(context(t))}</span>${esc(t.title)}`,'plan',`data-id="${esc(t.id)}"`,'focus-unplanned')).join('')}</details>`:'';
+    const extra=(title,items)=>items.length?`<details ${title==='시간 미정'?'open':''} class="focus-fold" data-fold="focus-${title}"><summary>${title} ${items.length}개</summary>${items.map(t=>action(`<span class="focus-context">${esc(context(t))}</span>${esc(t.title)}`,'plan',`data-id="${esc(t.id)}"`,'focus-unplanned')).join('')}</details>`:'';
     return `<div class="focus-time-heading"><span>08:00–19:00</span>${ui.date===today()?`<span>지금 <span data-focus-now>${time(koreaClock())}</span></span>`:''}</div><div class="focus-timeline">${past.length?`<details class="focus-history" data-fold="focus-past"><summary><span class="when-closed">지난 시간 펼치기</span><span class="when-open">지난 시간 접기</span></summary>${past.map(timelineRow).join('')}</details>`:''}${remaining.map(timelineRow).join('')}<div class="focus-time-row focus-time-end">${rail(DAY_END,DAY_END+10)}</div></div>${extra('시간 미정',unscheduled)}${extra('08:00–19:00 외 일정',outside)}`;
   }
   function openPicker(id,start,end){

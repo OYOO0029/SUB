@@ -1,7 +1,7 @@
-import {validatePeriod} from './schedule-rules.js?v=20261030-explicit-schedule-1';
+import {validatePeriod} from './schedule-rules.js?v=20261030-minimal-surface-1';
 import {assignTaskOwner} from './ownership.js?v=20261028-domain-rules-1';
 import {uid,planToday,today} from './model.js?v=20261030-explicit-schedule-1';
-import {validate} from './repository.js?v=20261030-explicit-schedule-1';
+import {validate} from './repository.js?v=20261030-minimal-surface-1';
 import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];

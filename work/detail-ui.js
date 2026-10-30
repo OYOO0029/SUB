@@ -1,12 +1,12 @@
-import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-explicit-schedule-1';
-import {periodLabel} from './task-list.js?v=20261030-explicit-schedule-1';
+import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-minimal-surface-1';
+import {periodLabel} from './task-list.js?v=20261030-minimal-surface-1';
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261030-explicit-schedule-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261030-explicit-schedule-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-explicit-schedule-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-minimal-surface-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
@@ -47,7 +47,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     const props=property('사업비','note',textField('budget',e.budget,'사업비'))+property('관련 인원','users',chipsField(e,'people'))+property('태그','tag',chipsField(e))+property('메모','note',textField('notes',e.notes,'메모',true));
     return `<section class="pl-project-properties" data-project-context="${esc(e.id)}"><div class="pl-page-heading"><input class="detail-title-input" data-inline-field="title" aria-label="프로젝트 이름" value="${esc(e.title)}" maxlength="160">${status}${button(icon('trash'),'delete-project',`data-id="${esc(e.id)}" aria-label="프로젝트 삭제" title="삭제"`,'icon-button')}</div><p id="project-inline-error" role="alert"></p><dl class="pl-project-period">${dateProperty('사업 기간','period',e.start?`${e.start}${e.end&&e.end!==e.start?' – '+e.end:''}`:'')}</dl><details class="pl-project-extra" data-fold="project-info-${esc(e.id)}"><summary>프로젝트 정보</summary><dl class="properties">${props}</dl></details></section>`;
   }
-  for(const event of ['pointerdown','focusin'])document.addEventListener(event,e=>{const host=e.target.closest('[data-project-context]');if(host)ui.detail={type:'project',id:host.dataset.projectContext};},true);
+  for(const event of ['pointerdown','focusin'])document.addEventListener(event,e=>{const host=e.target.closest('[data-project-context]');if(host){if($('#detail').open){document.activeElement?.blur();if(ui.saveWarning)return;$('#detail').close();}ui.detail={type:'project',id:host.dataset.projectContext};}},true);
   function changeProjectState(id,value){
     if(!PROJECT_STATES.some(([v])=>v===value))return;
     const remaining=projectTasks(getData(),id).filter(unfinished);
@@ -64,7 +64,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       const planned=p?`${p.start}${p.end!==p.start?' – '+p.end:''}`:'';
       const reminder=property('리마인드','calendar',`<div class="task-reminder"><input type="checkbox" data-task-reminder aria-label="리마인드 사용" ${e.remindFrom?'checked':''}>${e.remindFrom?valueButton(showDate(e.remindFrom)+' – '+(e.remindUntil?showDate(e.remindUntil):'종료일 없음'),'field-date','data-field="remindFrom" aria-label="리마인드 기간 변경"'):'<span class="empty-value">사용 안 함</span>'}</div>`);
       props=property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+property('상태','check',choiceSelect(e.status,statusOptions(data),'data-list-status="'+esc(e.id)+'"','할 일 상태'))+dateProperty('작업일자','workPeriod',periodLabel(taskPeriod(e)));
-      body='<section class="task-memo-section"><h3>메모</h3>'+textField('notes',e.notes,'메모',true)+'</section><details class="detail-extra"><summary>체크리스트</summary>'+checks(e)+'</details>';
+      body='<section class="task-memo-section"><h3>메모</h3>'+textField('notes',e.notes,'메모',true)+'</section>'+(activeChecks(e).length?'<details class="detail-extra"><summary>체크리스트</summary>'+checks(e)+'</details>':'');
       extra=reminder+property('시간 배치','clock',valueButton(e.blocks.filter(b=>b.date===ui.date).map(b=>b.start+' – '+b.end).join(' / '),'time','data-id="'+id+'"'));
 
     }else if(type==='work'){
@@ -80,14 +80,14 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     if(type==='work'){
       $('#detail').innerHTML=`<header class="detail-header wd-simple-header"><h2 id="detail-title"><input class="detail-title-input" data-inline-field="title" aria-label="업무 이름" value="${esc(e.title)}" maxlength="160"></h2>${button(icon('close'),'close-detail','aria-label="상세 닫기"','icon-button')}<p id="inline-error" role="alert"></p></header><div class="detail-body"><dl class="properties">${props}</dl>${body}</div>`;window.dispatchEvent(new window.Event('work-detail-render'));return;
     }
-    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>기타 정보</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!e.todaySelected&&unfinished(e)?button(icon('calendar'),'do-today',`data-id="${id}" aria-label="오늘 하기" title="오늘 하기"`,'icon-button'):''}</footer>`;
+    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>추가 설정</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!e.todaySelected&&unfinished(e)?button(icon('calendar'),'do-today',`data-id="${id}" aria-label="오늘 하기" title="오늘 하기"`,'icon-button'):''}</footer>`;
 
   }
   function open(type,id){
     if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:id}));return;}
-    if($('#detail').open&&ui.detail&&(ui.detail.type!==type||ui.detail.id!==id))history.push({...ui.detail,scroll:$('#detail').scrollTop});else if(!$('#detail').open)history=[];
+    const active=document.activeElement;if(active?.closest('#detail')&&active.matches('[data-inline-field],[data-check-title]'))active.blur();if((ui.saveWarning||$('#detail [data-invalid]'))&&$('#detail').open){notify('저장하지 못한 내용을 먼저 다시 저장해 주세요.');return;}history=[];
     if(type==='work'&&ui.detail?.id!==id)Object.assign(workQuery,{search:'',sort:'added',status:'all'});
-    ui.detail={type,id};ui.inlineSaved='';$('#detail').classList.add('flow-drawer');render();if(!$('#detail').open)$('#detail').showModal();$('#detail').scrollTop=0;
+    ui.detail={type,id};ui.inlineSaved='';$('#detail').classList.add('flow-drawer');render();if(!$('#detail').open)$('#detail').show();$('#detail').scrollTop=0;
   }
   function persist(refresh=true,refreshList=true){const ok=save(refreshList)!==false;if(refresh)render();else if(ui.saveWarning)error(new Error(ui.saveWarning));const hint=$('[data-save-state]');if(hint)hint.textContent=ok?'기기에 저장됨':'저장 실패 · 입력 유지';return ok;}
   function error(err){const out=$('#detail').open?$('#detail #inline-error'):$('#project-inline-error')||$('#inline-error');if(out)out.textContent=err.message;else notify(err.message);}
@@ -215,8 +215,8 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       if(el.id==='block-date'){if(el.value)timeEditor(timeDraft.id,el.value);else el.value=timeDraft.date;return;}
       if(el.dataset.checkTitle){if(!el.value.trim())throw new Error('확인사항 내용을 입력해 주세요.');changeCheck(getData(),el.dataset.taskId,el.dataset.checkTitle,{title:el.value.trim()});}
       else{const field=el.dataset.inlineField,value=field==='stages'?[...new Set(el.value.split(',').map(s=>s.trim()).filter(Boolean))]:el.value;if(field==='notes'&&ui.detail.type==='task')updateMemo(getData(),ui.detail.id,[{text:value},...(item().memoParts||[]).filter(p=>p.image||p.asset)]);else updateItem(getData(),ui.detail.type,ui.detail.id,{[field]:value});el.classList.toggle('is-empty',!el.value);}
-      if(el.dataset.inlineField==='status'){$('.detail-complete').checked=item().status==='done';}persist(false,false);if(!ui.saveWarning&&$('#inline-error'))$('#inline-error').textContent='';
-    }catch(err){error(err);if(el.dataset.inlineField){const saved=item()[el.dataset.inlineField];el.value=Array.isArray(saved)?saved.join(', '):saved||'';}}
+      if(el.dataset.inlineField==='status'){$('.detail-complete').checked=item().status==='done';}delete el.dataset.invalid;persist(false,false);if(!ui.saveWarning&&$('#inline-error'))$('#inline-error').textContent='';
+    }catch(err){error(err);el.dataset.invalid='true';}
   }
   document.addEventListener('change',saveField,true);
   document.addEventListener('focusout',event=>{if(event.target.matches('[data-inline-field],[data-check-title]'))saveField(event);},true);
@@ -230,7 +230,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       else{const type=form.dataset.createForm||'task',e=createItem(data,type,f.title,{date:form.hasAttribute('data-create-form')?(form.dataset.date||null):ui.date,workId:form.dataset.workId||null,projectId:form.dataset.projectId||null});if(form.hasAttribute('data-create-form')){$('#editor').close();persist(false);if(type==='project'){window.dispatchEvent(new CustomEvent('work-open-project',{detail:e.id}));}else open(type,e.id);}else{if(persist(false))notify('추가했습니다.');}}
     }catch(err){const out=form.querySelector('.form-error,.property-error');if(out)out.textContent=err.message;else error(err);}
   },true);
-  document.addEventListener('keydown',event=>{const el=event.target;if(el.closest('[data-choice-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeChoiceForm(el.closest('[data-choice-form]'));return;}if(el.matches('[data-inline-field],[data-check-title]')&&event.key==='Enter'&&!event.isComposing&&el.tagName!=='TEXTAREA'){event.preventDefault();el.blur();}if(el.closest('[data-check-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCheckForm(el.closest('[data-check-form]'));}if(el.matches('[data-quick-task] input')&&event.key==='Escape'){event.preventDefault();save();}});
+  document.addEventListener('keydown',event=>{const el=event.target;if(event.key==='Escape'&&$('#detail').open&&!document.querySelector('dialog:modal')){el.blur();if(ui.saveWarning||$('#detail [data-invalid]'))return;$('#detail').close();ui.detail=null;return;}if(el.closest('[data-choice-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeChoiceForm(el.closest('[data-choice-form]'));return;}if(el.matches('[data-inline-field],[data-check-title]')&&event.key==='Enter'&&!event.isComposing&&el.tagName!=='TEXTAREA'){event.preventDefault();el.blur();}if(el.closest('[data-check-form]')&&event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCheckForm(el.closest('[data-check-form]'));}if(el.matches('[data-quick-task] input')&&event.key==='Escape'){event.preventDefault();save();}});
   $('#detail').addEventListener('close',()=>{history=[];$('#detail').innerHTML='';ui.inlineSaved='';if($('#detail').dataset.skipCloseSave){delete $('#detail').dataset.skipCloseSave;return;}save();});$('#editor').addEventListener('close',()=>$('#editor').classList.remove('time-editor'));
   return {open,render,timeEditor,create,trash,checkForm,checkAddButton,projectInfo,changeProjectState};
 }

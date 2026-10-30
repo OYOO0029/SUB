@@ -1,5 +1,5 @@
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {createTaskBatch} from './editing.js?v=20261030-explicit-schedule-1';
+import {createTaskBatch} from './editing.js?v=20261030-minimal-surface-1';
 import {today} from './model.js?v=20261030-explicit-schedule-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  let draft=null,resize=null,contextToken=null,composing=false,compositionEnded=0;const drafts=new Map();
@@ -29,9 +29,9 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   const currentContext=contextKey();if(contextToken!==null&&contextToken!==currentContext){stash();draft=drafts.get(currentContext)||null;}contextToken=currentContext;
   resize?.disconnect();
   document.querySelectorAll('.task-entry-row,.table-add-edge,.task-entry-body').forEach(e=>e.remove());
-  const targets=[...document.querySelectorAll('.tt-screen > .tt-table-wrap table,.tt-remaining table[data-list-key="remaining"],.project-task-table')];
+  const targets=[...document.querySelectorAll('.tt-screen table[data-list-key="today"],.tt-remaining table,.project-task-table')];
   for(const table of targets){
-   const target=table.dataset.listKey==='remaining'?'remaining':table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
+   const target=['remaining','overdue'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
    const active=draft&&draft.target===target;
    const empty=table.querySelector('td.tt-empty,td.pl-empty');
    if(empty)empty.parentElement.hidden=!!active;

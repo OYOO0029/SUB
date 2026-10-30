@@ -9,7 +9,7 @@ test('unified project properties save to their project and list status changes p
  const dom=new JSDOM('<main></main><dialog id="detail"></dialog><dialog id="editor"></dialog><dialog id="property-editor"></dialog>',{url:'https://fixture.invalid'});
  const keys=['window','document','CustomEvent','FormData'],old=new Map(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
  for(const k of keys)Object.defineProperty(globalThis,k,{value:dom.window[k],configurable:true,writable:true});
- dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false};
+ dom.window.HTMLDialogElement.prototype.show=dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false};
  try{
   const data=emptyWorkState(),p=createItem(data,'project','Project'),t=createItem(data,'task','Child',{projectId:p.id}),before=structuredClone(t),ui={projectPage:p.id,detail:null};let saves=0;
   const button=(l,a,attrs='',cls='')=>`<button data-action="${a}" class="${cls}" ${attrs}>${l}</button>`;
