@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><title>공통 UX 로컬 검수</title>
 <style>body{margin:0;background:#101318;color:white;font:12px sans-serif}nav{display:flex;gap:6px;padding:6px;flex-wrap:wrap}button{padding:6px 10px}iframe{display:block;border:0;height:720px;margin:auto}pre{margin:4px 8px;max-height:70px;overflow:auto;white-space:pre-wrap}</style>
-<nav aria-label="화면 너비"><button data-width="1280">1280px</button><button data-width="390">390px</button><button data-width="320">320px</button></nav>
+<nav aria-label="화면 너비"><button data-width="1280">1280px</button><button data-width="768">768px</button><button data-width="390">390px</button><button data-width="320">320px</button></nav>
 <nav aria-label="검수 화면"><button data-page="tasks">오늘 목록</button><button data-page="timeline">타임라인</button><button data-page="projects">프로젝트 목록</button><button data-page="project-detail">프로젝트 상세</button><button data-page="work">업무 상세</button><button data-page="task">할 일 상세</button><button data-page="calendar">캘린더</button><button data-page="add">행 추가</button><button data-page="project-scope">프로젝트 탭</button><button data-page="project-menu">탭 편집</button><button data-page="menu">선택 메뉴</button></nav>
 <pre id="metrics"></pre><iframe title="검수용 업무 화면" style="width:1280px"></iframe>
 <script>
@@ -12,7 +12,7 @@ document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>{frame.style.
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=async()=>{const p=b.dataset.page,d=frame.contentDocument;
  if(p==='project-scope'){click('[data-task-project]:not([data-task-project=""])');return;}
  if(p==='project-menu'){click('[aria-label="프로젝트 탭 편집"]');return;}
- if(p==='menu'){click('[data-list-menu="status"][data-list-key="today"]');return;}
+ if(p==='menu'){click('[data-list-menu="due"][data-list-key="today"]');return;}
  if(p==='add'){click('[data-batch-edge]');return;}
  click('#detail[open] [data-action=close-detail]');
  const tab=['task','timeline'].includes(p)?'tasks':['project-detail','work'].includes(p)?'projects':p;

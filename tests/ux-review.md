@@ -147,3 +147,9 @@
 - Removed task status column, detail selector and calendar status filter. Project lifecycle remains unchanged.
 - Preserved historical stored task fields; no production data migration.
 - npm test: 134/134 passed. Local fixture browser: today/remaining/overdue headers contain no status; task detail has completion checkbox, project, work period and memo, without status selector.
+
+## 2026-10-30 · Responsive task surfaces
+- Phone task rows reflow title, ownership/date and 44px actions without horizontal task scrolling. Tablet retains internal table scrolling; saved desktop widths are not mutated.
+- Phone composer reflows vertically; fixed an observed 42px cell clipping issue and verified form stays inside its row (320px: row177/form176px).
+- Fixture DOM checks: 320px today, project, calendar and detail show no document overflow; detail within viewport. 390px and 768px no document overflow; icon16px; desktop1280px retains42px table rows. Browser screenshot inspected mobile task rows and actions.
+- npm test: 134/134 passed. Data mutations/schema unchanged. Physical iOS/Android hardware not tested.

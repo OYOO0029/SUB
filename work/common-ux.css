@@ -74,7 +74,7 @@ html {scrollbar-gutter: stable;}
 .tt-today {display: inline-flex; align-items: center; justify-content: center; min-height: var(--ux-control); padding: 0; background: transparent; color: var(--muted); font-size: 12px; white-space: nowrap; border-radius: 6px; width: 32px; height: 32px;}
 .tt-today>.icon {width: 16px; height: 16px;}
 .ux-empty {font-size: 11px; line-height: 16px; font-weight: 400; color: var(--muted);}
-.tt-table-wrap,.pl-table-wrap {max-height: min(60dvh,560px); overflow: auto; scrollbar-width: thin; overscroll-behavior: contain;}
+.tt-table-wrap,.pl-table-wrap {max-width:100%; min-width:0; max-height: min(60dvh,560px); overflow: auto; scrollbar-width: thin; overscroll-behavior-inline: contain;}
 .tt-table {border-collapse: separate; border-spacing: 0;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th {position: sticky; top: 0; z-index: 3; background: var(--panel); box-shadow: 0 1px 0 var(--line);}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th:not(:last-child),
@@ -290,7 +290,8 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .tt-toolbar>.tt-toolbar-right {margin-left:auto;}
 .tt-toolbar-right>.ux-tools {margin-left: auto;}
 .tt-toolbar-right>.tt-status {order: 3; flex-basis: 100%;}
-#detail.minimal-task {width: calc(100vw - 24px); inset: 12px; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px);}
+#detail.flow-drawer {width:100%;max-width:100%;inset:0;height:100dvh;max-height:100dvh;border-radius:0;box-sizing:border-box;}
+#detail.minimal-task :is(.detail-header,.detail-body,.detail-footer){padding-inline:16px;}
 }
 @media (pointer:coarse) {
 :root {--ux-control: 44px;--task-check-width:64px;--task-actions-width:200px;}
@@ -380,3 +381,52 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 #app tr:is(:hover,:focus-within) .task-status-cell .ux-status-filter>svg {opacity:1;}
 .project-workspace {padding-top:0;}
 @media(pointer:coarse){#app .task-status-cell .ux-status-filter>svg{opacity:1;}.order-handle{width:28px!important;left:-8px;transform:none;}.schedule-check{justify-content:flex-end;}}
+
+/* Phone layout keeps each task and its actions together; desktop column widths remain stored. */
+@media(max-width:600px){
+ html{scrollbar-gutter:auto;}
+ #app .new-workspace>.flow-nav{gap:4px;}
+ #app .flow-nav-link:nth-child(n){width:auto;padding-inline:8px;}
+ .flow-nav>.ux-view-tabs{gap:0;}
+ .project-view-tabs{flex-wrap:wrap;gap:4px;}
+ .task-project-tabs>button{min-height:44px;padding-inline:8px;max-width:160px;}
+ .task-project-menu{position:fixed;left:12px;right:12px;top:140px;width:auto;max-height:calc(100dvh - 164px);overflow:auto;}
+ #app .schedule-table{display:block;width:100%!important;min-width:0!important;}
+ .tt-table-wrap:has(.schedule-table){max-height:none;overflow:visible;}
+ .schedule-table colgroup,.schedule-table .ux-col-resize{display:none;}
+ .schedule-table :is(thead,tbody){display:block;width:100%;}
+ .schedule-table thead tr{display:flex;gap:20px;padding:0 8px;flex-wrap:wrap;background:var(--panel);}
+ #app .schedule-table thead th{display:block;position:static;height:40px;padding:0;border:0;box-shadow:none;}
+ .schedule-table thead th:empty,.schedule-table thead th[aria-label]{display:none!important;}
+ .schedule-table tbody tr[data-tt-row]{display:grid;position:relative;grid-template-columns:36px minmax(0,1fr) minmax(0,1fr);padding:4px 8px;border-bottom:1px solid #ffffff12;}
+ #app .schedule-table tbody tr[data-tt-row]>td{display:block;height:auto;min-width:0;padding:0;border:0;text-align:left;}
+ .schedule-table tbody tr[data-tt-row]>td:first-child{grid-column:1;grid-row:1;align-self:center;}
+ .schedule-table tbody tr[data-tt-row]>td:nth-child(2){grid-column:2/-1;grid-row:1;}
+ #app .schedule-table .list-title-edit{height:44px;min-width:0;width:100%;}
+ .schedule-table tbody tr[data-tt-row]>.tt-project{grid-column:2;grid-row:2;}
+ .schedule-table tbody tr[data-tt-row]>.task-period-cell{grid-column:3;grid-row:2;}
+ .schedule-table tbody tr[data-tt-row]:not(:has(.tt-project))>.task-period-cell{grid-column:2/-1;}
+ .schedule-table tbody tr[data-tt-row]>.task-late-cell{grid-column:2/-1;font-size:12px;color:var(--muted);}
+ #app .schedule-table .cell-edit{width:100%;min-height:32px;text-align:left;white-space:normal;overflow-wrap:anywhere;}
+ .schedule-table tbody tr[data-tt-row]>td:last-child{grid-column:1/-1;}
+ .schedule-table .tt-row-actions{justify-content:flex-end;}
+ #app .schedule-table .tt-row-actions .icon-button{width:44px;height:44px;min-height:44px;}
+ .schedule-table .row-hover{opacity:1;pointer-events:auto;}
+ .schedule-table .order-handle:disabled{opacity:0;pointer-events:none;}
+ .schedule-table .schedule-check{justify-content:center;min-height:44px;}
+ .schedule-table .order-handle{left:-12px;width:20px!important;}
+ #app .schedule-table .task-entry-row,#app .schedule-table .task-entry-row>td{display:block;width:100%;height:auto;box-sizing:border-box;}
+ #app .schedule-table .task-composer{display:flex;flex-direction:column;gap:8px;padding:8px;}
+ #app .schedule-table .task-composer>:is(.batch-title,.batch-project,.batch-actions){width:100%;padding:0;border:0;box-sizing:border-box;}
+ #app .schedule-table .task-composer .batch-title textarea{min-height:44px;font-size:16px;}
+ #app .schedule-table .task-composer .batch-due{display:none;}
+ #app .schedule-table .task-composer .batch-actions{justify-content:flex-end;}
+ .task-entry-row .form-error{white-space:normal;}
+ .schedule-table .tt-empty{display:block;width:100%;box-sizing:border-box;}
+ #app .execution-section>summary{min-height:44px;}
+ #app .project-workspace-toolbar{gap:4px;}
+ #detail.flow-drawer .property-row{grid-template-columns:72px minmax(0,1fr);}
+ #detail.flow-drawer :is(.inline-value,.relation-value){overflow-wrap:anywhere;white-space:normal;}
+ #detail.flow-drawer .detail-footer{padding-bottom:max(16px,env(safe-area-inset-bottom));}
+ .project-list-menu,.cell-project-picker{max-width:calc(100vw - 24px);box-sizing:border-box;}
+}

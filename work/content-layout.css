@@ -7,10 +7,10 @@
 .new-workspace>.workspace-content:has(.tt-screen){padding-top:16px;padding-bottom:24px}
 .new-workspace>.workspace-content:has(.connected-calendar){padding-top:0}
 @media(max-width:720px){
- #app{--work-content-inset:16px}
+ #app{--work-content-inset:12px}
  .new-workspace>.workspace-content{padding:16px var(--work-content-inset) 24px}
 }
 @media(max-width:440px){
- #app{--work-content-inset:16px}
+ #app{--work-content-inset:12px}
  .new-workspace>.workspace-content{padding:16px var(--work-content-inset) 24px}
 }
