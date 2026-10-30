@@ -12,21 +12,21 @@ document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>{frame.style.
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=async()=>{const p=b.dataset.page,d=frame.contentDocument;
  if(p==='project-scope'){click('[data-task-project]:not([data-task-project=""])');return;}
  if(p==='project-menu'){click('[aria-label="프로젝트 탭 편집"]');return;}
- if(p==='menu'){click('.tt-toolbar [aria-label="오늘 할 일 상태"]');return;}
- if(p==='add'){click('[data-focus=add]');return;}
+ if(p==='menu'){click('[data-list-menu="status"][data-list-key="today"]');return;}
+ if(p==='add'){click('[data-batch-edge]');return;}
  click('#detail[open] [data-action=close-detail]');
  const tab=['task','timeline'].includes(p)?'tasks':['project-detail','work'].includes(p)?'projects':p;
  click(`[data-action=navigate][data-value="${tab}"]`);await tick();
  if(p==='timeline')click('[data-focus=view][data-value=timeline], [data-action=view][data-value=timeline]');
  if(p==='tasks'||p==='task')click('[data-focus=view][data-value=list], [data-action=view][data-value=list]');
- if(p==='project-detail')click('.pl-project-table [data-action=detail][data-type=project]');
- if(p==='work')click('.pl-project-table [data-action=detail][data-type=work]');
+ if(p==='project-detail')click('[data-task-project]:not([data-task-project=""])');
+ if(p==='work'){click('[data-action=project-page-tab][data-value=wbs]');await tick();click('[data-action=detail][data-type=work]');}
  if(p==='task')click('.tt-table .row-detail');
 });
 function measure(){const d=frame.contentDocument,w=frame.contentWindow;if(!d?.querySelector('#app'))return;
  const style=e=>w.getComputedStyle(e),rect=e=>{const r=e.getBoundingClientRect();return {w:Math.round(r.width),h:Math.round(r.height)}};
  const visible=e=>e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0;
- const labels=[...d.querySelectorAll('th .tt-column>span,th .pl-column>span')].filter(visible).map(e=>{const a=e.getBoundingClientRect(),b=e.closest('th').getBoundingClientRect();return Math.round(Math.abs(a.x+a.width/2-b.x-b.width/2)*10)/10;});
+ const labels=[...d.querySelectorAll('th .tt-column>span,th .pl-column>span')].filter(visible).map(e=>{const a=e.getBoundingClientRect(),th=e.closest('th'),b=th.getBoundingClientRect();return Math.round(Math.abs(th.classList.contains('text-column')?a.x-b.x-8:a.x+a.width/2-b.x-b.width/2)*10)/10;});
  document.querySelector('#metrics').textContent=JSON.stringify({width:w.innerWidth,overflow:d.documentElement.scrollWidth>w.innerWidth,headerMaxOffset:Math.max(0,...labels),tabs:[...d.querySelectorAll('.flow-nav-link')].map(e=>rect(e)),icons:[...d.querySelectorAll('.row-detail .icon,.row-delete .icon')].filter(visible).slice(0,4).map(e=>rect(e)),cells:[...d.querySelectorAll('table td')].filter(visible).slice(0,3).map(e=>({padding:style(e).paddingLeft,weight:style(e).fontWeight,height:rect(e).h})),nativeSelects:[...d.querySelectorAll('select')].filter(e=>visible(e)&&!e.hidden).length,dialog:[...d.querySelectorAll('dialog[open]')].map(e=>({...rect(e),within:e.getBoundingClientRect().right<=w.innerWidth&&e.getBoundingClientRect().left>=0})),errors:[...d.querySelectorAll('[role=alert]')].map(e=>e.textContent).filter(Boolean)});
 }setInterval(measure,300);
 </script></html>

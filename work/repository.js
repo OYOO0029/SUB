@@ -1,8 +1,9 @@
+import {validatePeriod} from './schedule-rules.js?v=20261030-explicit-schedule-1';
 import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
-import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261028-data-safety-1';
-import {BASE_STATUSES,LEGACY_STATUS} from './detail-fields.js?v=20261026-controls-1';
+import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261030-explicit-schedule-1';
+import {BASE_STATUSES,LEGACY_STATUS} from './detail-fields.js?v=20261030-explicit-schedule-1';
 export const workAccount=createWorkAccount({storage:appStorage,validate});
 export function loadState(){return {state:emptyWorkState(),warning:''};}
 export let lastSaveError='';
@@ -20,7 +21,9 @@ export function validate(data){
   for(const e of [...data.tasks,...data.works,...data.projects])if(e.people!==undefined&&typeof e.people!=='string'&&(!strings(e.people)||e.people.some(p=>!p.trim()||p.length>160)))throw new Error('관련 인원 형식이 올바르지 않습니다.');
   if(data.dailyOrder!==undefined&&(data.dailyOrder===null||Array.isArray(data.dailyOrder)||typeof data.dailyOrder!=='object'||Object.entries(data.dailyOrder).some(([day,ids])=>!day||!date(day)||!Array.isArray(ids)||!ids.every(id)||new Set(ids).size!==ids.length)))throw new Error('일별 정렬 정보가 올바르지 않습니다.');
   if(![data.tasks,data.works,data.projects,data.personal].every(unique))throw new Error('항목 ID 또는 제목을 확인해 주세요.');
-  for(const t of data.tasks){if(t.projectId&&(!id(t.projectId)||!data.projects.some(p=>p.id===t.projectId)))throw new Error('할 일 프로젝트 연결을 확인해 주세요.');if(![...builtins.map(([id])=>id),...custom.map(s=>s.id)].includes(t.status)||![t.plans,t.blocks,t.checks,t.tags].every(Array.isArray)||typeof t.notes!=='string'||!date(t.due)||!date(t.remindFrom)||!date(t.remindUntil??null)||t.remindUntil&&(!t.remindFrom||t.remindUntil<t.remindFrom)||t.workId&&!data.works.some(w=>w.id===t.workId))throw new Error('할 일 데이터의 형식이나 연결이 올바르지 않습니다.');
+  if(data.todayOrder!==undefined&&(!Array.isArray(data.todayOrder)||!data.todayOrder.every(id)||new Set(data.todayOrder).size!==data.todayOrder.length))throw Error('오늘 정렬을 확인해 주세요.');
+  for(const e of [...data.tasks,...data.works])if(Object.hasOwn(e,'workPeriod'))validatePeriod(e.workPeriod);
+  for(const t of data.tasks){if(t.todaySelected!==undefined&&typeof t.todaySelected!=='boolean')throw Error('오늘 선택값을 확인해 주세요.');if(t.projectId&&(!id(t.projectId)||!data.projects.some(p=>p.id===t.projectId)))throw new Error('할 일 프로젝트 연결을 확인해 주세요.');if(![...builtins.map(([id])=>id),...custom.map(s=>s.id)].includes(t.status)||![t.plans,t.blocks,t.checks,t.tags].every(Array.isArray)||typeof t.notes!=='string'||!date(t.due)||!date(t.remindFrom)||!date(t.remindUntil??null)||t.remindUntil&&(!t.remindFrom||t.remindUntil<t.remindFrom)||t.workId&&!data.works.some(w=>w.id===t.workId))throw new Error('할 일 데이터의 형식이나 연결이 올바르지 않습니다.');
     if(t.startDate!==undefined&&!date(t.startDate))throw new Error('작업 시작일을 확인해 주세요.');
     if(t.memoParts!==undefined&&(!Array.isArray(t.memoParts)||t.memoParts.some(p=>!validMemoPart(p))))throw new Error('업무 메모 형식을 확인해 주세요.');
     if(t.excludedDates!==undefined&&(!Array.isArray(t.excludedDates)||t.excludedDates.some(d=>!d||!date(d))))throw new Error('제외 날짜 형식이 올바르지 않습니다.');

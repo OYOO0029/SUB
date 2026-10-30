@@ -46,7 +46,7 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
   let view;
   try{
     const data=emptyWorkState(),date=today(),task=createItem(data,'task','오늘 수정할 업무',{date});
-    task.due=date;task.dueTime='16:00';task.checks.push({id:'check',title:'상세에서만 확인',done:false});
+    task.todaySelected=true;task.due=date;task.dueTime='16:00';task.checks.push({id:'check',title:'상세에서만 확인',done:false});
     const p=createItem(data,'project','프로젝트'),w=createItem(data,'work','업무 묶음',{projectId:p.id});task.workId=w.id;
     const second=createItem(data,'task','마감만 오늘인 일',{date:null});second.due=date;
     const originalDue=task.due,originalWork=task.workId;
@@ -57,9 +57,9 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     view=createFocusView({getData:()=>data,getScope:()=>owner,ui,esc,icon:()=>'',flow:{row:t=>esc(t.title)},passes:()=>true,render,persist(){saves++;render()},notify(){},storage:dom.window.localStorage});
     const click=s=>{const e=document.querySelector(s);assert(e,'Missing '+s);e.click()};
     const submit=s=>document.querySelector(s).dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
-    render();assert.equal(document.querySelectorAll('.tt-table tbody tr').length,2);
+    render();assert.equal(document.querySelectorAll('.tt-table [data-tt-row]').length,2);
     assert.equal(document.querySelector('.tt-project').textContent,'프로젝트');
-    assert.equal(document.querySelector('.tt-due').textContent,'오늘');
+    assert(document.querySelector('[data-tt=edit-period]'));
     assert(!document.querySelector('.tt-table tbody tr').textContent.includes('상세에서만 확인'));
     assert.equal(document.querySelector('.focus-ring'),null);
     click(`[data-tt="focus"][data-id="${task.id}"]`);click('[data-tt="start"]');
@@ -82,7 +82,7 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     assert.equal(task.due,originalDue);assert.equal(task.workId,originalWork);assert.equal(task.checks.length,1);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     let addRequested=false;window.addEventListener('work-add-tasks',()=>addRequested=true);
-    click('[data-focus="add"]');assert(addRequested);assert.equal(data.tasks.length,2);
+    assert(!document.querySelector('[data-focus="add"]'));assert.equal(data.tasks.length,2);
     assert.equal(dom.window.localStorage.getItem('my-work-focus-timer-v1:qa-account'),savedTimer);
     assert.equal(taskContext(data,task).project.id,p.id);
     click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');
@@ -96,9 +96,9 @@ test('focus UI connects existing tasks, keeps timer and drafts, and saves only e
     const project=document.querySelector('[data-focus-new-project]');project.value=p.id;project.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
     click('[data-minute="890"]');click('[data-minute="850"]');submit('[data-focus-plan-form]');
     assert.equal(data.tasks.length,3);const created=data.tasks.at(-1);assert.equal(created.title,'새 배치 업무');assert.equal(created.projectId,p.id);
-    assert.equal(created.blocks[0].start,'14:10');assert.equal(created.blocks[0].end,'15:00');assert.equal(created.plans[0].start,date);assert.equal(saves,2);
+    assert.equal(created.blocks[0].start,'14:10');assert.equal(created.blocks[0].end,'15:00');assert.equal(created.plans.length,0);assert.equal(saves,2);
     click(`[data-focus="plan"][data-id="${task.id}"]`);click('[data-focus="choose-task"]');click(`[data-focus="pick-task"][data-id="${second.id}"]`);
-    click('[data-minute="900"]');submit('[data-focus-plan-form]');assert.equal(data.tasks.length,3);assert.equal(second.due,date);assert.equal(second.blocks[0].start,'15:00');assert.equal(second.plans[0].start,date);
+    click('[data-minute="900"]');submit('[data-focus-plan-form]');assert.equal(data.tasks.length,3);assert.equal(second.due,date);assert.equal(second.blocks[0].start,'15:00');assert.equal(second.plans.length,0);
     owner='other-account';view.resetPanels();render();assert.equal(document.querySelector('.tt-panel'),null);assert.equal(document.querySelector('.tt-mini'),null);assert.equal(document.querySelector('.focus-ring'),null);
   }finally{view?.destroy();dom.window.close();for(const key of keys){const d=originals.get(key);if(d)Object.defineProperty(globalThis,key,d);else delete globalThis[key];}}
 });

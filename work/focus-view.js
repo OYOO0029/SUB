@@ -1,8 +1,9 @@
-import {createTodayTable} from './today-table.js?v=20261028-compact-toolbar-1';
-import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261028-domain-rules-1';
-import {executionSections,unfinished} from './workflow.js?v=20261028-domain-rules-1';
-import {orderedTasks,deadlineConflict} from './work-view.js?v=20261028-domain-rules-1';
-import {createItem,conflicts} from './editing.js?v=20261028-domain-rules-1';
+import {executionBuckets} from './schedule-rules.js?v=20261030-explicit-schedule-1';
+import {createTodayTable} from './today-table.js?v=20261030-explicit-schedule-1';
+import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261030-explicit-schedule-1';
+import {executionSections,unfinished} from './workflow.js?v=20261030-explicit-schedule-1';
+import {orderedTasks,deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
+import {createItem,conflicts} from './editing.js?v=20261030-explicit-schedule-1';
 import {createFocusTimer} from './focus-timer.js?v=20261026-controls-1';
 import {DAY_START,DAY_END,minute,time,koreaClock,timelineRows} from './focus-timeline.js?v=20261026-controls-1';
 
@@ -12,7 +13,7 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   window.addEventListener('task-project-context',()=>{picker=null;});
   let picker=null,addOpen=false,addDraft='',timerEditing=false,timerDraft='60',lastView='',lastDay=today();
   const find=id=>getData().tasks.find(t=>t.id===id&&!t.deletedAt);
-  const eligible=()=>executionSections(getData(),ui.date).planned.filter(unfinished).filter(table.matchesProject);
+  const eligible=()=>executionBuckets(getData(),ui.date).today.filter(unfinished).filter(table.matchesProject);
   const currentClock=()=>ui.date<today()?1440:ui.date>today()?-1:koreaClock();
   const phase=(start,end)=>end<=currentClock()?'past':start<=currentClock()&&currentClock()<end?'now':'future';
   const action=(label,name,attrs='',cls='focus-button')=>`<button type="button" class="${cls}" data-focus="${name}" ${attrs}>${label}</button>`;
@@ -57,7 +58,7 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
     if(ui.view==='list')return table.screen(addOpen?`<form data-focus-add class="focus-add"><input name="title" value="${esc(addDraft)}" placeholder="새로운 할 일" maxlength="160" required aria-label="새로운 할 일"><button type="submit" class="small-button">추가</button>${action('취소','cancel-add')}<p class="form-error" role="alert"></p></form>`:'');
     const viewKey=`${ui.tab}/${ui.view}/${ui.date}`;
     if(lastView&&lastView!==viewKey)picker=null;lastView=viewKey;
-    const s=executionSections(getData(),ui.date,true),planned=orderedTasks(getData(),table.filterTasks(s.planned).filter(t=>unfinished(t)&&passes(t)),ui.date),done=table.filterTasks(s.planned).filter(t=>t.status==='done'&&passes({...t,status:ui.status==='active'?'todo':t.status}));
+    const buckets=executionBuckets(getData(),ui.date),s={planned:buckets.today,overdue:buckets.overdue,upcoming:buckets.remaining},planned=orderedTasks(getData(),table.filterTasks(s.planned).filter(t=>unfinished(t)&&passes(t)),ui.date),done=table.filterTasks(s.planned).filter(t=>t.status==='done'&&passes({...t,status:ui.status==='active'?'todo':t.status}));
     const fold=(label,key,tasks)=>tasks.length?`<details class="focus-fold" data-fold="${key}"><summary>${label} ${tasks.length}개</summary>${tasks.map(t=>flow.row(t,{carry:true})).join('')}</details>`:'';
     return `<section class="focus-screen tt-screen"><div class="focus-layout"><section class="focus-work" aria-label="오늘 할 일">${table.toolbar(true)}${table.toolbarMenu()}${addOpen?`<form data-focus-add class="focus-add"><input name="title" value="${esc(addDraft)}" placeholder="새로운 할 일" maxlength="160" required aria-label="새로운 할 일"><button type="submit" class="small-button">추가</button>${action('취소','cancel-add')}<p class="form-error" role="alert"></p></form>`:''}${picker?pickerView():ui.view==='timeline'?timeline(planned):planned.map(row).join('')||(done.length?'':ui.project||ui.work||ui.status!=='active'?'<p class="focus-empty">조건에 맞는 할 일이 없습니다. <button type="button" class="text-button" data-action="clear-filters">필터 초기화</button></p>':'<p class="focus-empty">오늘 할 일이 없습니다. +로 추가하세요.</p>')}${picker?'':table.remainingView({...s,overdue:s.overdue.filter(passes),upcoming:s.upcoming.filter(passes)})+(done.length?`<details class="focus-fold" data-fold="focus-done"><summary>완료한 일 ${done.length}개</summary>${done.map(row).join('')}</details>`:'')}</section></div>${table.panelView()}${table.miniView()}</section>`;
   }
@@ -94,7 +95,7 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
     try{
       if(form.matches('[data-focus-add]')){const task=createItem(getData(),'task',new FormData(form).get('title'),{date:ui.date});addDraft='';addOpen=false;if(picker)picker.taskId=task.id;persist('오늘 할 일에 추가했습니다.');}
       else if(form.matches('[data-focus-timer-form]')){timer.change('minutes',Number(new FormData(form).get('minutes')));timerEditing=false;render();}
-      else if(picker){if(picker.choosing)throw new Error('할 일을 선택하거나 추가해 주세요.');const state=getData(),existing=find(picker.taskId);if(!existing&&!picker.newTitle)throw new Error('할 일을 선택하거나 추가해 주세요.');if(existing&&!unfinished(existing))throw new Error('진행 중인 할 일을 선택해 주세요.');const draft=existing?structuredClone(existing):createItem({...state,tasks:[]},'task',picker.newTitle,{projectId:picker.projectId||null});setTime(draft,picker.date,time(picker.start),time(picker.end));if(existing)Object.assign(existing,draft);else state.tasks.push(draft);picker=null;persist('시간을 배치했습니다.');}
+      else if(picker){if(picker.choosing)throw new Error('할 일을 선택하거나 추가해 주세요.');const state=getData(),existing=find(picker.taskId);if(!existing&&!picker.newTitle)throw new Error('할 일을 선택하거나 추가해 주세요.');if(existing&&!unfinished(existing))throw new Error('진행 중인 할 일을 선택해 주세요.');const draft=existing?structuredClone(existing):createItem({...state,tasks:[]},'task',picker.newTitle,{projectId:picker.projectId||null});if(!existing)draft.todaySelected=true;setTime(draft,picker.date,time(picker.start),time(picker.end));if(existing)Object.assign(existing,draft);else state.tasks.push(draft);picker=null;persist('시간을 배치했습니다.');}
     }catch(error){form.querySelector('.form-error').textContent=error.message;}
   });
   document.addEventListener('keydown',event=>{
@@ -106,5 +107,5 @@ export function createFocusView({getData,getScope,ui,esc,icon,flow,passes,render
   const interval=setInterval(updateTimer,1000);
   window.addEventListener('storage',event=>{if(event.key?.startsWith('my-work-focus-timer-v1:')){timer.reload();updateTimer();}});
   function rollover(){const next=today();if(next!==lastDay){if(ui.tab==='tasks'&&ui.date===lastDay)ui.date=next;lastDay=next;}}
-  return {viewTabs:table.viewTabs,addContext:()=>({...table.addContext(),...(ui.view==='timeline'?{date:ui.date}:{})}),screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
+  return {selectProject:table.selectProject,projectTabs:table.projectTabs,selectedProject:()=>table.addContext().projectId,viewTabs:table.viewTabs,addContext:()=>({...table.addContext(),...(ui.view==='timeline'?{date:ui.date}:{})}),screen,overlays:()=>ui.tab!=='tasks'?table.panelView()+table.miniView():'',updateTimer,resetPanels,rollover,busy:()=>table.busy()||!!picker||addOpen||timerEditing,destroy:()=>clearInterval(interval)};
 }

@@ -1,4 +1,4 @@
-import {taskDay,isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261028-domain-rules-1';
+import {taskDay,isPlanned,isVisible,isDuePast,planToday,taskContext} from './model.js?v=20261030-explicit-schedule-1';
 
 export function automaticOrder(tasks,date){
   const start=t=>t.blocks.filter(b=>b.date===date).map(b=>b.start).sort()[0];

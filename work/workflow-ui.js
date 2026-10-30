@@ -1,9 +1,9 @@
-import {taskRowActions} from './ui-components.js?v=20261028-task-flow-1';
-import {statusFilter} from './status-filter.js?v=20261028-task-flow-1';
-import {today,taskStart,isPlanned,taskContext,isDuePast} from './model.js?v=20261028-domain-rules-1';
+import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
+import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
+import {today,taskStart,isPlanned,taskContext,isDuePast} from './model.js?v=20261030-explicit-schedule-1';
 import {projectState,PROJECT_STATES} from './project-view.js';
-import {projectTasks,projectSummary,executionSections,unfinished} from './workflow.js?v=20261028-domain-rules-1';
-import {orderedTasks,automaticOrder} from './work-view.js?v=20261028-domain-rules-1';
+import {projectTasks,projectSummary,executionSections,unfinished} from './workflow.js?v=20261030-explicit-schedule-1';
+import {orderedTasks,automaticOrder} from './work-view.js?v=20261030-explicit-schedule-1';
 export function createWorkflowUI({getData,ui,esc,icon,button,passes,projectInfo=null}){
  const dateText=d=>d?d.replaceAll('-','.') : '';
  const add=(projectId='',workId='')=>`<form class="flow-add" data-flow-add data-project-id="${esc(projectId)}" data-work-id="${esc(workId)}"><input name="title" aria-label="${workId?'업무 묶음':projectId?'프로젝트':'오늘'}에 새 할 일" placeholder="+ 할 일 추가" maxlength="160" required autocomplete="off"><button type="submit" class="small-button">추가</button><p class="form-error" role="alert"></p></form>`;

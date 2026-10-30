@@ -79,7 +79,7 @@ html {scrollbar-gutter: stable;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th {position: sticky; top: 0; z-index: 3; background: var(--panel); box-shadow: 0 1px 0 var(--line);}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th:not(:last-child),
 #app .tt-table td:not(:last-child):not([colspan]),
-#app .pl-table:not(.pl-project-table) td:not(:last-child):not([colspan]) {border-right: 1px solid var(--line);}
+#app .pl-table:not(.pl-project-table) td:not(:last-child):not([colspan]) {border-right: 0;}
 .task-reminder {display: flex; align-items: center; gap: 8px; min-height: 32px;}
 .task-reminder input {width: 16px; height: 16px; accent-color: var(--accent); margin: 0;}
 #detail .detail-extra>summary {font-size: 12px; color: var(--muted); padding: 8px 0;}
@@ -176,7 +176,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .cell-project-options button:hover,.cell-project-options button[aria-pressed=true] {background: var(--ux-menu-selected); color: #a6d8dc;}
 .cell-project-error {font-size: 12px; color: #efb4ae; margin: 0;}
 :is(#app,#detail) :is(.tt-table,.pl-table) :is(th,td) {height: var(--ux-row); box-sizing: border-box; padding: 0 var(--ux-cell-inset); font-weight: 400; color: var(--ux-list-text);}
-:is(#app,#detail) :is(.tt-table,.pl-table) :is(.pl-name,.list-title-edit,.cell-edit,.tt-title,.tt-project,.tt-due,.pl-column,.tt-column,.pl-status-badge,small) {font-weight: 400; color: #fff;}
+:is(#app,#detail) :is(.tt-table,.pl-table) :is(.pl-name,.list-title-edit,.cell-edit,.tt-title,.tt-project,.tt-due,.pl-column,.tt-column,.pl-status-badge,small) {font-weight: 400; color: var(--muted);}
 :is(#app,#detail) :is(.tt-table,.pl-table) :is(.pl-task-title,.pl-work-title) {font-weight: 400; color: #fff;}
 :is(#app,#detail) .pl-table td.pl-add-cell {padding: 0 8px;}
 :is(#app,#detail) :is(.tt-table,.pl-table) th:has(.tt-column,.pl-column) {padding-inline: 8px;}
@@ -230,7 +230,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .task-entry-row .batch-actions {grid-column:var(--entry-end); grid-row:1; display:flex; align-items:center; justify-content:flex-end; padding:0 8px;}
 .task-entry-row .task-composer {margin:0; border:0; border-radius:0; padding:0; background:transparent; display:grid; grid-template-columns:44px 144px minmax(160px,1fr) 110px 64px; gap:0; align-items:stretch; --entry-title:3; --entry-due:4; --entry-end:5;}
 .task-entry-row textarea {margin:0; min-width:0; min-height:40px; height:40px; field-sizing:content; max-height:140px; padding:8px 0; resize:none; border:0; background:transparent; color:#fff; font-size:13px; font-weight:400;}
-:is(#app,#detail) .list-title-edit {font-weight: 400;}
+:is(#app,#detail) .list-title-edit {font-size:14px; font-weight:500; color:#fff;}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus {width: var(--ux-control); height: var(--ux-control); padding: 0; display: inline-flex; align-items: center; justify-content: center; position: relative; border: 0; background: transparent;}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus::before {content: ''; position: absolute; width: var(--ux-check); height: var(--ux-check); box-sizing: border-box; border: 1px solid var(--line); border-radius: 3px; left: 50%; top: 50%; transform: translate(-50%,-50%);}
 :is(#app,#detail) :is(.tt-table,.pl-table) .tt-focus>.icon {width: 10px; height: 10px; position: relative; border: 0; padding: 0;}
@@ -244,7 +244,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .tt-menu {background: var(--ux-menu-bg); border-radius: var(--ux-surface-radius); padding: 6px; border: 1px solid var(--ux-menu-line); box-shadow: 0 8px 24px #0005;}
 .tt-menu>.tt-button {min-height: 32px; padding: 6px 8px; font-weight: 400; color: var(--ux-list-text); text-align: left;}
 #detail .surface-menu .icon {width: var(--ux-chevron); height: var(--ux-chevron);}
-.task-entry-row .batch-project {grid-column:2; grid-row:1; padding:4px 8px; min-width:0; border-right:1px solid var(--line);}
+.task-entry-row .batch-project {grid-column:var(--entry-project,3); grid-row:1; padding:4px 8px; min-width:0; border-right:0;}
 .task-entry-row .batch-title {grid-column:var(--entry-title); grid-row:1; display:flex; align-items:center; min-width:0; padding:0 8px; border-right:1px solid var(--line);}
 .task-entry-row .batch-title textarea {flex:1;}
 .task-entry-row .batch-actions>button {flex:none;}
@@ -293,7 +293,7 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 #detail.minimal-task {width: calc(100vw - 24px); inset: 12px; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px);}
 }
 @media (pointer:coarse) {
-:root {--ux-control: 44px;}
+:root {--ux-control: 44px;--task-check-width:88px;--task-actions-width:200px;}
 #app :is(.flow-nav-link,.tt-focus,.tt-status>.tt-button,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button) {min-height: 44px;}
 #app :is(.tt-focus,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button) {width: 44px;}
 .tt-table .tt-c-focus {width: 80px;}
@@ -305,3 +305,38 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .tt-task-cell .tt-task-menu>[data-menu-toggle] {opacity: 1;}
 .row-delete {opacity: 1;}
 }
+
+/* Shared flat task and WBS surfaces. */
+:is(#app,#detail) .schedule-table :is(th,td){border-inline:0; border-bottom:1px solid #ffffff0c; padding-inline:8px; height:42px;}
+:is(#app,#detail) .schedule-table th{font-size:12px;font-weight:500;}
+#app .schedule-table .text-column{text-align:left;}
+#app .schedule-table .text-column .tt-column{margin-inline:0;justify-content:flex-start;}
+#app .schedule-table td{font-size:13px;font-weight:400;color:var(--muted);}
+#app .schedule-table .list-title-edit{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;}
+#app .schedule-table .cell-edit{font-size:13px;font-weight:400;color:var(--muted);}
+#app .schedule-table .tt-column.is-applied>.icon{opacity:1;color:var(--accent);}
+.schedule-table{min-width:880px;}
+#app .schedule-table:not(:has(.tt-project)){min-width:740px;}
+#app .schedule-table th:is(:hover,:focus-within) .tt-column>.icon{opacity:1;}
+#app .schedule-table .tt-column{font-size:12px;font-weight:500;}
+.schedule-check{display:flex;align-items:center;justify-content:flex-end;gap:0;}
+.schedule-check input{width:18px;height:18px;flex:none;margin:0;}
+.row-hover{opacity:0;pointer-events:none;}
+tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:1;pointer-events:auto;}
+.order-handle{cursor:grab;touch-action:none;}
+.order-handle:disabled{opacity:0;pointer-events:none;}
+.project-workspace-toolbar,.project-view-tabs,.group-assign{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.project-workspace-toolbar .task-project-nav{flex:1;min-width:0;}
+.project-view-tabs [aria-pressed=true]{background:var(--panel);color:#fff;}
+.project-list-menu{position:fixed;z-index:500;display:flex;flex-direction:column;gap:8px;width:248px;max-width:calc(100vw - 24px);padding:6px;}
+.group-assign{flex-wrap:wrap;}
+.group-assign input{min-width:120px;width:160px;}
+.group-results{margin-top:24px;}
+.group-results details{border-bottom:1px solid var(--line);padding:12px 0;}
+.group-results label{display:grid;grid-template-columns:80px 1fr;gap:8px;margin:12px 0;}
+.group-results textarea{min-height:80px;}
+.wbs-project{background:var(--panel);}
+.tt-remaining>h2{font-size:13px;font-weight:500;margin:0 0 12px;}
+@media(hover:none){.row-hover{opacity:1;pointer-events:auto;}}
+
+.period-warning-tip{position:fixed;z-index:10000;max-width:280px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;box-shadow:0 8px 24px #0005;}

@@ -1,7 +1,8 @@
+import {validatePeriod} from './schedule-rules.js?v=20261030-explicit-schedule-1';
 import {assignTaskOwner} from './ownership.js?v=20261028-domain-rules-1';
-import {uid,planToday,today} from './model.js?v=20261028-domain-rules-1';
-import {validate} from './repository.js?v=20261028-domain-rules-1';
-import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
+import {uid,planToday,today} from './model.js?v=20261030-explicit-schedule-1';
+import {validate} from './repository.js?v=20261030-explicit-schedule-1';
+import {BASE_STAGES,LEGACY_STATUS,statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 
 export const collection=type=>({task:'tasks',work:'works',project:'projects'})[type];
 export const getItem=(data,type,id)=>data[collection(type)]?.find(x=>x.id===id);
@@ -22,14 +23,14 @@ export function conflicts(data,taskId,date,start,end){return data.tasks.filter(t
 export function createItem(data,type,title,{date=null,workId=null,projectId=null}={}){
   title=title.trim();if(!title||title.length>160)throw new Error('이름을 1~160자로 입력해 주세요.');
   const common={id:uid(),title,tags:[],people:[],notes:'',deletedAt:null};let item;
-  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'todo',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};assignTaskOwner(data,item,{workId,projectId});if(date)planToday(item,date);}
+  if(type==='task'){item={...common,workId,projectId:workId?null:projectId,status:'waiting',due:null,dueTime:'',remindFrom:null,plans:[],blocks:[],checks:[],completedAt:null};assignTaskOwner(data,item,{workId,projectId});if(date)planToday(item,date);}
   else if(type==='work')item={...common,projectId,stage:'',due:null};
   else item={...common,lifecycle:'active',subtitle:'',start:null,end:null,stage:'',stages:[...BASE_STAGES],budget:''};
   const draft=structuredClone(data);draft[collection(type)].push(item);validate(draft);data[collection(type)].push(item);return item;
 }
 
 export function updateItem(data,type,id,patch){
-  const allowed={task:['startDate','title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom','remindUntil'],work:['title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
+  const allowed={task:['todaySelected','workPeriod','startDate','title','notes','tags','people','workId','projectId','status','due','dueTime','remindFrom','remindUntil'],work:['workPeriod','title','notes','tags','people','projectId','stage','due'],project:['nextTaskId','lifecycle','title','notes','tags','people','budget','stage','stages','start','end']}[type];
   if(!allowed||Object.keys(patch).some(k=>!allowed.includes(k)))throw new Error('수정할 수 없는 속성입니다.');
   const draft=structuredClone(data),item=getItem(draft,type,id);if(!item||item.deletedAt)throw new Error('항목을 찾을 수 없습니다.');
   if(type==='task')assignTaskOwner(draft,item,patch);
@@ -40,6 +41,7 @@ export function updateItem(data,type,id,patch){
   if('people' in patch){if(typeof patch.people!=='string'&&(!Array.isArray(patch.people)||patch.people.some(p=>typeof p!=='string')))throw new Error('관련 인원을 확인해 주세요.');item.people=peopleValues(patch.people);}
   if(!item.title.trim()||item.title.length>160)throw new Error('이름을 1~160자로 입력해 주세요.');
   item.title=item.title.trim();
+  if('workPeriod' in patch){validatePeriod(item.workPeriod);if(type==='task'){item.startDate=item.workPeriod?.start||null;item.due=item.workPeriod?.end||null;}}
   if(type==='task'){
     if(('startDate' in patch||'due' in patch)&&item.startDate&&item.due&&item.startDate>item.due)throw Error('마감은 작업 시작일 이후로 설정하세요.');
     if(!item.due)item.dueTime='';
@@ -129,13 +131,13 @@ export function changeCheck(data,id,checkId,patch){
 }
 
 // Validate the entire batch before publishing any records.
-export function createTaskBatch(data,text,{projectId=null,workId=null,startDate=null,due=null}={}){
+export function createTaskBatch(data,text,{projectId=null,workId=null,startDate=null,due=null,todaySelected=false}={}){
  const titles=text.split(/\r?\n/).map(t=>t.trim()).filter(Boolean);
  if(!titles.length||titles.length>100)throw Error('할 일을 1~100개 입력하세요.');
  if(startDate&&due&&startDate>due)throw Error('마감은 작업 시작일 이후로 설정하세요.');
  const draft=structuredClone(data),items=titles.map(title=>{
   const item=createItem(draft,'task',title,{date:null,projectId,workId});
-  return updateItem(draft,'task',item.id,{startDate,due});
+  return updateItem(draft,'task',item.id,{startDate,due,todaySelected,workPeriod:startDate||due?{start:startDate||due,end:due||startDate}:null});
  });
  validate(draft);data.tasks.push(...items);return items;
 }

@@ -1,12 +1,15 @@
-import {taskRowActions} from './ui-components.js?v=20261028-task-flow-1';
-import {statusFilter} from './status-filter.js?v=20261028-task-flow-1';
-import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261028-domain-rules-1';
+import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-explicit-schedule-1';
+import {periodLabel} from './task-list.js?v=20261030-explicit-schedule-1';
+import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
+import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
+import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
+import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261030-explicit-schedule-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
-import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261028-domain-rules-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261028-domain-rules-1';
-import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261026-controls-1';
-import {deadlineConflict} from './work-view.js?v=20261028-domain-rules-1';
-import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261028-domain-rules-1';
+import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261030-explicit-schedule-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-explicit-schedule-1';
+import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
+import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
+import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 
 export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무',project:'프로젝트'};
@@ -48,7 +51,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function changeProjectState(id,value){
     if(!PROJECT_STATES.some(([v])=>v===value))return;
     const remaining=projectTasks(getData(),id).filter(unfinished);
-    if(value!=='active'&&remaining.length){pendingLifecycle={id,value};const label=PROJECT_STATES.find(([v])=>v===value)[1];popover('프로젝트 '+label,`<p>미완료 할 일이 ${remaining.length}개 있습니다. 할 일의 완료 상태와 마감일은 유지됩니다.</p><div class="lifecycle-actions">${button('프로젝트 상태만 변경','apply-project-state','data-remove="no"','small-button')}${remaining.some(t=>isPlanned(t,today()))?button('오늘 배치도 해제','apply-project-state','data-remove="yes"','small-button'):''}${button('취소','cancel-project-state','','quiet-link')}</div>`);}
+    if(value!=='active'&&remaining.length){pendingLifecycle={id,value};const label=PROJECT_STATES.find(([v])=>v===value)[1];popover('프로젝트 '+label,`<p>미완료 할 일이 ${remaining.length}개 있습니다. 할 일의 완료 상태와 마감일은 유지됩니다.</p><div class="lifecycle-actions">${button('프로젝트 상태만 변경','apply-project-state','data-remove="no"','small-button')}${remaining.some(t=>t.todaySelected)?button('오늘 배치도 해제','apply-project-state','data-remove="yes"','small-button'):''}${button('취소','cancel-project-state','','quiet-link')}</div>`);}
     else{updateItem(getData(),'project',id,{lifecycle:value});persist();}
   }
   function render(){
@@ -60,13 +63,13 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       const {work,project}=taskContext(data,e),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');
       const planned=p?`${p.start}${p.end!==p.start?' – '+p.end:''}`:'';
       const reminder=property('리마인드','calendar',`<div class="task-reminder"><input type="checkbox" data-task-reminder aria-label="리마인드 사용" ${e.remindFrom?'checked':''}>${e.remindFrom?valueButton(showDate(e.remindFrom)+' – '+(e.remindUntil?showDate(e.remindUntil):'종료일 없음'),'field-date','data-field="remindFrom" aria-label="리마인드 기간 변경"'):'<span class="empty-value">사용 안 함</span>'}</div>`);
-      props=property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+property('업무','briefcase',relation('workId',e.workId,'work'))+dateProperty('작업 시작','startDate',taskStart(e)||'')+dateProperty('마감','due',e.due?`${e.due}${e.dueTime?' '+e.dueTime:''}`:'')+reminder;
-      body=checks(e)+`<section class="task-memo-section"><h3>메모</h3>${textField('notes',e.notes,'메모',true)}</section>`;
-      extra=property('시간 배치','clock',valueButton(e.blocks.filter(b=>b.date===ui.date).map(b=>`${b.start} – ${b.end}`).join(' / '),'time',`data-id="${id}"`));
+      props=property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+property('상태','check',choiceSelect(e.status,statusOptions(data),'data-list-status="'+esc(e.id)+'"','할 일 상태'))+dateProperty('작업일자','workPeriod',periodLabel(taskPeriod(e)));
+      body='<section class="task-memo-section"><h3>메모</h3>'+textField('notes',e.notes,'메모',true)+'</section><details class="detail-extra"><summary>체크리스트</summary>'+checks(e)+'</details>';
+      extra=reminder+property('시간 배치','clock',valueButton(e.blocks.filter(b=>b.date===ui.date).map(b=>b.start+' – '+b.end).join(' / '),'time','data-id="'+id+'"'));
 
     }else if(type==='work'){
-      props=dateProperty('마감','due',e.due||'');
-      body=workTasks(e);
+      props=dateProperty('업무 기간','workPeriod',periodLabel(workPeriod(e)));
+      body='<details class="detail-extra"><summary>연결 할 일</summary>'+data.tasks.filter(t=>!t.deletedAt&&t.workId===e.id).map(t=>'<p>'+esc(t.title)+(outsideWork(t,e)?'<button class="icon-button" data-period-warning title="업무 기간을 벗어난 할 일입니다" aria-label="업무 기간을 벗어난 할 일입니다">'+icon('info')+'</button>':'')+'</p>').join('')+'</details>';
 
     }else{
       const works=data.works.filter(w=>w.projectId===id&&!w.deletedAt);
@@ -75,9 +78,9 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     }
     const shared=property('관련 인원','users',chipsField(e,'people'))+property('태그','tag',chipsField(e));
     if(type==='work'){
-      $('#detail').innerHTML=`<header class="detail-header wd-simple-header"><h2 id="detail-title"><input class="detail-title-input" data-inline-field="title" aria-label="업무 이름" value="${esc(e.title)}" maxlength="160"></h2>${button(icon('close'),'close-detail','aria-label="상세 닫기"','icon-button')}<p id="inline-error" role="alert"></p></header><div class="detail-body">${body}</div>`;window.dispatchEvent(new window.Event('work-detail-render'));return;
+      $('#detail').innerHTML=`<header class="detail-header wd-simple-header"><h2 id="detail-title"><input class="detail-title-input" data-inline-field="title" aria-label="업무 이름" value="${esc(e.title)}" maxlength="160"></h2>${button(icon('close'),'close-detail','aria-label="상세 닫기"','icon-button')}<p id="inline-error" role="alert"></p></header><div class="detail-body"><dl class="properties">${props}</dl>${body}</div>`;window.dispatchEvent(new window.Event('work-detail-render'));return;
     }
-    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>기타 정보</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!isPlanned(e,today())&&unfinished(e)?button(icon('calendar'),'do-today',`data-id="${id}" aria-label="오늘 하기" title="오늘 하기"`,'icon-button'):''}</footer>`;
+    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>기타 정보</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!e.todaySelected&&unfinished(e)?button(icon('calendar'),'do-today',`data-id="${id}" aria-label="오늘 하기" title="오늘 하기"`,'icon-button'):''}</footer>`;
 
   }
   function open(type,id){
@@ -123,12 +126,14 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   },true);
   const calendar=createDatePicker({dialog:$('#property-editor'),esc,icon,onFormat:format=>{dateFormat=format;try{localStorage.setItem('what-to-do:detail-date-format',format);}catch{}render();},onCommit:d=>{
     const data=getData();
-    if(d.field==='startDate')updateItem(data,'task',ui.detail.id,{startDate:d.start||null});
+    if(d.field==='workPeriod')updateItem(data,ui.detail.type,ui.detail.id,{workPeriod:d.start?{start:d.start,end:d.end||d.start}:null});
+    else if(d.field==='startDate')updateItem(data,'task',ui.detail.id,{startDate:d.start||null});
     else if(d.field==='plan')updatePlan(data,ui.detail.id,d.start,d.end);
     else updateItem(data,ui.detail.type,ui.detail.id,d.field==='remindFrom'?{remindFrom:d.start||null,remindUntil:d.start&&d.range?d.end||null:null}:d.field==='period'?{start:d.start||null,end:d.end||null}:{[d.field]:d.start||null,...(d.allowTime?{dueTime:d.includeTime?d.time:''}:{}),...(d.reminderChanged?{remindFrom:d.reminder}:{})});
     persist();
   }});
   function dateEditor(field,anchor){
+    if(field==='workPeriod'){closeRelation();const e=item(),p=ui.detail.type==='work'?workPeriod(e):taskPeriod(e);calendar.open({field,title:ui.detail.type==='work'?'업무 기간':'작업일자',start:p?.start||'',end:p?.end||'',allowRange:true,range:!!p?.start&&p.start!==p.end,anchor:anchor.getBoundingClientRect()});return;}
     closeRelation();const e=item(),p=e.plans&&(planFor(e,ui.date)||e.plans.find(p=>p.state==='active')),range=['plan','period','remindFrom'].includes(field),dueTask=field==='due'&&ui.detail.type==='task';
     calendar.open({field,title:{startDate:'작업 시작',plan:'작업 기간',period:'사업 기간',due:'마감',remindFrom:'리마인드 기간'}[field],start:field==='startDate'?taskStart(e):field==='plan'?p?.start:field==='period'?e.start:e[field],end:field==='remindFrom'?e.remindUntil:field==='plan'?p?.end:e.end,allowRange:range,range:field==='remindFrom'&&!!e.remindUntil,allowTime:dueTask,time:dueTask?e.dueTime:'',allowReminder:false,reminder:dueTask?e.remindFrom:null,format:dateFormat,anchor:anchor.getBoundingClientRect()});
   }
@@ -163,7 +168,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     const el=event.target.closest('[data-action]');if(!el||!actions.has(el.dataset.action))return;event.preventDefault();event.stopImmediatePropagation();const a=el.dataset.action,data=getData();
     try{
       if(a==='work-sort'||a==='work-status'||a==='work-clear'){if(a==='work-clear')Object.assign(workQuery,{search:'',status:'all'});else workQuery[a==='work-sort'?'sort':'status']=el.dataset.value;render();}
-      else if(a==='apply-project-state'){const draft=pendingLifecycle;if(!draft)return;updateItem(data,'project',draft.id,{lifecycle:draft.value});if(el.dataset.remove==='yes')projectTasks(data,draft.id).filter(unfinished).forEach(t=>{if(isPlanned(t,today()))removeFromDay(t,today());});pendingLifecycle=null;$('#property-editor').close();persist();}
+      else if(a==='apply-project-state'){const draft=pendingLifecycle;if(!draft)return;updateItem(data,'project',draft.id,{lifecycle:draft.value});if(el.dataset.remove==='yes')projectTasks(data,draft.id).filter(unfinished).forEach(t=>{selectToday(t,false);});pendingLifecycle=null;$('#property-editor').close();persist();}
       else if(a==='cancel-project-state'){pendingLifecycle=null;$('#property-editor').close();render();}
       else if(a==='chip-picker')chipPicker(el.dataset.field);
       else if(a==='choose-chip'){const field=el.dataset.field;updateItem(data,ui.detail.type,ui.detail.id,{[field]:[...new Set([...chipValues(item(),field),el.dataset.value])]});$('#property-editor').close();persist();focusChip(field);}

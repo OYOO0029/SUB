@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261028-domain-rules-1';
+import {today,addDays,addMonths} from './model.js?v=20261030-explicit-schedule-1';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
@@ -74,7 +74,7 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
     if(el.dataset.calendarDay){
       const day=el.dataset.calendarDay;
       if(d.range&&d.active==='start'){d.start=day;d.end=day;d.active='end';d.waiting=true;d.saved=false;d.error='';}
-      else if(d.range){d.end=day;if(d.end<d.start)[d.start,d.end]=[d.end,d.start];d.waiting=false;d.active='start';commit();}
+      else if(d.range){d.end=day;d.waiting=false;if(d.end<d.start){d.error='시작일은 종료일보다 늦을 수 없습니다.';d.saved=false;}else{d.active='start';commit();}}
       else{d.start=day;d.end=day;commit();}
       d.month=day.slice(0,7)+'-01';if(d.simple&&d.saved){dialog.close();return;}render(day);return;
     }

@@ -12,6 +12,7 @@ export function mergeWorkData(current,incoming,validate){
  }
  next.workStages=[...new Set([...(next.workStages||[]),...(source.workStages||[])])];next.dailyOrder??={};
  for(const [date,ids] of Object.entries(source.dailyOrder||{})){if(next.dailyOrder[date]&&!same(next.dailyOrder[date],ids))throw Error('같은 날짜의 수동 순서가 다릅니다. 기록을 확인해 주세요.');next.dailyOrder[date]=copy(ids);}
+ if(source.todayOrder){if(next.todayOrder&&!same(next.todayOrder,source.todayOrder))throw Error('오늘 목록의 수동 순서가 다릅니다. 기록을 확인해 주세요.');next.todayOrder=copy(source.todayOrder);}
  return validate(next);
 }
 export function createWorkAccount({storage,validate}){

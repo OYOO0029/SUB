@@ -8,7 +8,7 @@ export function icon(name,cls=''){return `<svg class="icon ${cls}" viewBox="0 0 
 export const button=(label,action,attrs='',cls='button')=>`<button class="${cls}" data-action="${action}" ${attrs} ${!attrs.includes('title=')&&attrs.match(/aria-label="([^"]+)"/) ? 'title="'+attrs.match(/aria-label="([^"]+)"/)[1]+'"' : ''}>${label}</button>`;
 export function taskRowActions(task){
  const id=escapeHTML(task.id),name=escapeHTML(task.title);
- return `<div class="tt-row-actions">${button(icon('trash'),'delete-task',`data-id="${id}" aria-label="${name} 삭제" title="삭제"`,'icon-button row-delete')}${button(icon('note'),'detail',`data-type="task" data-id="${id}" aria-label="${name} 상세 보기" title="상세 보기"`,'icon-button row-detail')}</div>`;
+ return `<div class="tt-row-actions">${button(icon('trash'),'delete-task',`data-id="${id}" aria-label="${name} 삭제" title="삭제"`,'icon-button row-delete')}${button(icon('more'),'detail',`data-type="task" data-id="${id}" aria-label="${name} 상세 보기" title="상세 보기"`,'icon-button row-detail')}</div>`;
 }
 
 export function choiceSelect(value,options,attribute,label){

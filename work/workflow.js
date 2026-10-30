@@ -1,4 +1,4 @@
-import {taskDay,addDays,isPlanned,isDuePast,isCarried,planToday,taskContext,uid} from './model.js?v=20261028-domain-rules-1';
+import {taskDay,addDays,isPlanned,isDuePast,isCarried,planToday,taskContext,uid} from './model.js?v=20261030-explicit-schedule-1';
 export const unfinished=t=>!t.deletedAt&&!['done','cancelled'].includes(t.status);
 export function projectTasks(data,id){return data.tasks.filter(t=>!t.deletedAt&&taskContext(data,t).project?.id===id);}
 export function projectSummary(data,p){

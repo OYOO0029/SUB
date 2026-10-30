@@ -17,7 +17,7 @@ test('only an explicit reminder alerts; listing and acknowledgment never move or
  const data=empty(),task=createItem(data,'task','직접 알림 설정',{date:day});
  assert.deepEqual(reminderTasks(data,day),[]);task.remindFrom=day;
  assert.ok(reminderTasks(data,day).includes(task));assert.ok(taskSections(data,day).planned.includes(task));
- task.reminderAcknowledgedOn=day;assert.deepEqual(reminderTasks(data,day),[]);assert.ok(taskSections(data,day).planned.includes(task));assert.equal(task.status,'todo');
+ task.reminderAcknowledgedOn=day;assert.deepEqual(reminderTasks(data,day),[]);assert.ok(taskSections(data,day).planned.includes(task));assert.equal(task.status,'waiting');
  assert.ok(reminderTasks(data,'2030-10-17').includes(task));
  task.remindFrom=null;assert.deepEqual(reminderTasks(data,'2030-10-17'),[]);assert.ok(taskSections(data,'2030-10-17').planned.includes(task));
 });

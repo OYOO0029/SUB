@@ -1,8 +1,8 @@
 import {createImageStore,configureWorkImages,workImages,hydrateWorkImages,migrateInlineImages} from './image-store.mjs';
 import {startCloud} from '../schedule-cloud-ui.mjs?v=20261028-data-safety-1';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
-import {workAccount,validate} from './repository.js?v=20261028-domain-rules-1';
-import {mergeWorkData} from './work-account.mjs?v=20261028-data-safety-1';
+import {workAccount,validate} from './repository.js?v=20261030-explicit-schedule-1';
+import {mergeWorkData} from './work-account.mjs?v=20261030-explicit-schedule-1';
 
 export function startWorkCloud({getData,replaceData,resetEditors,notify,download,save,hasUnsaved=()=>false,onStatus=()=>{}}){
  let importing=false,message='',cloud;
