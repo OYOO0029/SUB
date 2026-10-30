@@ -1,14 +1,15 @@
-import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261030-work-groups-2';
-import {taskList} from './task-list.js?v=20261030-work-groups-2';
+import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
+import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261030-compact-lists-3';
+import {taskList} from './task-list.js?v=20261030-compact-lists-3';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {createProjectTabs} from './project-tabs.js?v=20261030-explicit-schedule-1';
+import {createProjectTabs} from './project-tabs.js?v=20261030-compact-lists-3';
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261030-work-groups-2';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261030-compact-lists-3';
 import {taskContext,uid,today,taskStart} from './model.js?v=20261030-explicit-schedule-1';
 import {executionSections} from './workflow.js?v=20261030-explicit-schedule-1';
 import {orderedTasks} from './work-view.js?v=20261030-explicit-schedule-1';
@@ -27,14 +28,16 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
   if(field==='workPeriod'){const p=taskPeriod(t);duePicker.open({field,title:'작업일자',taskId:id,owner,start:p.start||'',end:p.end||'',allowRange:true,range:!!p.start&&p.start!==p.end,anchor:anchor.getBoundingClientRect()});return;}
   duePicker.open({field,title:field==='due'?'마감':'작업 시작',taskId:id,owner,start:(field==='due'?t.due:taskStart(t))||'',time:t.dueTime||'',allowTime:field==='due',format:dateFormat,deadlineFormat:field==='due',anchor:anchor.getBoundingClientRect()});
  }
+ document.addEventListener('pointerdown',e=>{if(projectDialog?.open&&!projectDialog.contains(e.target)&&!e.target.closest('[data-tt=edit-project]'))projectDialog.close();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&projectDialog?.open)projectDialog.close();});
  function editProject(t,anchor){
-  if(!projectDialog){projectDialog=document.createElement('dialog');projectDialog.className='cell-project-picker';projectDialog.setAttribute('aria-label','프로젝트 변경');document.body.append(projectDialog);projectDialog.addEventListener('click',e=>{if(e.target===projectDialog)projectDialog.close()});}
+  if(!projectDialog){projectDialog=document.createElement('dialog');projectDialog.className='cell-project-picker surface-menu';projectDialog.setAttribute('aria-label','프로젝트 변경');document.body.append(projectDialog);projectDialog.addEventListener('click',e=>{if(e.target===projectDialog)projectDialog.close()});}
   const owner=getScope(),id=t.id,current=context(t)?.id||'';
-  projectDialog.innerHTML=`<header><strong>프로젝트</strong><button type="button" data-project-close aria-label="닫기">${icon('close')}</button></header><input class="cell-project-search" type="search" placeholder="프로젝트 검색" aria-label="프로젝트 검색"><div class="cell-project-options">${[{id:'',title:'단발성 업무'},...getData().projects.filter(p=>!p.deletedAt)].map(p=>`<button type="button" data-cell-project="${esc(p.id)}" aria-pressed="${p.id===current}"><span>${esc(p.title)}</span><span>${p.id===current?'✓':''}</span></button>`).join('')}</div><p class="cell-project-error" role="alert"></p>`;
+  projectDialog.innerHTML=`<header><strong>프로젝트</strong><button type="button" data-project-close aria-label="닫기">${icon('close')}</button></header><input class="cell-project-search" type="search" placeholder="프로젝트 검색" aria-label="프로젝트 검색">${projectStateToggle}<div class="cell-project-options">${[{id:'',title:'단발성 업무'},...getData().projects.filter(p=>!p.deletedAt)].map(p=>`<button type="button" data-project-inactive="${!!p.id&&!activeProject(p)}" data-cell-project="${esc(p.id)}" aria-pressed="${p.id===current}"><span>${esc(p.title)}</span><span>${p.id===current?'✓':''}</span></button>`).join('')}</div><p class="cell-project-error" role="alert"></p>`;
   projectDialog.querySelector('[data-project-close]').onclick=()=>projectDialog.close();
-  projectDialog.querySelector('input').oninput=e=>{const q=e.target.value.toLowerCase();projectDialog.querySelectorAll('[data-cell-project]').forEach(b=>b.hidden=!b.textContent.toLowerCase().includes(q));};
+  projectDialog.querySelector('input').oninput=e=>{const q=e.target.value.toLowerCase();filterProjectOptions(projectDialog,q);};
   projectDialog.querySelectorAll('[data-cell-project]').forEach(b=>b.onclick=()=>{if(getScope()!==owner)return;try{const previous=taskContext(getData(),task(id)).work;updateItem(getData(),'task',id,{projectId:b.dataset.cellProject||null});const ok=save();projectDialog.close();repaint();if(ok!==false&&previous&&!task(id).workId)notify('프로젝트를 변경하고 기존 업무 연결을 해제했습니다.');}catch(err){projectDialog.querySelector('[role=alert]').textContent=err.message;}});
-  const r=anchor.getBoundingClientRect();projectDialog.style.left=Math.max(12,Math.min(r.left,innerWidth-292))+'px';projectDialog.style.top=Math.max(12,Math.min(r.bottom+6,innerHeight-360))+'px';projectDialog.showModal();projectDialog.querySelector('input').focus();
+  const r=anchor.getBoundingClientRect();projectDialog.style.left=Math.max(12,Math.min(r.left,innerWidth-292))+'px';projectDialog.style.top=Math.max(12,Math.min(r.bottom+6,innerHeight-360))+'px';projectDialog.show();filterProjectOptions(projectDialog);projectDialog.querySelector('[data-include-inactive]').onchange=()=>filterProjectOptions(projectDialog,projectDialog.querySelector('.cell-project-search').value);projectDialog.querySelector('.cell-project-search').focus();
  }
  window.addEventListener('task-batch-saved',e=>{if(e.detail.target==='main'){scope='today';status='all';filters.today=blank();}});
  const task=id=>getData().tasks.find(t=>t.id===id&&!t.deletedAt),checks=t=>(t.checks||[]).filter(c=>!c.deletedAt);

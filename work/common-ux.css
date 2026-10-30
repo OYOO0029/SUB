@@ -27,7 +27,7 @@ html {scrollbar-gutter: stable;}
 .flow-nav>.ux-view-tabs {margin-left:auto;}
 #app .ux-view-tabs>.ux-view-icon {width: var(--ux-control); min-width: var(--ux-control); height: var(--ux-control); padding: 0;}
 .ux-view-icon .icon {width: 16px; height: 16px; display: block; flex: none;}
-.tt-remaining {margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0;}
+.tt-remaining {margin-top:20px;padding-top:0;border-top:0;min-width:0;}
 .tt-remaining-toolbar h2 {display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; line-height: 20px; margin: 0 0 12px;}
 .tt-remaining-toolbar h2>span {font-size: 12px; font-weight: 400; color: var(--muted);}
 .tt-today:hover {background: var(--panel); color: var(--text);}
@@ -164,7 +164,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .cell-edit {display: block; width: 100%; min-height: 32px; border: 0; background: transparent; color: inherit; font: inherit; padding: 4px 0; text-align: center; cursor: pointer;}
 .cell-edit-project {text-align: left;}
 .cell-edit:hover {color: var(--text,#e4e8ef);}
-.cell-project-picker {position: fixed; margin: 0; width: 280px; max-width: calc(100vw - 24px); max-height: 340px; padding: 12px; border: 1px solid #3b434e; border-radius: 8px; background: var(--ux-menu-bg); color: #e4e8ef; box-shadow: 0 12px 32px #0005;}
+.cell-project-picker {position:fixed;inset:auto; margin:0; width: 280px; max-width: calc(100vw - 24px); max-height: 340px; padding: 12px; border: 1px solid #3b434e; border-radius: 8px; background: var(--ux-menu-bg); color: #e4e8ef; box-shadow: 0 12px 32px #0005;}
 .cell-project-picker::backdrop {background: transparent;}
 .cell-project-picker header {display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;}
 .cell-project-picker header button {width: 28px; height: 28px; background: none; color: inherit; border: 0;}
@@ -293,7 +293,7 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 #detail.minimal-task {width: calc(100vw - 24px); inset: 12px; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px);}
 }
 @media (pointer:coarse) {
-:root {--ux-control: 44px;--task-check-width:88px;--task-actions-width:200px;}
+:root {--ux-control: 44px;--task-check-width:64px;--task-actions-width:200px;}
 #app :is(.flow-nav-link,.tt-focus,.tt-status>.tt-button,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button) {min-height: 44px;}
 #app :is(.tt-focus,.tt-panel>header>.tt-button,.tt-section-title>.tt-button,.tt-sub>.tt-button,.tt-mini>.tt-button,.tt-timer-controls>.tt-button) {width: 44px;}
 .tt-table .tt-c-focus {width: 80px;}
@@ -319,14 +319,14 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 #app .schedule-table:not(:has(.tt-project)){min-width:740px;}
 #app .schedule-table th:is(:hover,:focus-within) .tt-column>.icon{opacity:1;}
 #app .schedule-table .tt-column{font-size:12px;font-weight:500;}
-.schedule-check{display:flex;align-items:center;justify-content:flex-end;gap:0;}
+.schedule-check{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:0;}
 .schedule-check input{width:18px;height:18px;flex:none;margin:0;}
 .row-hover{opacity:0;pointer-events:none;}
 tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:1;pointer-events:auto;}
-.order-handle{cursor:grab;touch-action:none;}
+.order-handle{position:absolute;left:-8px;width:18px!important;cursor:grab;touch-action:none;}
 .order-handle:disabled{opacity:0;pointer-events:none;}
 .project-workspace-toolbar,.project-view-tabs,.group-assign{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.project-workspace-toolbar .task-project-nav{flex:1;min-width:0;}
+.project-workspace-toolbar .task-project-nav{flex:1;min-width:0;margin:0;gap:4px;}
 .project-view-tabs [aria-pressed=true]{background:var(--panel);color:#fff;}
 .project-list-menu{position:fixed;z-index:500;display:flex;flex-direction:column;gap:8px;width:248px;max-width:calc(100vw - 24px);padding:6px;}
 .group-assign{flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--workspace);}
@@ -369,3 +369,14 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 .work-metadata {flex:1;min-width:0;}
 .work-group-tools>.icon-button {flex:none;color:var(--muted);}
 @media(max-width:600px){.group-create {margin-left:0;width:100%;}.work-linked-tasks>li {flex-wrap:wrap;gap:4px;}.work-linked-title {flex-basis:100%;}.group-results label {grid-template-columns:1fr;}.work-group-body {padding-left:16px;}}
+
+.project-state-toggle {display:flex;align-items:center;gap:6px;padding:8px;font-size:12px;font-weight:400;color:var(--muted);}
+.project-state-toggle input {width:14px!important;height:14px;min-height:0!important;flex:none;}
+.cell-project-picker [hidden],.task-project-options [hidden],.relation-options [hidden] {display:none!important;}
+.cell-project-picker .cell-project-options>button {min-height:32px;padding:6px 8px;font-size:12px;font-weight:400;border-radius:5px;}
+#app .task-status-cell .ux-status-filter {min-width:0;width:84px;gap:8px;padding:0 8px;border-color:transparent;background:transparent;color:var(--muted);font-weight:400;}
+#app .task-status-cell .ux-status-filter:is(:hover,:focus-visible,[aria-expanded=true]) {background:var(--ux-menu-hover);color:var(--text);}
+#app .task-status-cell .ux-status-filter>svg {opacity:0;}
+#app tr:is(:hover,:focus-within) .task-status-cell .ux-status-filter>svg {opacity:1;}
+.project-workspace {padding-top:0;}
+@media(pointer:coarse){#app .task-status-cell .ux-status-filter>svg{opacity:1;}.order-handle{width:28px!important;left:-8px;transform:none;}.schedule-check{justify-content:flex-end;}}

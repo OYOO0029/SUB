@@ -1,12 +1,13 @@
-import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-work-groups-2';
-import {periodLabel} from './task-list.js?v=20261030-work-groups-2';
+import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
+import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-compact-lists-3';
+import {periodLabel} from './task-list.js?v=20261030-compact-lists-3';
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261030-explicit-schedule-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261030-explicit-schedule-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-work-groups-2';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-compact-lists-3';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
@@ -26,7 +27,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   function chipsField(e,field='tags'){const label=chipLabel(field);return `<div class="inline-tags">${chipValues(e,field).map((t,i)=>`<span class="tag">${esc(t)}${button(icon('close'),'remove-chip',`data-field="${field}" data-index="${i}" aria-label="${esc(t)} ${label} 삭제"`,'tag-remove')}</span>`).join('')}${button('+ '+label,'chip-picker',`data-field="${field}" aria-label="${label} 선택 또는 추가"`,'quiet-link')}</div>`;}
   function chipPicker(field){
     const label=chipLabel(field),values=[...new Set(['tasks','works','projects'].flatMap(k=>getData()[k].filter(e=>!e.deletedAt).flatMap(e=>chipValues(e,field))))].filter(t=>!chipValues(item(),field).includes(t)).sort((a,b)=>a.localeCompare(b,'ko'));
-    popover(label+' 선택',`<form data-chip-picker="${field}"><input id="chip-search" name="value" class="relation-search" placeholder="${field==='people'?'이름 검색 또는 새 이름 입력':'기존 태그 검색 또는 새 태그 입력'}" aria-label="${label} 검색 또는 추가" maxlength="${field==='people'?160:40}" autocomplete="off"><div class="relation-options">${values.map(t=>button(esc(t),'choose-chip',`type="button" data-field="${field}" data-value="${esc(t)}"`,'relation-option chip-option')).join('')}</div><button type="submit" class="relation-create" id="chip-create" hidden>추가</button><p class="property-error" role="alert"></p></form>`);$('#chip-search').focus();
+    popover(label+' 선택',`<form data-chip-picker="${field}"><input id="chip-search" name="value" class="relation-search" placeholder="${field==='people'?'이름 검색 또는 새 이름 입력':'기존 태그 검색 또는 새 태그 입력'}" aria-label="${label} 검색 또는 추가" maxlength="${field==='people'?160:40}" autocomplete="off">${type==='project'?projectStateToggle:''}<div class="relation-options">${values.map(t=>button(esc(t),'choose-chip',`type="button" data-field="${field}" data-value="${esc(t)}"`,'relation-option chip-option')).join('')}</div><button type="submit" class="relation-create" id="chip-create" hidden>추가</button><p class="property-error" role="alert"></p></form>`);$('#chip-search').focus();
   }
   function choiceField(field,value,options,label){return `<div class="choice-field"><fieldset class="inline-choices"><legend class="sr-only">${label}</legend>${options.map(([v,t])=>`<label class="choice-option"><input type="radio" name="detail-${field}" data-choice-field="${field}" value="${esc(v)}" ${value===v?'checked':''}><span>${esc(t)}</span></label>`).join('')}${button(icon('plus'),'add-choice',`type="button" aria-label="${label} 항목 추가" aria-expanded="false"`,'icon-button choice-add')}</fieldset><form data-choice-form hidden><input name="label" aria-label="새 ${field==='status'?'상태':'진행 단계'} 이름" placeholder="항목 이름" maxlength="40" required autocomplete="off"><button type="submit" class="quiet-link">저장</button>${button('취소','cancel-choice','type="button"','quiet-link')}<p class="property-error" role="alert"></p></form></div>`;}
   function dateProperty(label,field,text){return property(label,'calendar',valueButton(text?text.replace(/\d{4}-\d{2}-\d{2}/g,showDate):'설정','field-date',`data-field="${field}" aria-label="${label} 편집"`));}
@@ -111,8 +112,8 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     const project=ui.detail.type==='task'?taskContext(getData(),item()).project:null;
     const xs=getData()[type==='work'?'works':'projects'].filter(x=>!x.deletedAt&&(type!=='work'||ui.detail.type!=='task'||(x.projectId||null)===(project?.id||null)));
     const current=field==='projectId'&&ui.detail.type==='task'?project?.id:item()[field];
-    anchor.parentElement.insertAdjacentHTML('beforeend',`<div id="relation-dropdown" class="relation-dropdown" role="region" aria-label="${labels[type]} 선택"><input id="relation-search" class="relation-search" placeholder="검색 또는 새로 만들기" aria-label="연결 항목 검색" autocomplete="off"><div class="relation-options">${button('비어 있음','choose-relation',`data-field="${field}" data-value="" aria-pressed="${!current}"`,'relation-option empty-value')}${xs.map(x=>button(esc(x.title),'choose-relation',`data-field="${field}" data-value="${x.id}" aria-pressed="${x.id===current}"`,'relation-option')).join('')}</div><p class="relation-no-results empty-value" hidden>검색 결과 없음</p>${button(icon('plus')+'새 '+labels[type]+' 만들기','create-relation',`data-field="${field}" data-related="${type}"`,'relation-create')}<p class="property-error" role="alert"></p></div>`);
-    sizeRelation();
+    anchor.parentElement.insertAdjacentHTML('beforeend',`<div id="relation-dropdown" class="relation-dropdown" role="region" aria-label="${labels[type]} 선택"><input id="relation-search" class="relation-search" placeholder="검색 또는 새로 만들기" aria-label="연결 항목 검색" autocomplete="off"><div class="relation-options">${button('비어 있음','choose-relation',`data-field="${field}" data-value="" aria-pressed="${!current}"`,'relation-option empty-value')}${xs.map(x=>button(esc(x.title),'choose-relation',`data-project-inactive="${type==='project'&&!activeProject(x)}" data-field="${field}" data-value="${x.id}" aria-pressed="${x.id===current}"`,'relation-option')).join('')}</div><p class="relation-no-results empty-value" hidden>검색 결과 없음</p>${button(icon('plus')+'새 '+labels[type]+' 만들기','create-relation',`data-field="${field}" data-related="${type}"`,'relation-create')}<p class="property-error" role="alert"></p></div>`);
+    filterProjectOptions($('.relation-dropdown'));const toggle=$('.relation-dropdown [data-include-inactive]');if(toggle)toggle.onchange=()=>filterProjectOptions($('.relation-dropdown'),$('#relation-search').value);sizeRelation();
     anchor.setAttribute('aria-expanded','true');anchor.setAttribute('aria-controls','relation-dropdown');$('#relation-search').focus();
   }
   document.addEventListener('pointerdown',event=>{if($('.relation-dropdown')&&!event.target.closest('.relation-value'))closeRelation();},true);
@@ -200,7 +201,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
       document.querySelectorAll('.chip-option').forEach(e=>e.hidden=!!q&&!e.textContent.toLowerCase().includes(q.toLowerCase()));
       const create=$('#chip-create');create.hidden=!q||chipValues(item(),field).includes(q);create.textContent=q+' 추가';
     }
-    if(event.target.id==='relation-search'){const q=event.target.value.trim().toLowerCase();const options=[...document.querySelectorAll('.relation-dropdown .relation-option')];options.forEach(e=>e.hidden=!!q&&!e.textContent.toLowerCase().includes(q));$('.relation-no-results').hidden=options.some(e=>!e.hidden);}
+    if(event.target.id==='relation-search'){const q=event.target.value.trim().toLowerCase();const options=[...document.querySelectorAll('.relation-dropdown .relation-option')];options.forEach(e=>e.hidden=!!q&&!e.textContent.toLowerCase().includes(q));filterProjectOptions($('.relation-dropdown'),q);$('.relation-no-results').hidden=options.some(e=>!e.hidden);}
   });
   function focusChip(field){$(`[data-action="chip-picker"][data-field="${field}"]`)?.focus();}
   function closeChoiceForm(form){form.hidden=true;form.reset();form.querySelector('.property-error').textContent='';const trigger=form.parentElement.querySelector('[data-action="add-choice"]');trigger.setAttribute('aria-expanded','false');trigger.focus();}

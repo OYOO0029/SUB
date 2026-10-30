@@ -18,9 +18,9 @@ function showMode(next) {
     const frame = document.createElement('iframe');
     frame.className = 'planner-view';
     frame.title = mode === 'personal' ? '개인 일정' : '업무 일정';
-    const url = new URL(mode === 'personal' ? './personal.html?v=20261030-work-groups-2' : './work/index.html?v=20261030-work-groups-2', location.href);
+    const url = new URL(mode === 'personal' ? './personal.html?v=20261030-compact-lists-3' : './work/index.html?v=20261030-compact-lists-3', location.href);
     url.searchParams.set('embedded','1');
-    url.searchParams.set('v','20261030-work-groups-2');
+    url.searchParams.set('v','20261030-compact-lists-3');
     frame.src = url.href;
     const frameMode = mode;
     frame.addEventListener('load', () => {
