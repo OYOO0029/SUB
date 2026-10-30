@@ -1,4 +1,4 @@
-import {taskPeriod,lateDays} from './schedule-rules.js?v=20261030-minimal-surface-1';
+import {taskPeriod,lateDays} from './schedule-rules.js?v=20261030-work-groups-2';
 import {taskContext} from './ownership.js';
 import {escapeHTML as esc,icon,choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';

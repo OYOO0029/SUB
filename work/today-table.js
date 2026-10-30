@@ -1,5 +1,5 @@
-import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261030-minimal-surface-1';
-import {taskList} from './task-list.js?v=20261030-minimal-surface-1';
+import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261030-work-groups-2';
+import {taskList} from './task-list.js?v=20261030-work-groups-2';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
 import {createProjectTabs} from './project-tabs.js?v=20261030-explicit-schedule-1';
@@ -8,7 +8,7 @@ import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261030-minimal-surface-1';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261030-work-groups-2';
 import {taskContext,uid,today,taskStart} from './model.js?v=20261030-explicit-schedule-1';
 import {executionSections} from './workflow.js?v=20261030-explicit-schedule-1';
 import {orderedTasks} from './work-view.js?v=20261030-explicit-schedule-1';

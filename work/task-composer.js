@@ -1,5 +1,5 @@
 import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {createTaskBatch} from './editing.js?v=20261030-minimal-surface-1';
+import {createTaskBatch} from './editing.js?v=20261030-work-groups-2';
 import {today} from './model.js?v=20261030-explicit-schedule-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  let draft=null,resize=null,contextToken=null,composing=false,compositionEnded=0;const drafts=new Map();
