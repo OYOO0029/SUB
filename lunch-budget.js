@@ -17,6 +17,7 @@
   document.querySelector('#page-spend .metricGrid').after(panel);
   const style = document.createElement('style');
   style.textContent = `.lunchBudget{margin:16px 0}.lunchBudget table{width:100%;border-collapse:collapse;table-layout:fixed}.lunchBudget th,.lunchBudget td{padding:10px 12px;border-bottom:1px solid var(--line);white-space:normal}.lunchBudget th{text-align:left;font-weight:400;width:62%}.lunchBudget td{text-align:right;font-variant-numeric:tabular-nums}.lunchBudget .lunchTotal th,.lunchBudget .lunchTotal td{font-weight:700}.lunchBudget .progress{margin-top:14px}.lunchBudget p{margin:8px 0 0;line-height:1.6}@media(max-width:480px){.lunchBudget th,.lunchBudget td{padding:10px 4px}.lunchBudget th .tiny{display:block}.lunchBudget .panelHead{flex-wrap:wrap;gap:6px}}`;
+  style.textContent += `.lunchBudget table{display:table!important;min-width:0!important;max-width:100%!important}.lunchBudget tbody{display:table-row-group!important}.lunchBudget tr{display:table-row!important;background:transparent;border:0;padding:0}.lunchBudget th,.lunchBudget td{display:table-cell!important;position:static;transform:none}.lunchBudget td{color:var(--text);font-size:14px}`;
   document.head.append(style);
   function renderLunchBudget() {
     const rows = currentRows();
