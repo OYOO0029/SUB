@@ -11,12 +11,14 @@ export function taskRowActions(task){
  return `<div class="tt-row-actions">${button(icon('trash'),'delete-task',`data-id="${id}" aria-label="${name} 삭제" title="삭제"`,'icon-button row-delete')}${button(icon('more'),'detail',`data-type="task" data-id="${id}" aria-label="${name} 상세 보기" title="상세 보기"`,'icon-button row-detail')}</div>`;
 }
 
-export function choiceSelect(value,options,attribute,label){
- return `<select ${attribute} aria-label="${escapeHTML(label)}">${options.map(([v,l])=>`<option value="${escapeHTML(v)}" ${value===v?'selected':''}>${escapeHTML(l)}</option>`).join('')}</select>`;
+export function choiceSelect(value,options,attribute,label,extra=''){
+ const select=`<select ${attribute} aria-label="${escapeHTML(label)}">${options.map(([v,l])=>`<option value="${escapeHTML(v)}" ${value===v?'selected':''}>${escapeHTML(l)}</option>`).join('')}</select>`;
+ return extra?`<span data-select-with-extra>${select}<template data-select-extra>${extra}</template></span>`:select;
 }
 export function selectSurface(select,id){
  const label=select.getAttribute('aria-label')||select.name||'선택',options=[...select.options],value=select.value;
- return `<button type="button" class="ux-status-filter" data-menu-toggle aria-label="${escapeHTML(label)}" aria-haspopup="menu" aria-expanded="false" aria-controls="${id}" ${select.disabled?'disabled':''}><span>${escapeHTML(options.find(o=>o.value===value)?.textContent||'선택')}</span>${icon('down')}</button><div id="${id}" class="surface-menu ux-status-menu" data-menu-panel role="menu" hidden>${options.map(o=>`<button type="button" class="menu-option" data-select-option="${escapeHTML(o.value)}" role="menuitemradio" aria-checked="${value===o.value}" ${o.disabled?'disabled':''}><span>${escapeHTML(o.textContent)}</span></button>`).join('')}</div>`;
+ const extra=select.closest('[data-select-with-extra]')?.querySelector('template[data-select-extra]')?.innerHTML||'';
+ return `<button type="button" class="ux-status-filter" data-menu-toggle aria-label="${escapeHTML(label)}" aria-haspopup="menu" aria-expanded="false" aria-controls="${id}" ${select.disabled?'disabled':''}><span>${escapeHTML(options.find(o=>o.value===value)?.textContent||'선택')}</span>${icon('down')}</button><div id="${id}" class="surface-menu ux-status-menu" data-menu-panel role="menu" hidden>${options.map(o=>`<button type="button" class="menu-option" data-select-option="${escapeHTML(o.value)}" role="menuitemradio" aria-checked="${value===o.value}" ${o.disabled?'disabled':''}><span>${escapeHTML(o.textContent)}</span></button>`).join('')}${extra}</div>`;
 }
 export function installSelectControls(){
  let serial=0;

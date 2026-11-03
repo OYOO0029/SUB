@@ -1,8 +1,8 @@
-import {taskList,periodLabel} from './task-list.js?v=20261030-responsive-1';
+import {taskList,periodLabel} from './task-list.js?v=20261103-compact-mobile-1';
 import {taskContext} from './ownership.js';
-import {workPeriod,outsideWork,taskPeriod} from './schedule-rules.js?v=20261030-responsive-1';
-import {updateItem,createItem,trashItem,restoreItem} from './editing.js?v=20261030-responsive-1';
-import {choiceSelect,escapeHTML as esc,icon,button} from './ui-components.js?v=20261030-explicit-schedule-1';
+import {workPeriod,outsideWork,taskPeriod} from './schedule-rules.js?v=20261103-compact-mobile-1';
+import {updateItem,createItem,trashItem,restoreItem} from './editing.js?v=20261103-compact-mobile-1';
+import {choiceSelect,escapeHTML as esc,icon,button} from './ui-components.js?v=20261103-compact-mobile-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
 export function createProjectWorkspace({getData,ui,render,save,notify,tabs,selectedProject,projectInfo=()=>''}){
  let selected=new Set(),filter='',sort='manual',query='',projectFilter='',menu=null,ownerProject=null;

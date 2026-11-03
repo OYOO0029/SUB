@@ -1,13 +1,13 @@
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
-import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261030-responsive-1';
-import {periodLabel} from './task-list.js?v=20261030-responsive-1';
-import {choiceSelect} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {taskRowActions} from './ui-components.js?v=20261030-explicit-schedule-1';
-import {statusFilter} from './status-filter.js?v=20261030-explicit-schedule-1';
+import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
+import {periodLabel} from './task-list.js?v=20261103-compact-mobile-1';
+import {choiceSelect} from './ui-components.js?v=20261103-compact-mobile-1';
+import {taskRowActions} from './ui-components.js?v=20261103-compact-mobile-1';
+import {statusFilter} from './status-filter.js?v=20261103-compact-mobile-1';
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261030-explicit-schedule-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261030-explicit-schedule-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261030-responsive-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261103-compact-mobile-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
@@ -81,7 +81,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
     if(type==='work'){
       $('#detail').innerHTML=`<header class="detail-header wd-simple-header"><h2 id="detail-title"><input class="detail-title-input" data-inline-field="title" aria-label="업무 이름" value="${esc(e.title)}" maxlength="160"></h2>${button(icon('close'),'close-detail','aria-label="상세 닫기"','icon-button')}<p id="inline-error" role="alert"></p></header><div class="detail-body"><dl class="properties">${props}</dl>${body}</div>`;window.dispatchEvent(new window.Event('work-detail-render'));return;
     }
-    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>추가 설정</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&!e.todaySelected&&unfinished(e)?button(icon('calendar'),'do-today',`data-id="${id}" aria-label="오늘 하기" title="오늘 하기"`,'icon-button'):''}</footer>`;
+    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>추가 설정</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer">${button(icon('trash'),'trash-entity',`aria-label="${labels[type]} 휴지통으로 이동"`,'icon-button danger')}<span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&unfinished(e)?button(icon('calendar'),e.todaySelected?'detail-unselect-today':'do-today',`data-id="${id}" aria-label="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}" title="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}"`,'icon-button')+`<button class="icon-button" data-tt="focus" data-work-focus data-id="${id}" aria-label="집중" title="집중">${icon('play')}</button>`:''}</footer>`;
 
   }
   function open(type,id){
@@ -164,11 +164,12 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   document.addEventListener('click',e=>{if(e.target.closest('[data-work-focus]'))$('#detail').close();},true);
   document.addEventListener('change',e=>{if(e.target.matches('[data-work-task-status]')){workQuery.status=e.target.value;render();document.querySelector('[data-work-task-status]')?.focus();}});
   document.addEventListener('submit',e=>{if(!e.target.matches('[data-work-search]'))return;e.preventDefault();workQuery.search=new FormData(e.target).get('query').trim();render();});
-  const actions=new Set(['work-sort','work-status','work-clear','chip-picker','choose-chip','remove-chip','add-choice','cancel-choice','detail-back','field-relation','choose-relation','create-relation','field-date','close-property','delete-check','open-check-add','cancel-check-add','trash-entity','restore-entity','restore-check','time-slot','time-save','time-clear','quick-add','quick-cancel','apply-project-state','cancel-project-state']);
+  const actions=new Set(['detail-unselect-today','work-sort','work-status','work-clear','chip-picker','choose-chip','remove-chip','add-choice','cancel-choice','detail-back','field-relation','choose-relation','create-relation','field-date','close-property','delete-check','open-check-add','cancel-check-add','trash-entity','restore-entity','restore-check','time-slot','time-save','time-clear','quick-add','quick-cancel','apply-project-state','cancel-project-state']);
   document.addEventListener('click',event=>{
     const el=event.target.closest('[data-action]');if(!el||!actions.has(el.dataset.action))return;event.preventDefault();event.stopImmediatePropagation();const a=el.dataset.action,data=getData();
     try{
       if(a==='work-sort'||a==='work-status'||a==='work-clear'){if(a==='work-clear')Object.assign(workQuery,{search:'',status:'all'});else workQuery[a==='work-sort'?'sort':'status']=el.dataset.value;render();}
+      else if(a==='detail-unselect-today'){selectToday(item(),false);persist();}
       else if(a==='apply-project-state'){const draft=pendingLifecycle;if(!draft)return;updateItem(data,'project',draft.id,{lifecycle:draft.value});if(el.dataset.remove==='yes')projectTasks(data,draft.id).filter(unfinished).forEach(t=>{selectToday(t,false);});pendingLifecycle=null;$('#property-editor').close();persist();}
       else if(a==='cancel-project-state'){pendingLifecycle=null;$('#property-editor').close();render();}
       else if(a==='chip-picker')chipPicker(el.dataset.field);

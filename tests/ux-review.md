@@ -153,3 +153,9 @@
 - Phone composer reflows vertically; fixed an observed 42px cell clipping issue and verified form stays inside its row (320px: row177/form176px).
 - Fixture DOM checks: 320px today, project, calendar and detail show no document overflow; detail within viewport. 390px and 768px no document overflow; icon16px; desktop1280px retains42px table rows. Browser screenshot inspected mobile task rows and actions.
 - npm test: 134/134 passed. Data mutations/schema unchanged. Physical iOS/Android hardware not tested.
+
+## 2026-11-03 · Compact phone list and composer
+- Phone rows: title/check/detail share first line; project/date second line, undated placeholder omitted. Normal fixture row80px; overdue row100px includes delay label. Table header becomes search/project/sort tools.
+- Secondary row actions are available in unified detail; verified footer exposes delete, today selection and focus. Added regression assertion that removing today selection preserves dates.
+- Composer inactive-project option lives inside shared menu; checked inclusion stays in open menu. Desktop input row measured42px (form40px).
+- 320/390px fixture DOM: no document overflow. Screenshot inspected390px list; desktop1280px composer measured. npm test134/134 passed. No production data migration or physical phone testing.
