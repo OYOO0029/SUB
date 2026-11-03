@@ -171,7 +171,9 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .cell-project-picker .icon {width: 16px; height: 16px;}
 .cell-project-search {width: 100%; box-sizing: border-box; background: #20252c; border: 1px solid #404854; border-radius: 6px; padding: 9px 10px; color: inherit;}
 .cell-project-options {max-height: 220px; overflow: auto; margin-top: 8px;}
-.cell-project-options button {width: 100%; display: flex; gap: 12px; justify-content: space-between; text-align: left; padding: 9px 10px; border: 0; border-radius: 5px; color: inherit; background: transparent;}
+.cell-project-options button {align-items:center;width: 100%; display: flex; gap: 12px; justify-content: space-between; text-align: left; padding: 9px 10px; border: 0; border-radius: 5px; color: inherit; background: transparent;}
+.cell-project-options button>span{flex:1;min-width:0;overflow-wrap:anywhere;}
+.cell-project-options button>.icon{flex:none;color:#8fa9b5;}
 .cell-project-options button[hidden] {display: none;}
 .cell-project-options button:hover,.cell-project-options button[aria-pressed=true] {background: var(--ux-menu-selected); color: #a6d8dc;}
 .cell-project-error {font-size: 12px; color: #efb4ae; margin: 0;}
@@ -390,8 +392,10 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 .task-list-controls .ux-status-filter{max-width:150px;}
 .project-picker-caption{font-size:12px;color:var(--muted);margin:8px 0;}
 .cell-project-options small{white-space:nowrap;flex:none;color:var(--muted);font-size:11px;}
-.project-picker-more,.project-picker-unlink{display:block;width:100%;min-height:36px;padding:6px 8px;text-align:left;background:transparent;border:0;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;}
-.project-picker-unlink{border-top:1px solid var(--line);}
+.project-picker-more,.project-picker-unlink{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding:6px 8px;text-align:left;background:transparent;border:0;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;}
+.project-picker-more{margin-top:8px;border:1px solid var(--line);border-radius:6px;color:var(--text);}
+.project-picker-settings{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+.project-picker-unlink{margin-top:8px;border-top:1px solid var(--line);}
 .project-picker-more:hover,.project-picker-unlink:hover{background:var(--ux-menu-hover);}
 [data-select-with-extra]{display:block;min-width:0;}
 .task-entry-row .project-state-toggle{white-space:nowrap;}
