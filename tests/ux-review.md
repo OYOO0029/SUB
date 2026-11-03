@@ -159,3 +159,11 @@
 - Secondary row actions are available in unified detail; verified footer exposes delete, today selection and focus. Added regression assertion that removing today selection preserves dates.
 - Composer inactive-project option lives inside shared menu; checked inclusion stays in open menu. Desktop input row measured42px (form40px).
 - 320/390px fixture DOM: no document overflow. Screenshot inspected390px list; desktop1280px composer measured. npm test134/134 passed. No production data migration or physical phone testing.
+
+## 2026-11-03 최근 프로젝트 및 목록 도구 통합
+- 프로젝트 소속 변경/추가/상세를 검색·최근 5개 공통 팝오버로 통합. 종료 프로젝트는 포함 옵션, 연결 해제는 하단에 배치.
+- 할 일 헤더 검색 제거. 완료 보기·정렬을 한 번만 배치하고 완료 목록은 별도 표시. 직접 정렬 복귀는 저장 순서 유지.
+- 기존 데이터 마이그레이션 없음. synthetic preview 4231에서만 체크/프로젝트 선택을 검증; 운영 사용자 데이터 수정 없음.
+- npm test: 135/135 통과. 계정별 최근 선택, 실패/계정 전환 방어, 완료 분류·정렬 시 원본 불변 검증.
+- 브라우저 320px/1280px overflow=false, 320px 선택 메뉴 280px/화면 내 배치. 실제 정렬 선택 반영 확인. 완료 목록에 추가 행 없음. 최근 선택 재노출 확인.
+- 검수 이미지: ../recent-lists-qa.png (로컬 합성 데이터).

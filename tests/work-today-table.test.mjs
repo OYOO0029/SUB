@@ -30,6 +30,11 @@ test('today table filters, unified detail entry, remaining separation and timer 
   view.reset();const past=createItem(data,'task','late',{projectId:p.id});past.due=addDays(date,-1);past.todaySelected=true;const undated=createItem(data,'task','undated'),future=createItem(data,'task','future');future.startDate=addDays(date,2);render();
   const ids=label=>[...document.querySelectorAll('table[aria-label="'+label+'"] [data-tt-row]')].map(e=>e.dataset.ttRow);
   assert.deepEqual(ids('기한 지난 일'),[past.id]);assert.deepEqual(ids('남은 할 일'),[undated.id,future.id]);assert.equal(new Set([...ids('오늘 할 일'),...ids('남은 할 일'),...ids('기한 지난 일')]).size,5);
+  assert.equal(document.querySelectorAll('th button[data-list-menu]').length,0);
+  past.status='done';render();const before=JSON.stringify(data);click('[data-today-list-show-done]');assert.deepEqual(ids('완료한 일'),[past.id]);assert.deepEqual(ids('기한 지난 일'),[]);assert.equal(document.querySelectorAll('[data-today-list-show-done]').length,1);
+  change('[data-today-list-sort]','recent');assert.deepEqual(ids('남은 할 일'),[future.id,undated.id]);assert.equal(document.querySelector('[data-today-drag]'),null);
+  change('[data-today-list-sort]','manual');assert.deepEqual(ids('남은 할 일'),[undated.id,future.id]);assert.equal(JSON.stringify(data),before);
+  click('[data-task-project="'+p.id+'"]');assert.deepEqual(ids('완료한 일'),[past.id]);assert.deepEqual(ids('남은 할 일'),[]);assert.equal(JSON.stringify(data),before);
   owner='other';view.reset();render();assert(!document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));validate(data);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
 });

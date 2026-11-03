@@ -1,6 +1,7 @@
+import {createProjectPicker} from './project-picker.js?v=20261103-recent-lists-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {periodLabel} from './task-list.js?v=20261103-compact-mobile-1';
+import {periodLabel} from './task-list.js?v=20261103-recent-lists-1';
 import {choiceSelect} from './ui-components.js?v=20261103-compact-mobile-1';
 import {taskRowActions} from './ui-components.js?v=20261103-compact-mobile-1';
 import {statusFilter} from './status-filter.js?v=20261103-compact-mobile-1';
@@ -12,8 +13,9 @@ import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=2026
 import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 
-export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
+export function createDetailUI({getData,getScope=()=>null,ui,esc,icon,button,property,taskCard,workCard,save,notify}){
   const $=s=>document.querySelector(s),labels={task:'할 일',work:'업무',project:'프로젝트'};
+  let pickerTarget=null;const projectPicker=createProjectPicker({getData,getScope,onPick:id=>{updateItem(getData(),pickerTarget.type,pickerTarget.id,{projectId:id});const ok=save();render();return ok;}});
   let history=[],timeDraft=null,pendingLifecycle=null;
   let dateFormat='absolute';try{dateFormat=localStorage.getItem('what-to-do:detail-date-format')||'absolute';}catch{}
   const showDate=value=>deadlineLabel(value,dateFormat);
@@ -108,6 +110,7 @@ export function createDetailUI({getData,ui,esc,icon,button,property,taskCard,wor
   window.addEventListener('resize',sizeRelation);
   $('#detail').addEventListener('scroll',sizeRelation);
   function relationEditor(field,type,anchor){
+    if(type==='project'){pickerTarget={...ui.detail};projectPicker.open(anchor,ui.detail.type==='task'?taskContext(getData(),item()).project?.id:item()[field]);return;}
     const wasOpen=anchor.getAttribute('aria-expanded')==='true';closeRelation();if(wasOpen)return;
     const project=ui.detail.type==='task'?taskContext(getData(),item()).project:null;
     const xs=getData()[type==='work'?'works':'projects'].filter(x=>!x.deletedAt&&(type!=='work'||ui.detail.type!=='task'||(x.projectId||null)===(project?.id||null)));

@@ -1,11 +1,13 @@
+import {createProjectPicker} from './project-picker.js?v=20261103-recent-lists-1';
 import {activeProject} from './project-options.js';
 import {choiceSelect} from './ui-components.js?v=20261103-compact-mobile-1';
 import {createTaskBatch} from './editing.js?v=20261103-compact-mobile-1';
 import {today} from './model.js?v=20261030-explicit-schedule-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
+ const projectPicker=createProjectPicker({getData,getScope,onPick:id=>{if(!draft)return false;draft.projectId=id||'';render();}});
  let includeInactive=false;let draft=null,resize=null,contextToken=null,composing=false,compositionEnded=0;const drafts=new Map();
  function view(){if(!draft)return '';const project=getData().projects.find(p=>p.id===draft.projectId);
- return `<form class="task-composer" data-task-composer>${!draft.hideProject?`<div class="batch-project">${choiceSelect(draft.projectId,[['','프로젝트 선택'],...getData().projects.filter(p=>!p.deletedAt&&(includeInactive||activeProject(p)||p.id===draft.projectId)).map(p=>[p.id,p.title])],'data-batch-project','추가 대상 프로젝트',`<label class="project-state-toggle"><input type="checkbox" data-batch-inactive ${includeInactive?'checked':''}> 완료·취소·보류 포함</label>`)}</div>`:''}<div class="batch-title"><textarea name="titles" rows="1" ${draft.pending?'readonly':''} aria-label="추가할 할 일" placeholder="할 일 입력 후 Enter" required>${esc(draft.text)}</textarea></div><div class="batch-due"><span class="ux-empty">-</span></div><div class="batch-actions"><button type="submit" class="icon-button batch-submit" aria-label="할 일 저장" title="저장">${icon('check')}</button><button type="button" class="icon-button batch-close" data-batch-close aria-label="연속 추가 닫기" title="닫기">${icon('close')}</button></div><span class="batch-status" role="status">${esc(draft.message||'')}</span><p role="alert" class="form-error">${esc(draft.error||'')}</p></form>`;}
+ return `<form class="task-composer" data-task-composer>${!draft.hideProject?`<div class="batch-project"><button type="button" class="ux-status-filter" data-batch-picker aria-label="추가 대상 프로젝트"><span>${esc(project?.title||'프로젝트 선택')}</span>${icon('down')}</button></div>`:''}<div class="batch-title"><textarea name="titles" rows="1" ${draft.pending?'readonly':''} aria-label="추가할 할 일" placeholder="할 일 입력 후 Enter" required>${esc(draft.text)}</textarea></div><div class="batch-due"><span class="ux-empty">-</span></div><div class="batch-actions"><button type="submit" class="icon-button batch-submit" aria-label="할 일 저장" title="저장">${icon('check')}</button><button type="button" class="icon-button batch-close" data-batch-close aria-label="연속 추가 닫기" title="닫기">${icon('close')}</button></div><span class="batch-status" role="status">${esc(draft.message||'')}</span><p role="alert" class="form-error">${esc(draft.error||'')}</p></form>`;}
  const draftKey=d=>JSON.stringify([d.owner,d.target,d.projectId||'',d.workId||'']);
  const contextKey=()=>{const c=getContext(),w=getData().works.find(x=>x.id===c.workId);return draftKey({owner:getScope(),target:c.target||'main',projectId:w?.projectId||c.projectId||'',workId:w?.id||''});};
  function stash(){if(!draft)return;const key=draftKey(draft);if(draft.text.trim()||draft.pending)drafts.set(key,draft);else drafts.delete(key);}
@@ -17,7 +19,7 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   contextToken=contextKey();stash();draft=drafts.get(draftKey(next))||next;draft.hideProject=next.hideProject;render();focusInput();
  }
  function close(){if(draft)drafts.delete(draftKey(draft));draft=null;render();}
- document.addEventListener('click',e=>{if(draft&&e.target.closest('[data-batch-close]'))close();});
+ document.addEventListener('click',e=>{if(draft&&e.target.closest('[data-batch-picker]'))projectPicker.open(e.target.closest('[data-batch-picker]'),draft.projectId);if(draft&&e.target.closest('[data-batch-close]'))close();});
  window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){stash();draft=null;}const saved=drafts.get(draftKey({owner:getScope(),target:'main',projectId:e.detail||'',workId:''}));if(saved){draft=saved;draft.hideProject=!!e.detail;} });
  document.addEventListener('change',e=>{if(e.target.matches('[data-batch-inactive]')){includeInactive=e.target.checked;render();queueMicrotask(()=>document.querySelector('.batch-project [data-menu-toggle]')?.click());return;}if(e.target.matches('[data-batch-project]')&&draft&&!draft.pending){draft.projectId=e.target.value;return;}if(e.target.matches('[data-task-scope]')&&draft?.target==='main'&&!draft.pending){draft.defaultDate=getContext().date||today();draft.startDate=draft.defaultDate;}});
  document.addEventListener('input',e=>{if(e.target.matches('[data-task-composer] textarea')&&draft)draft.text=e.target.value;});
@@ -31,7 +33,7 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   resize?.disconnect();
   document.querySelectorAll('.task-entry-row,.table-add-edge,.task-entry-body').forEach(e=>e.remove());
   const targets=[...document.querySelectorAll('.tt-screen table[data-list-key="today"],.tt-remaining table,.project-task-table')];
-  for(const table of targets){
+  for(const table of targets.filter(t=>t.dataset.listKey!=='completed')){
    const target=['remaining','overdue'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
    const active=draft&&draft.target===target;
    const empty=table.querySelector('td.tt-empty,td.pl-empty');

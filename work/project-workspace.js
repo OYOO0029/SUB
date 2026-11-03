@@ -1,14 +1,16 @@
-import {taskList,periodLabel} from './task-list.js?v=20261103-compact-mobile-1';
+import {listControls,sortTasks} from './list-controls.js?v=20261103-recent-lists-1';
+import {taskList,periodLabel} from './task-list.js?v=20261103-recent-lists-1';
 import {taskContext} from './ownership.js';
 import {workPeriod,outsideWork,taskPeriod} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {updateItem,createItem,trashItem,restoreItem} from './editing.js?v=20261103-compact-mobile-1';
 import {choiceSelect,escapeHTML as esc,icon,button} from './ui-components.js?v=20261103-compact-mobile-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
 export function createProjectWorkspace({getData,ui,render,save,notify,tabs,selectedProject,projectInfo=()=>''}){
+ let showDone=false;
  let selected=new Set(),filter='',sort='manual',query='',projectFilter='',menu=null,ownerProject=null;
  const project=()=>ui.projectPage||selectedProject()||'';
  const tasks=()=>getData().tasks.filter(t=>!t.deletedAt&&(!project()||taskContext(getData(),t).project?.id===project()));
- function visible(){return tasks().filter(t=>(filter?t.status===filter:t.status!=='cancelled')&&(!projectFilter||taskContext(getData(),t).project?.id===projectFilter)&&(!query||t.title.toLowerCase().includes(query.toLowerCase()))).sort((a,b)=>sort==='due'?(taskPeriod(a).end||'9999').localeCompare(taskPeriod(b).end||'9999'):0);}
+ function visible(){return sortTasks(getData(),tasks().filter(t=>t.status!=='cancelled'&&(showDone||t.status!=='done')),sort);}
  function warning(w){const xs=tasks().filter(t=>t.workId===w.id&&outsideWork(t,w));return xs.length?`<button class="icon-button" data-period-warning="${esc(xs.map(t=>t.title).join(', '))}" title="업무 기간을 벗어난 할 일: ${esc(xs.map(t=>t.title).join(', '))}" aria-label="업무 기간 초과 이유">${icon('info')}</button>`:'';}
  function view(){
   if(ownerProject!==project()){ownerProject=project();selected.clear();filter='';query='';projectFilter='';menu=null;}
@@ -16,7 +18,7 @@ export function createProjectWorkspace({getData,ui,render,save,notify,tabs,selec
   const nav=`<div class="project-workspace-toolbar">${tabs()}${button(icon('plus'),'add-project','aria-label="프로젝트 생성"','icon-button')}</div><div class="project-view-tabs">${[['tasks','할 일'],['wbs','일정(WBS)'],['groups','업무별 보기']].map(([v,l])=>button(l,'project-page-tab',`data-value="${v}" aria-pressed="${mode===v}"`,'view-tab')).join('')}</div>`;
   const table=taskList(data,visible(),{key:mode==='groups'?'group':'project',project:project(),filter,sort,query,projectFilter,selection:mode==='groups',selected});
   const menuHTML=menu?`<div class="project-list-menu surface-menu">${menu==='project'?choiceSelect(projectFilter,[['','전체 프로젝트'],...data.projects.filter(p=>!p.deletedAt).map(p=>[p.id,p.title])],'data-project-list-project','프로젝트 필터'):menu==='status'?choiceSelect(filter,[['','전체'],...statusOptions(data)],'data-project-list-filter','할 일 상태 필터'):menu==='due'?choiceSelect(sort,[['manual','등록순'],['due','마감 빠른순']],'data-project-list-sort','작업일자 정렬'):`<input data-project-list-query aria-label="할 일 검색" value="${esc(query)}">`}<button data-project-menu-close>닫기</button></div>`:'';
-  let body=table+menuHTML;
+  let body=listControls(showDone,sort,'project-list')+table+menuHTML;
   if(mode==='wbs')body=`<div class="pl-table-wrap"><table class="pl-table schedule-table" aria-label="프로젝트 업무 일정"><colgroup><col style="width:60%"><col style="width:28%"><col style="width:12%"></colgroup><thead><tr><th class="text-column">프로젝트 · 업무</th><th>업무 기간</th><th aria-label="관리"></th></tr></thead><tbody>${data.projects.filter(p=>!p.deletedAt&&(!project()||p.id===project())).map(p=>`<tr class="wbs-project"><td class="pl-text">${esc(p.title)}</td><td>${esc(periodLabel({start:p.start,end:p.end}))}</td><td>${button(icon('plus'),'add-work',`data-project-id="${esc(p.id)}" aria-label="${esc(p.title)} 업무 추가"`,'icon-button')}</td></tr>${works.filter(w=>w.projectId===p.id).map(w=>`<tr><td class="pl-text"><button class="cell-edit cell-edit-project" data-action="detail" data-type="work" data-id="${esc(w.id)}">${esc(w.title)}</button>${warning(w)}</td><td>${button(esc(periodLabel(workPeriod(w))),'detail',`data-type="work" data-id="${esc(w.id)}" aria-label="${esc(w.title)} 기간 편집"`,'cell-edit')}</td><td>${button(icon('trash'),'workspace-delete-work',`data-id="${esc(w.id)}" aria-label="${esc(w.title)} 업무 삭제"`,'icon-button')}</td></tr>`).join('')}`).join('')}</tbody></table></div>`;
   if(mode==='groups'){
    const owners=new Set(tasks().filter(t=>selected.has(t.id)).map(t=>taskContext(data,t).project?.id));
@@ -28,6 +30,7 @@ export function createProjectWorkspace({getData,ui,render,save,notify,tabs,selec
  }
  function positionMenu(){const box=document.querySelector('.project-list-menu'),anchor=document.querySelector('[data-list-menu="'+menu+'"][data-list-key="'+(ui.projectPageTab==='groups'?'group':'project')+'"]');if(!box||!anchor)return;const r=anchor.getBoundingClientRect();box.style.left=Math.max(8,Math.min(r.left,innerWidth-264))+'px';box.style.top=Math.max(8,Math.min(r.bottom+6,innerHeight-box.offsetHeight-8))+'px';}
  window.addEventListener('task-project-context',e=>{if(ui.tab==='projects'){ui.projectPage=e.detail||null;selected.clear();menu=null;filter='';}});
+ document.addEventListener('change',e=>{if(ui.tab!=='projects')return;if(e.target.matches('[data-project-list-show-done]')){showDone=e.target.checked;render();}});
  document.addEventListener('click',e=>{if(ui.tab!=='projects')return;const b=e.target.closest('[data-list-menu]');if(b&&['project','group'].includes(b.dataset.listKey)){menu=menu===b.dataset.listMenu?null:b.dataset.listMenu;render();positionMenu();}if(e.target.closest('[data-project-menu-close]')){menu=null;render();}if(e.target.closest('[data-unlink-selected]')){try{assign(null); }catch(err){notify(err.message);}}const del=e.target.closest('[data-action="workspace-delete-work"]');if(del){const id=del.dataset.id;trashItem(getData(),'work',id);save();render();notify('업무를 삭제했습니다. 할 일은 미분류로 유지됩니다.',()=>{restoreItem(getData(),'work',id);save();render();});}});
  function assign(workId,newTitle=''){
   const ids=tasks().filter(t=>selected.has(t.id));if(!ids.length)throw Error('할 일을 선택해 주세요.');
