@@ -1,17 +1,17 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-task-types-1';
-import {listControls,sortTasks} from './list-controls.js?v=20261104-task-types-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-timeline-side-1';
+import {listControls,sortTasks} from './list-controls.js?v=20261104-timeline-side-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {taskList} from './task-list.js?v=20261104-task-types-1';
+import {taskList} from './task-list.js?v=20261104-timeline-side-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {taskRowActions} from './ui-components.js?v=20261104-workspace-1';
-import {createProjectTabs} from './project-tabs.js?v=20261104-task-types-1';
+import {createProjectTabs} from './project-tabs.js?v=20261104-timeline-side-1';
 import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
 import {statusFilter} from './status-filter.js?v=20261104-workspace-1';
 import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261104-task-types-1';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261104-timeline-side-1';
 import {taskContext,uid,today,taskStart} from './model.js?v=20261030-explicit-schedule-1';
 import {executionSections} from './workflow.js?v=20261030-explicit-schedule-1';
 import {orderedTasks} from './work-view.js?v=20261030-explicit-schedule-1';
@@ -53,7 +53,7 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
 
  function panelView(){if(panel&&panel.tab!==ui.tab)return '';const t=panel&&task(panel.id);if(!t){panel=null;return ''}const focus=panel.mode==='focus',s=timer.read(),linked=s.taskId===t.id;return `<aside class="tt-panel" aria-label="${esc(t.title)} ${focus?'집중':'상세'}"><header>${focus?`<h2>${esc(t.title)}</h2>`:`<textarea rows="1" spellcheck="false" class="tt-edit-title" data-tt-title data-task-id="${esc(t.id)}" aria-label="할 일 제목" maxlength="160" required>${esc(t.title)}</textarea>`}${focus?'':taskMenu(t,'panel')}${btn(icon('close'),'close-panel','aria-label="패널 닫기"')}</header><div class="tt-panel-body">${focus?`<input class="tt-clock" data-tt-clock aria-label="집중 시간 수정 (분)" title="클릭하여 분 단위 수정" value="${linked?s.clock:String(s.minutes).padStart(2,'0')+':00'}"><div class="tt-presets">${[10,20,30,60].map(n=>btn(n+'분','minutes',`data-value="${n}"`)).join('')}</div><div class="tt-timer-controls">${btn(timerIcon(linked&&s.running?'pause':'play'),linked&&s.running?'pause':'start',`aria-label="${linked&&s.running?'일시정지':'시작 또는 계속'}" title="${linked&&s.running?'일시정지':'시작 또는 계속'}"`)}${btn(timerIcon('stop'),'stop','aria-label="종료" title="종료"')}</div><p class="tt-error" data-tt-error role="status"></p>`:`<div class="tt-date"><span>마감</span>${btn(esc(t.due?deadlineLabel(t.due,dateFormat)+(t.dueTime?' '+t.dueTime:''):'설정')+icon('calendar'),'edit-due','aria-label="마감 설정"')}</div>`}${focus?'':checklist(t)}${focus?'':`<h3>업무 메모</h3><div class="tt-memo" contenteditable="true" role="textbox" aria-multiline="true" aria-label="업무 메모" data-tt-memo data-task-id="${esc(t.id)}">${memo(t)}</div>${savedImages(t)?`<details class="tt-saved-images"><summary>기존 첨부</summary>${savedImages(t)}</details>`:''}<p class="tt-error" data-tt-error role="status"></p><div class="tt-detail-footer">${btn(timerIcon('play'),'focus',`data-id="${esc(t.id)}" aria-label="집중" title="집중"`)}<button type="button" data-action="detail" data-type="task" data-id="${esc(t.id)}" class="tt-button">추가 설정</button></div>`}</div></aside>`;}
  function miniView(){const s=timer.read(),t=task(s.taskId);if(!t||(panel?.tab===ui.tab&&panel?.mode==='focus'&&panel.id===t.id))return '';return `<div class="tt-mini">${btn(esc(t.title),'focus',`data-id="${esc(t.id)}"`,'tt-mini-title')}<span data-tt-mini-clock>${s.clock}</span>${btn(timerIcon(s.running?'pause':'play'),s.running?'pause':'resume',`aria-label="${s.running?'일시정지':'계속하기'}" title="${s.running?'일시정지':'계속하기'}"`)}${btn(timerIcon('stop'),'stop','aria-label="종료" title="종료"')}</div>`;}
- function viewTabs(){return `<div class="ux-view-tabs" role="group" aria-label="할 일 보기">${[['list','리스트'],['timeline','타임라인']].map(([v,l])=>`<button class="view-tab ux-view-icon" data-action="view" data-value="${v}" aria-pressed="${ui.view===v}" aria-label="${l}" title="${l}">${icon(v==='list'?'list':'clock')}</button>`).join('')}</div>`;}
+ function viewTabs(){return `<div class="ux-view-tabs"><button class="view-tab ux-view-icon" data-timeline-toggle aria-pressed="false" aria-label="타임라인" title="타임라인">${icon('clock')}</button></div>`;}
  function renderList(key){const f=filters[key],project=projectTabs.current(),xs=filtered(key==='completed'?getData().tasks.filter(t=>!t.deletedAt&&t.status==='done'):executionBuckets(getData(),today())[key],key);return taskList(getData(),xs,{key,project,date:today(),filter:f.status,sort:f.sort,query:f.query,projectFilter:f.project,drag:key==='today'&&!project&&!f.project&&!f.status&&!f.query&&listSort==='manual'});}
  function section(key){const label={today:'오늘 할 일',remaining:'남은 할 일',overdue:'기한 지난 일',completed:'완료한 일'}[key];return '<details open class="execution-section '+(key==='today'?'execution-today':'tt-remaining')+'" data-fold="execution-'+key+'"><summary>'+label+'</summary>'+renderList(key)+(menuScope===key?menuView():'')+'</details>';}
  function remainingView(){return ['remaining','overdue',...(showDone?['completed']:[])].map(section).join('');}

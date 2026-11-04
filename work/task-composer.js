@@ -1,7 +1,7 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-task-types-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-timeline-side-1';
 import {activeProject} from './project-options.js';
 import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
-import {createTaskBatch} from './editing.js?v=20261104-task-types-1';
+import {createTaskBatch} from './editing.js?v=20261104-timeline-side-1';
 import {today} from './model.js?v=20261030-explicit-schedule-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  const projectPicker=createProjectPicker({getData,getScope,onPick:id=>{if(!draft)return false;draft.projectId=id||'';render();}});

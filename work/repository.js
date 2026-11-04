@@ -1,4 +1,4 @@
-import {taskTypes} from './task-types.js?v=20261104-task-types-1';
+import {taskTypes} from './task-types.js?v=20261104-timeline-side-1';
 import {validatePeriod} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
