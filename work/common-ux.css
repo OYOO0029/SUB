@@ -1,6 +1,6 @@
 /* Canonical shared UX styles. Tokens and per-component rules live here; change the owning rule, never append a competing override. See DESIGN.md. */
 html {scrollbar-gutter: stable;}
-:root {--ux-control: 32px; --ux-icon: 16px; --ux-chevron: 12px; --ux-check: 18px; --ux-gap: 8px; --ux-radius: 6px; --ux-surface-radius: 8px; --ux-row: 40px; --ux-cell-inset: 8px; --ux-panel-inset: 24px; --ux-section-gap: 20px; --ux-menu-bg: #272c35; --ux-menu-hover: #343c47; --ux-menu-selected: #8ecbd014; --ux-menu-line: #353c47; --ux-list-text: #fff;}
+:root {--ux-control: 32px; --ux-icon: 16px; --ux-chevron: 12px; --ux-check: 18px; --ux-gap: 8px; --ux-radius: 6px; --ux-surface-radius: 8px; --ux-row: 42px; --ux-title-size: 18px; --ux-secondary: #adb7c5; --ux-property-label: 88px; --ux-cell-inset: 8px; --ux-panel-inset: 24px; --ux-section-gap: 20px; --ux-menu-bg: #272c35; --ux-menu-hover: #343c47; --ux-menu-selected: #8ecbd014; --ux-menu-line: #353c47; --ux-list-text: #fff;}
 #app button {font-family: inherit;}
 :is(#app,#detail,#editor,#property-editor) :is(.icon-button,.filter-toggle,.ux-tools>.focus-button) {display: inline-flex; align-items: center; justify-content: center; width: var(--ux-control); height: var(--ux-control); min-height: var(--ux-control); padding: 0; flex-shrink: 0; border-radius: var(--ux-radius); background: transparent; color: var(--muted);}
 :is(#app,#detail,#editor,#property-editor) :is(.icon-button,.filter-toggle,.ux-tools,.tt-panel,.tt-mini) .icon {width: var(--ux-icon); height: var(--ux-icon); display: block; flex: none; stroke-width: 1.65;}
@@ -84,7 +84,10 @@ html {scrollbar-gutter: stable;}
 .task-reminder input {width: 16px; height: 16px; accent-color: var(--accent); margin: 0;}
 #detail .detail-extra>summary {font-size: 12px; color: var(--muted); padding: 8px 0;}
 #detail.minimal-task .property-row dt .icon {display:inline-block;width:16px;height:16px;flex:none;}
-#detail.minimal-task .property-row dt {font-size: 12px;}
+#detail:is(.minimal-task,.minimal-work) .property-row dt {font-size:12px;color:var(--ux-secondary);gap:8px;}
+#detail:is(.minimal-task,.minimal-work) .property-row dd{margin:0;min-width:0;font-size:13px;line-height:20px;}
+#detail:is(.minimal-task,.minimal-work) .property-row :is(.inline-value,.relation-value){font-size:13px;font-weight:400;line-height:20px;padding-inline:0;}
+#detail:is(.minimal-task,.minimal-work) .empty-value,#detail:is(.minimal-task,.minimal-work) .inline-memo::placeholder{color:var(--ux-secondary);}
 #detail.minimal-task .check-section {margin-top: 12px;}
 #app :is(.new-workspace,.tt-panel,.tt-table-wrap,.pl-table-wrap,.project-list-scroll,.tt-memo) {border-radius: 8px;}
 .tt-date>.tt-button {display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--text);}
@@ -92,13 +95,13 @@ html {scrollbar-gutter: stable;}
 .tt-saved-images {margin-top: 12px; font-size: 12px; color: var(--muted);}
 .tt-saved-images img {display: block; max-width: 100%; height: auto; margin-top: 8px;}
 #app>.main>.new-workspace {border-radius: 8px;}
-#detail.minimal-work .detail-title-input {font-size: 20px;}
+
 #detail.minimal-work .detail-body {padding-top: 12px;}
 #detail.minimal-work .wd-project {font-size: 12px; margin: 0 0 8px;}
 #detail.minimal-work .wd-project .inline-value {font-size: 12px; color: var(--muted); width: auto;}
 .wd-project .relation-value {justify-content: flex-start;}
 .wd-project .relation-open {margin-left: 4px;}
-#detail.minimal-work .property-row {grid-template-columns: 72px minmax(0,1fr); margin-bottom: 8px;}
+
 #detail.minimal-work .property-row dt .icon {display:inline-block;width:16px;height:16px;flex:none;}
 .wd-tasks {margin-top: 16px;}
 .wd-tasks .section-heading {display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;}
@@ -211,13 +214,13 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 .table-add-edge .icon,.table-empty-add .icon {width:16px; height:16px; flex:none;}
 .task-entry-row>td {padding: 0 !important; text-align: left !important;}
 .task-entry-row .form-error {grid-column: 1/-1;}
-#detail:is(.minimal-task,.minimal-work) .detail-nav {display:flex;justify-content:flex-end;position:relative;margin:0 0 20px;gap:4px;}
+#detail:is(.minimal-task,.minimal-work) .detail-nav {display:flex;justify-content:flex-end;position:relative;margin:0 0 12px;gap:var(--ux-gap);}
 #detail .inline-save-state:empty {display:none;}
 #detail:is(.minimal-task,.minimal-work) h2 {padding:0;margin:0;display:flex;align-items:flex-start;gap:10px;}
 #detail .detail-title-check{width:18px;height:18px;flex:none;margin:5px 0 0;}
 #detail .detail-primary-actions{position:static;justify-content:flex-start;padding-top:0;padding-bottom:0;}
 #detail .detail-primary-actions .detail-footer-spacer{display:none;}
-#detail:is(.minimal-task,.minimal-work) .detail-title-input {font-size: 18px;box-sizing:border-box;margin:0; field-sizing: content; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 28px; height: auto; max-height: none; line-height: 1.5; border: 0; outline: 0; background: transparent; padding: 0;}
+#detail:is(.minimal-task,.minimal-work) .detail-title-input {font-size: var(--ux-title-size);font-weight:600;color:#fff;box-sizing:border-box;margin:0; field-sizing: content; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 28px; height: auto; max-height: none; line-height: 1.5; border: 0; outline: 0; background: transparent; padding: 0;}
 #detail.minimal-task .detail-complete {margin-top: 5px;}
 #detail.minimal-task .properties {margin: 0;}
 #detail.minimal-task .inline-value {min-height: 32px; height: auto; background: transparent; border-color: transparent; text-align: left; padding: 4px 0;}
@@ -313,14 +316,14 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 .task-type-picker{z-index:160;}
 .task-type-picker p{font-size:12px;color:var(--muted);}
 .task-type-cell .cell-edit{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-:is(#app,#detail) .schedule-table :is(th,td){border-inline:0; border-bottom:1px solid #ffffff0c; padding-inline:8px; height:42px;}
+:is(#app,#detail) .schedule-table :is(th,td){border-inline:0; border-bottom:1px solid #ffffff0c; padding-inline:8px; height:var(--ux-row);}
 :is(#app,#detail) :is(.tt-table,.pl-table) th{height:34px;font-size:12px;font-weight:500;color:#9aa3af;background:var(--surface,#21252b);}
 :is(#app,#detail) :is(.tt-table,.pl-table) th button{color:inherit;}
 :is(#app,#detail) .schedule-table .text-column{text-align:left;}
 :is(#app,#detail) .schedule-table .text-column .tt-column{margin-inline:0;justify-content:flex-start;}
-:is(#app,#detail) .schedule-table td{font-size:13px;font-weight:400;color:var(--muted);}
+:is(#app,#detail) .schedule-table td{font-size:13px;font-weight:400;color:var(--ux-secondary);}
 :is(#app,#detail) .schedule-table .list-title-edit{font-size:14px;font-weight:500;color:#fff;white-space:nowrap;}
-:is(#app,#detail) .schedule-table .cell-edit{font-size:13px;font-weight:400;color:var(--muted);}
+:is(#app,#detail) .schedule-table .cell-edit{font-size:13px;font-weight:400;color:var(--ux-secondary);}
 :is(#app,#detail) .schedule-table .tt-column.is-applied>.icon{opacity:1;color:var(--accent);}
 .schedule-table{min-width:780px;}
 :is(#app,#detail) .schedule-table:not(:has(.tt-project)){min-width:640px;}
@@ -344,6 +347,10 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 .group-results label{display:grid;grid-template-columns:80px minmax(0,1fr);gap:8px;margin:12px 0;color:var(--muted);font-size:12px;}
 .group-results textarea{min-height:72px;resize:vertical;}
 .wbs-project{background:var(--panel);}
+:is(#app,#detail) .schedule-table:has(.wbs-project) .cell-edit-project{font-size:14px;font-weight:500;color:var(--ux-list-text);}
+.schedule-table td:has(>[data-period-warning]){position:relative;}
+.schedule-table td:has(>[data-period-warning])>.cell-edit{width:calc(100% - var(--ux-control) - 8px);}
+.schedule-table td>[data-period-warning]{position:absolute;right:8px;top:50%;transform:translateY(-50%);}
 .tt-remaining>h2{font-size:13px;font-weight:500;margin:0 0 12px;}
 @media(hover:none){.row-hover{opacity:1;pointer-events:auto;}}
 
@@ -455,7 +462,7 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
  .tt-table .tt-empty{display:block;width:100%;box-sizing:border-box;}
  #app .execution-section>summary{min-height:44px;}
  #app .project-workspace-toolbar{gap:4px;}
- #detail.flow-drawer .property-row{grid-template-columns:72px minmax(0,1fr);}
+ #detail.flow-drawer{--ux-property-label:80px;}
  #detail.flow-drawer :is(.inline-value,.relation-value){overflow-wrap:anywhere;white-space:normal;}
  #detail.flow-drawer .detail-footer{padding-bottom:max(16px,env(safe-area-inset-bottom));}
  .project-list-menu,.cell-project-picker{max-width:calc(100vw - 24px);box-sizing:border-box;}
@@ -470,29 +477,29 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 .project-index-toolbar,.project-index-tools,.project-content-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
 .project-index-tools,.project-content-toolbar>.task-list-controls{margin-left:auto;}
 .project-index-table{width:100%;min-width:740px;table-layout:fixed;border-collapse:collapse;}
-.project-index-table :is(th,td){height:42px;padding:0 8px;border:0;border-bottom:1px solid var(--line);font-size:13px;text-align:center;}
+.project-index-table :is(th,td){height:var(--ux-row);padding:0 8px;border:0;border-bottom:1px solid var(--line);font-size:13px;text-align:center;}
 .project-index-table th{font-size:12px;font-weight:500;}
 #app .project-index-table :is(.text-column,.pl-text){text-align:left;}
 .project-index-name,.project-index-work{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;border:0;background:none;color:var(--text);padding:0;font:inherit;cursor:pointer;}
 .project-index-name{font-size:14px;font-weight:500;color:#fff;}
-.project-index-work{color:var(--muted);}
-.project-back{display:inline-flex;align-items:center;gap:4px;margin-bottom:16px;font-size:12px;}
+.project-index-work{color:var(--ux-secondary);}
+.project-back{display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;font-size:12px;}
 .project-all-title{font-size:18px;margin:0 0 16px;}
 .project-action-menu{position:relative;}
-.pl-project-properties{margin-bottom:16px;}
+.pl-project-properties{margin-bottom:8px;}
 .project-workspace .pl-project-properties .pl-page-heading{display:flex;align-items:center;gap:8px;}
-.project-workspace .pl-project-properties .detail-title-input{flex:1;min-width:0;font-size:18px;}
+.project-workspace .pl-project-properties .detail-title-input{flex:1;min-width:0;font-size:var(--ux-title-size);font-weight:600;line-height:28px;color:#fff;padding:0;}
 #detail:is(.minimal-task,.minimal-work){width:460px;max-width:calc(100vw - 24px);height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);inset:12px 12px 12px auto;margin:0;border-radius:8px;box-sizing:border-box;}
 #detail:is(.minimal-task,.minimal-work) .detail-header{padding:16px 24px 12px;border-bottom:0;}
 #detail:is(.minimal-task,.minimal-work) .detail-body{padding:12px 24px 24px;}
-#detail:is(.minimal-task,.minimal-work) .property-row{grid-template-columns:100px minmax(0,1fr);gap:12px;min-height:36px;margin-bottom:4px;align-items:center;}
+#detail:is(.minimal-task,.minimal-work) .property-row{grid-template-columns:var(--ux-property-label) minmax(0,1fr);gap:8px;min-height:36px;margin-bottom:4px;align-items:center;}
 #detail.detail-expanded{width:min(760px,calc(100vw - 24px));inset:12px;margin:auto;}
 #detail.detail-expanded :is(.detail-header,.detail-body,.detail-primary-actions){max-width:620px;margin-inline:auto;width:100%;box-sizing:border-box;}
 #detail .detail-nav>[data-action=detail-expand]{margin:0;}
 #detail .detail-nav>.inline-save-state{position:absolute;top:-10px;left:0;font-size:10px;}
 #detail .detail-nav>[data-action=close-detail]{margin-left:auto;}
 #detail .detail-settings{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);}
-#detail .detail-action{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 8px;background:transparent;color:var(--muted);font:inherit;font-size:12px;}
+#detail .detail-action{display:inline-flex;align-items:center;gap:var(--ux-gap);min-height:var(--ux-control);padding:4px 8px;background:transparent;color:var(--ux-secondary);font:inherit;font-size:13px;}
 #detail .detail-action .icon{width:16px;height:16px;}
 #detail .detail-nav [data-dropdown]{position:relative;}
 #detail .detail-nav .surface-menu{position:absolute;right:0;min-width:160px;z-index:2;}
