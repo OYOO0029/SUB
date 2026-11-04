@@ -1,0 +1,6 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../work/styles.css"><link rel="stylesheet" href="../work/common-ux.css"><style>body{margin:0}.app-header{height:54px}.workspace{width:min(1040px,90vw);margin:24px auto;background:#21252b;padding:24px;box-sizing:border-box}.spacer{height:1500px}</style><header class="app-header">타임라인 가상 데이터 검수</header><main class="workspace"><div class="ux-view-tabs"><button data-timeline-toggle>타임라인</button></div><p>10분 · 연속 · 30분 · 긴 제목 · 겹침 검수</p><div class="spacer"></div></main><dialog id="detail"></dialog><script type="module">
+import {installTimelineSide} from '../work/timeline-side.js';import {today} from '../work/model.js';
+const tasks=[['10:00','10:30','지난 일정'],['10:30','10:40','10분 일정 제목이 아주 길어도 시간과 겹치지 않는지 확인'],['10:40','11:10','연속 30분 일정'],['11:10','12:10','긴 제목 · 프로젝트 관련 자료를 확인하고 전달 내용을 정리하기'],['11:30','12:00','겹치는 일정']].map(([start,end,title],i)=>({id:String(i),title,status:'waiting',blocks:[{date:today(),start,end}]}));
+const ui={tab:'tasks'};installTimelineSide({getData:()=>({tasks}),getScope:()=> 'fixture',ui,matchesProject:()=>true,openDetail:()=>{},editTime:()=>{}}).sync();
+</script></html>
+

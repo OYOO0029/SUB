@@ -1,4 +1,4 @@
-import {taskTypeName} from './task-types.js?v=20261104-timeline-side-1';
+import {taskTypeName} from './task-types.js?v=20261104-timeline-polish-1';
 import {taskPeriod,lateDays} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {taskContext} from './ownership.js';
 import {escapeHTML as esc,icon} from './ui-components.js?v=20261104-workspace-1';
