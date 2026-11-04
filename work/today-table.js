@@ -1,20 +1,21 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-timeline-polish-1';
-import {listControls,sortTasks} from './list-controls.js?v=20261104-timeline-polish-1';
+import {koreaDay,selectedOn,historicalTask,recordedOn,deadline} from './task-history.js?v=20261104-work-history-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-work-history-1';
+import {listControls,sortTasks} from './list-controls.js?v=20261104-work-history-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
-import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {taskList} from './task-list.js?v=20261104-task-flow-1';
+import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261104-work-history-1';
+import {taskList} from './task-list.js?v=20261104-work-history-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
-import {taskRowActions} from './ui-components.js?v=20261104-workspace-1';
-import {createProjectTabs} from './project-tabs.js?v=20261104-timeline-polish-1';
-import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
-import {statusFilter} from './status-filter.js?v=20261104-workspace-1';
-import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
+import {taskRowActions} from './ui-components.js?v=20261104-work-history-1';
+import {createProjectTabs} from './project-tabs.js?v=20261104-work-history-1';
+import {choiceSelect} from './ui-components.js?v=20261104-work-history-1';
+import {statusFilter} from './status-filter.js?v=20261104-work-history-1';
+import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261104-work-history-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
-import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261104-timeline-polish-1';
-import {taskContext,uid,today,taskStart} from './model.js?v=20261030-explicit-schedule-1';
-import {executionSections} from './workflow.js?v=20261030-explicit-schedule-1';
-import {orderedTasks} from './work-view.js?v=20261030-explicit-schedule-1';
+import {updateMemo,changeCheck,updateItem} from './editing.js?v=20261104-work-history-1';
+import {taskContext,uid,today,taskStart} from './model.js?v=20261104-work-history-1';
+import {executionSections} from './workflow.js?v=20261104-work-history-1';
+import {orderedTasks} from './work-view.js?v=20261104-work-history-1';
 
 // This surface only consumes existing task records; filters never reschedule tasks.
 export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save,notify,flow,images=workImages}){
@@ -42,7 +43,7 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
  const timerIcon=type=>`<svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${type==='play'?'<path d="M7 4v16l14-8z"/>':type==='pause'?'<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>':'<rect x="5" y="5" width="14" height="14" rx="1"/>'}</svg>`;
  const context=t=>taskContext(getData(),t).project;
  function filtered(all,key){const xs=all.filter(matchesProject);return listSort==='manual'&&key==='today'?todayOrder(getData(),xs):sortTasks(getData(),xs,listSort);}
- function items(){return filtered(executionBuckets(getData(),today()).today,'today');}
+ function items(){return filtered(executionBuckets(getData(),ui.date).today,'today');}
  function menuView(){if(!menu)return '';if(menu==='move')return '<div class="tt-menu" role="dialog" aria-label="순서 이동"><button data-move-today="up">위로 이동</button><button data-move-today="down">아래로 이동</button>'+btn('닫기','close-menu')+'</div>';const f=filters[menuScope];return '<div class="tt-menu" role="dialog" aria-label="필터 및 정렬">'+(menu==='project'?choiceSelect(f.project,[['','전체 프로젝트'],...getData().projects.filter(p=>!p.deletedAt).map(p=>[p.id,p.title])],'data-tt-filter="project"','프로젝트 필터'):menu==='status'?choiceSelect(f.status,[['','전체'],...statusOptions(getData()).filter(([v])=>!['done','cancelled'].includes(v))],'data-tt-filter="status"','상태 필터'):menu==='due'?choiceSelect(f.sort,[['manual','직접 정렬'],['due','마감 빠른순']],'data-tt-filter="sort"','작업일자 정렬'):'<input data-tt-search aria-label="할 일 검색" value="'+esc(f.query)+'">')+btn('닫기','close-menu')+'</div>';}
  function taskMenu(t,where){return `<button type="button" class="tt-button ux-delete ${where==='panel'?'':'row-delete'}" data-action="delete-task" data-id="${esc(t.id)}" aria-label="${esc(t.title)} 삭제" title="삭제">${icon('trash')}</button>`;}
 
@@ -53,12 +54,14 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
 
  function panelView(){if(panel&&panel.tab!==ui.tab)return '';const t=panel&&task(panel.id);if(!t){panel=null;return ''}const focus=panel.mode==='focus',s=timer.read(),linked=s.taskId===t.id;return `<aside class="tt-panel" aria-label="${esc(t.title)} ${focus?'집중':'상세'}"><header>${focus?`<h2>${esc(t.title)}</h2>`:`<textarea rows="1" spellcheck="false" class="tt-edit-title" data-tt-title data-task-id="${esc(t.id)}" aria-label="할 일 제목" maxlength="160" required>${esc(t.title)}</textarea>`}${focus?'':taskMenu(t,'panel')}${btn(icon('close'),'close-panel','aria-label="패널 닫기"')}</header><div class="tt-panel-body">${focus?`<input class="tt-clock" data-tt-clock aria-label="집중 시간 수정 (분)" title="클릭하여 분 단위 수정" value="${linked?s.clock:String(s.minutes).padStart(2,'0')+':00'}"><div class="tt-presets">${[10,20,30,60].map(n=>btn(n+'분','minutes',`data-value="${n}"`)).join('')}</div><div class="tt-timer-controls">${btn(timerIcon(linked&&s.running?'pause':'play'),linked&&s.running?'pause':'start',`aria-label="${linked&&s.running?'일시정지':'시작 또는 계속'}" title="${linked&&s.running?'일시정지':'시작 또는 계속'}"`)}${btn(timerIcon('stop'),'stop','aria-label="종료" title="종료"')}</div><p class="tt-error" data-tt-error role="status"></p>`:`<div class="tt-date"><span>마감</span>${btn(esc(t.due?deadlineLabel(t.due,dateFormat)+(t.dueTime?' '+t.dueTime:''):'설정')+icon('calendar'),'edit-due','aria-label="마감 설정"')}</div>`}${focus?'':checklist(t)}${focus?'':`<h3>업무 메모</h3><div class="tt-memo" contenteditable="true" role="textbox" aria-multiline="true" aria-label="업무 메모" data-tt-memo data-task-id="${esc(t.id)}">${memo(t)}</div>${savedImages(t)?`<details class="tt-saved-images"><summary>기존 첨부</summary>${savedImages(t)}</details>`:''}<p class="tt-error" data-tt-error role="status"></p><div class="tt-detail-footer">${btn(timerIcon('play'),'focus',`data-id="${esc(t.id)}" aria-label="집중" title="집중"`)}<button type="button" data-action="detail" data-type="task" data-id="${esc(t.id)}" class="tt-button">추가 설정</button></div>`}</div></aside>`;}
  function miniView(){const s=timer.read(),t=task(s.taskId);if(!t||(panel?.tab===ui.tab&&panel?.mode==='focus'&&panel.id===t.id))return '';return `<div class="tt-mini">${btn(esc(t.title),'focus',`data-id="${esc(t.id)}"`,'tt-mini-title')}<span data-tt-mini-clock>${s.clock}</span>${btn(timerIcon(s.running?'pause':'play'),s.running?'pause':'resume',`aria-label="${s.running?'일시정지':'계속하기'}" title="${s.running?'일시정지':'계속하기'}"`)}${btn(timerIcon('stop'),'stop','aria-label="종료" title="종료"')}</div>`;}
- function viewTabs(){return `<div class="ux-view-tabs"><button class="view-tab ux-view-icon" data-timeline-toggle aria-pressed="false" aria-label="타임라인" title="타임라인">${icon('clock')}</button></div>`;}
- function renderList(key){const f=filters[key],project=projectTabs.current(),xs=filtered(key==='completed'?getData().tasks.filter(t=>!t.deletedAt&&t.status==='done'):executionBuckets(getData(),today())[key],key);return taskList(getData(),xs,{key,project,date:today(),filter:f.status,sort:f.sort,query:f.query,projectFilter:f.project,drag:key==='today'&&!project&&!f.project&&!f.status&&!f.query&&listSort==='manual'});}
- function section(key){const label={today:'오늘 할 일',remaining:'남은 할 일',overdue:'기한 지난 일',completed:'완료한 일'}[key];return '<details open class="execution-section '+(key==='today'?'execution-today':'tt-remaining')+'" data-fold="execution-'+key+'"><summary>'+label+'</summary>'+renderList(key)+(menuScope===key?menuView():'')+'</details>';}
- function remainingView(){return ['remaining','overdue',...(showDone?['completed']:[])].map(section).join('');}
- function toolbar(){if(listOwner!==getScope()){listOwner=getScope();showDone=false;listSort='manual';}return '<div class="tt-toolbar">'+projectTabs.view()+listControls(showDone,listSort,'today-list')+'</div>';}
- function screen(){return '<section class="focus-screen tt-screen">'+toolbar()+section('today')+remainingView()+panelView()+miniView()+'</section>';}
+ function viewTabs(){return '<div class="ux-view-tabs"><button class="view-tab" data-timeline-toggle aria-pressed="false" aria-label="시간표">'+icon('clock')+'시간표</button></div>';}
+ function sectionItems(key){const date=ui.date||today(),data=getData(),b=executionBuckets(data,date);if(key==='completed')return data.tasks.filter(t=>!t.deletedAt&&t.status==='done');if(date<today()&&key==='today')return data.tasks.filter(t=>!t.deletedAt&&recordedOn(t,date,taskPeriod(t))).map(t=>historicalTask(t,date));if(key==='scheduled')return b.remaining.filter(t=>taskPeriod(t).start);if(key==='undated')return b.remaining.filter(t=>!taskPeriod(t).start);return b[key]||[];}
+ function renderList(key){const project=projectTabs.current(),xs=filtered(sectionItems(key),key);return taskList(getData(),xs,{key,project,date:ui.date,drag:key==='today'&&ui.date===today()&&!project&&listSort==='manual'});}
+ function section(key){const label={today:ui.date===today()?'오늘 할 일':ui.date+' 할 일',scheduled:'예정된 할 일',undated:'날짜 없는 할 일',overdue:'기한 지난 일',completed:'완료한 일'}[key];if(key!=='today'&&!sectionItems(key).filter(matchesProject).length)return '';return '<section class="execution-section '+(key==='today'?'execution-today':'tt-remaining')+'"><h3>'+label+'</h3>'+renderList(key)+'</section>';}
+ function remainingView(){return (ui.date<today()?[]:['overdue','scheduled','undated',...(showDone?['completed']:[])]).map(section).join('');}
+ function toolbar(){if(listOwner!==getScope()){listOwner=getScope();showDone=false;listSort='manual';}return '<div class="tt-toolbar">'+projectTabs.view()+listControls(showDone,listSort,'today-list',{hideCompletion:ui.date<today()})+'</div>';}
+ function screen(){const date=ui.date||today(),y=new Date(today()+'T12:00Z');y.setUTCDate(y.getUTCDate()-1);const yesterday=y.toISOString().slice(0,10),carry=getData().tasks.filter(t=>!t.deletedAt&&!['done','cancelled'].includes(t.status)&&recordedOn(t,yesterday,taskPeriod(t))&&!selectedOn(t,today())&&matchesProject(t));return '<section class="focus-screen tt-screen"><div class="day-toolbar"><div class="date-navigation">'+btn(icon('left'),'day-prev','aria-label="이전 날짜"')+'<button class="date-label" data-action="calendar-date">'+date+'</button>'+btn(icon('chevron'),'day-next','aria-label="다음 날짜"')+(date!==today()?btn('오늘','day-today'):'')+'</div>'+(date===today()&&carry.length?btn('어제 미완료 '+carry.length+'개','yesterday'):'')+'</div>'+toolbar()+section('today')+remainingView()+'</section>';}
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-tt]');if(!b)return;const a=b.dataset.tt;if(a.startsWith('day-')){document.activeElement?.blur();if(ui.saveWarning)return;const d=new Date(ui.date+'T12:00Z');d.setUTCDate(d.getUTCDate()+(a==='day-prev'?-1:1));ui.date=a==='day-today'?today():d.toISOString().slice(0,10);repaint();}if(a==='yesterday'){window.dispatchEvent(new CustomEvent('work-yesterday'));}});
  document.addEventListener('click',e=>{const b=e.target.closest('[data-list-menu]');if(b&&['today','remaining','overdue'].includes(b.dataset.listKey)){menu=menu===b.dataset.listMenu&&menuScope===b.dataset.listKey?null:b.dataset.listMenu;menuScope=b.dataset.listKey;repaint();}const un=e.target.closest('[data-list-unselect]');if(un){selectToday(task(un.dataset.listUnselect),false);save();repaint();}});
  document.addEventListener('change',e=>{if(e.target.matches('[data-today-list-show-done]')){showDone=e.target.value==='all';repaint();return;}if(e.target.matches('[data-today-list-sort]')){listSort=e.target.value;repaint();return;}if(e.target.matches('[data-list-status]')){try{updateItem(getData(),'task',e.target.dataset.listStatus,{status:e.target.value});save();repaint();window.dispatchEvent(new Event('work-cell-updated'));}catch(err){notify(err.message);}}});
  let moveId=null;
@@ -85,5 +88,5 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
 
  // Prevent imported HTML or files from bypassing the controlled clipboard path.
  document.addEventListener('drop',e=>{if(e.target.closest('[data-tt-memo]'))e.preventDefault()});
- return {selectProject:id=>projectTabs.select(id),toolbarMenu:()=>menuScope==='today'?menuView():'',filterTasks:all=>filtered(all.filter(t=>status==='all'||(status==='done'?t.status==='done':t.status!=='done')),'today'),toolbar,projectTabs:()=>projectTabs.view(),matchesProject,addContext:()=>({date:null,todaySelected:true,projectId:projectTabs.current(),hideProject:!!projectTabs.current()}),screen,tick,viewTabs,remainingView,panelView,miniView,reset(){projectTabs.reset();dueDialog?.close();projectDialog?.close();panel=menu=null;scope='today';filters.today=blank();filters.remaining=blank();menuScope='today';status='all';addCheck=false;checkDraft=''},busy:()=>!!panel&&panel.tab===ui.tab||!!menu&&ui.tab==='tasks',items};
+ return {selectProject:id=>projectTabs.select(id),toolbarMenu:()=>menuScope==='today'?menuView():'',filterTasks:all=>filtered(all.filter(t=>status==='all'||(status==='done'?t.status==='done':t.status!=='done')),'today'),toolbar,projectTabs:()=>projectTabs.view(),matchesProject,addContext:()=>({date:ui.date,planDate:ui.date,todaySelected:ui.date===today(),projectId:projectTabs.current(),hideProject:!!projectTabs.current()}),screen,tick,viewTabs,remainingView,panelView,miniView,reset(){projectTabs.reset();dueDialog?.close();projectDialog?.close();panel=menu=null;scope='today';filters.today=blank();filters.remaining=blank();menuScope='today';status='all';addCheck=false;checkDraft=''},busy:()=>!!panel&&panel.tab===ui.tab||!!menu&&ui.tab==='tasks',items};
 }

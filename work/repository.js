@@ -1,5 +1,5 @@
-import {taskTypes} from './task-types.js?v=20261104-timeline-polish-1';
-import {validatePeriod} from './schedule-rules.js?v=20261103-compact-mobile-1';
+import {taskTypes} from './task-types.js?v=20261104-work-history-1';
+import {validatePeriod} from './schedule-rules.js?v=20261104-work-history-1';
 import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
@@ -27,6 +27,10 @@ export function validate(data){
   if(data.todayOrder!==undefined&&(!Array.isArray(data.todayOrder)||!data.todayOrder.every(id)||new Set(data.todayOrder).size!==data.todayOrder.length))throw Error('오늘 정렬을 확인해 주세요.');
   for(const e of [...data.tasks,...data.works])if(Object.hasOwn(e,'workPeriod'))validatePeriod(e.workPeriod);
   for(const t of data.tasks){if(t.todaySelected!==undefined&&typeof t.todaySelected!=='boolean')throw Error('오늘 선택값을 확인해 주세요.');if(t.projectId&&(!id(t.projectId)||!data.projects.some(p=>p.id===t.projectId)))throw new Error('할 일 프로젝트 연결을 확인해 주세요.');if(![...builtins.map(([id])=>id),...custom.map(s=>s.id)].includes(t.status)||![t.plans,t.blocks,t.checks,t.tags].every(Array.isArray)||typeof t.notes!=='string'||!date(t.due)||!date(t.remindFrom)||!date(t.remindUntil??null)||t.remindUntil&&(!t.remindFrom||t.remindUntil<t.remindFrom)||t.workId&&!data.works.some(w=>w.id===t.workId))throw new Error('할 일 데이터의 형식이나 연결이 올바르지 않습니다.');
+    if(t.deadline!==undefined&&!date(t.deadline))throw Error('마감일을 확인해 주세요.');
+    if(t.dayPlans!==undefined&&(!Array.isArray(t.dayPlans)||t.dayPlans.some(p=>!p||!p.date||!date(p.date)||typeof p.selected!=='boolean')||new Set(t.dayPlans.map(p=>p.date)).size!==t.dayPlans.length))throw Error('날짜별 계획을 확인해 주세요.');
+    if(t.history!==undefined&&(!Array.isArray(t.history)||t.history.some(e=>!e||!id(e.id)||!e.date||!date(e.date)||!['plan','unplan','period','time','time-clear','complete','reopen','worklog','change'].includes(e.kind)||typeof e.at!=='string'||!Number.isFinite(Date.parse(e.at))||typeof e.title!=='string'||e.text!==undefined&&typeof e.text!=='string')||new Set(t.history.map(e=>e.id)).size!==t.history.length))throw Error('업무 기록을 확인해 주세요.');
+    for(const e of t.history||[]){if(e.period!==undefined)validatePeriod(e.period);if(e.workPeriod!==undefined)validatePeriod(e.workPeriod);if(e.kind==='time'&&(!time(e.start)||!(time(e.end)||e.end==='24:00')||e.start>=e.end))throw Error('기록의 예정 시간을 확인해 주세요.');}
     if(t.startDate!==undefined&&!date(t.startDate))throw new Error('작업 시작일을 확인해 주세요.');
     if(t.memoParts!==undefined&&(!Array.isArray(t.memoParts)||t.memoParts.some(p=>!validMemoPart(p))))throw new Error('업무 메모 형식을 확인해 주세요.');
     if(t.excludedDates!==undefined&&(!Array.isArray(t.excludedDates)||t.excludedDates.some(d=>!d||!date(d))))throw new Error('제외 날짜 형식이 올바르지 않습니다.');

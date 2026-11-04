@@ -1,4 +1,4 @@
-import {escapeHTML as esc,icon} from './ui-components.js';
+import {escapeHTML as esc,icon} from './ui-components.js?v=20261104-work-history-1';
 export const DEFAULT_TASK_TYPES=['수정','신청','보완','작성','회신','전달','확인','디자인','검수','결재'].map((name,i)=>({id:'task-type-'+i,name}));
 export const taskTypes=data=>data.taskTypes??DEFAULT_TASK_TYPES;
 export const taskTypeName=(data,task)=>taskTypes(data).find(t=>t.id===task.typeId)?.name||'-';

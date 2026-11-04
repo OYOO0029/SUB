@@ -1,4 +1,4 @@
-import {today,addDays,addMonths} from './model.js?v=20261030-explicit-schedule-1';
+import {today,addDays,addMonths} from './model.js?v=20261104-work-history-1';
 
 export function parseDateInput(value){
   const match=value.trim().match(/^(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})\.?$/);
@@ -21,7 +21,8 @@ export function dateLabel(value,format='absolute',base=today()){
   return dateInputLabel(value);
 }
 
-export function deadlineLabel(value,format='absolute',base=today()){
+export function deadlineLabel(value,format,base=today()){
+ if(!format){try{format=localStorage.getItem('work-date-format')||'absolute';}catch{format='absolute';}}
  if(!value)return '';
  const diff=Math.round((Date.parse(value+'T12:00:00Z')-Date.parse(base+'T12:00:00Z'))/86400000);
  if(format==='relative')return diff===0?'오늘':diff>0?`D-${diff}`:`D+${-diff}`;
@@ -54,7 +55,6 @@ export function createDatePicker({dialog,esc,icon,onCommit,onFormat}){
       <div class="calendar-weekdays" aria-hidden="true">${['일','월','화','수','목','금','토'].map(v=>`<span>${v}</span>`).join('')}</div>
       <div class="date-calendar-grid" role="group" aria-label="날짜 선택">${days.map(day=>{const edge=day===d.start||d.range&&day===d.end,between=d.range&&d.start&&d.end&&day>d.start&&day<d.end;return `<button type="button" data-calendar-day="${day}" aria-label="${day}" aria-pressed="${!!edge}" ${day===base?'aria-current="date"':''} class="calendar-day-button ${day.slice(0,7)!==month?'outside':''} ${edge?'selected':''} ${between?'between':''}">${Number(day.slice(8))}</button>`;}).join('')}</div>
       <div class="calendar-settings">${d.allowRange?toggle('range','종료일',d.range):''}
-      <label class="calendar-setting"><span>날짜 형식</span><select aria-label="날짜 형식" data-calendar-format><option value="absolute" ${d.format==='absolute'?'selected':''}>${d.deadlineFormat?'월/일(요일)':'년/월/일'}</option><option value="relative" ${d.format==='relative'?'selected':''}>${d.deadlineFormat?'오늘 · D-day':'상대'}</option></select></label>
       ${d.allowTime?toggle('time','시간 포함',d.includeTime)+(d.includeTime?`<label class="calendar-time-row"><span>마감 시각</span><input type="time" data-calendar-time aria-label="마감 시각" value="${esc(d.time)}"></label>`:''):''}
       ${d.allowReminder?`<label class="calendar-setting"><span>리마인드</span><select data-calendar-reminder aria-label="마감 리마인드"><option value="" ${d.reminder===null?'selected':''}>없음</option>${[['0','당일'],['1','1일 전'],['2','2일 전'],['7','1주 전']].map(([v,t])=>`<option value="${v}" ${d.reminder!==null&&d.reminder===addDays(d.start||base,-Number(v))?'selected':''}>${t}</option>`).join('')}${d.reminder&&!['0','1','2','7'].some(v=>d.reminder===addDays(d.start||base,-Number(v)))?`<option value="custom" selected>${esc(d.reminder)}</option>`:''}</select></label>`:''}</div>
       <p class="calendar-feedback ${d.error?'error':''}" role="status">${esc(d.error||(d.waiting?'종료일을 선택하세요.':d.saved?'저장됨':''))}</p>

@@ -1,3 +1,4 @@
+import {completeTask} from '../work/task-history.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createItem} from '../work/editing.js';
@@ -35,5 +36,5 @@ test('future rescheduling is respected; completed, cancelled and trashed tasks d
  task.plans=[task.plans[0]];task.remindFrom='2030-10-18';assert.ok(taskSections(data,day).planned.includes(task));assert.deepEqual(reminderTasks(data,day),[]);
  for(const status of ['done','cancelled']){task.status=status;assert.deepEqual(taskSections(data,day).planned,[]);assert.deepEqual(reminderTasks(data,day),[]);}
  task.status='todo';task.deletedAt=day;assert.deepEqual(taskSections(data,day).planned,[]);
- task.deletedAt=null;complete(task,day);assert.deepEqual(taskSections(data,day).planned,[]);assert.ok(taskSections(data,day,true).planned.includes(task));
+ task.deletedAt=null;completeTask(task,data,new Date(day+'T03:00:00Z'));assert.deepEqual(taskSections(data,day).planned,[]);assert.ok(taskSections(data,day,true).planned.includes(task));
 });

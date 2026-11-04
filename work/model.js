@@ -1,3 +1,4 @@
+import {completeTask,recordTask,selectedOn,deadline} from './task-history.js?v=20261104-work-history-1';
 import {taskContext} from './ownership.js?v=20261028-domain-rules-1';
 export {taskContext} from './ownership.js?v=20261028-domain-rules-1';
 // All date/view decisions live here. This module has no DOM or storage dependency.
@@ -8,7 +9,7 @@ export const weekDays=date=>{const n=new Date(date+'T12:00:00Z').getUTCDay();con
 export const monthDays=date=>{const start=date.slice(0,8)+'01';const first=weekDays(start)[0];return Array.from({length:42},(_,i)=>addDays(first,i));};
 export const uid=()=>globalThis.crypto.randomUUID();
 export function scheduleOf(task){if(Object.hasOwn(task,'workPeriod'))return {legacy:false,periods:[],start:task.workPeriod?.start||null};const periods=task.plans.filter(p=>p.state==='active'),legacy=!Object.hasOwn(task,'startDate');return {legacy,periods,start:legacy?periods.map(p=>p.start).sort()[0]||null:task.startDate||null};}
-export function isPlanned(task,date){const s=scheduleOf(task);if(task.excludedDates?.includes(date))return false;if(Object.hasOwn(task,'workPeriod'))return !!task.workPeriod&&task.workPeriod.start<=date&&task.workPeriod.end>=date;return s.legacy?s.periods.some(p=>p.start<=date&&p.end>=date):!!s.start&&s.start<=date&&(!task.completedAt||date<=task.completedAt.slice(0,10));}
+export function isPlanned(task,date){if(selectedOn(task,date))return true;if(date<today()&&(task.history||[]).some(e=>e.date===date&&['plan','time','complete','worklog'].includes(e.kind)||e.period?.start<=date&&e.period?.end>=date))return true;const s=scheduleOf(task);if(task.excludedDates?.includes(date))return false;if(Object.hasOwn(task,'workPeriod'))return !!task.workPeriod&&task.workPeriod.start<=date&&task.workPeriod.end>=date;return s.legacy?s.periods.some(p=>p.start<=date&&p.end>=date):!!s.start&&s.start<=date&&(!task.completedAt||date<=task.completedAt.slice(0,10));}
 export function isCarried(task,date){const {legacy,periods:plans}=scheduleOf(task);if(!legacy)return false;return plans.some(p=>p.end<date)&&!plans.some(p=>p.end>=date);}
 export function isDuePast(task,date,now=new Date()){
   if(!task.due)return false;
@@ -36,13 +37,14 @@ export function planToday(task,date){
   task.plans.forEach(p=>{if(p.state==='active'&&p.end<date)p.state='superseded';});
   const plan={id:uid(),start:date,end:date,state:'active'};task.plans.push(plan);return plan;
 }
-export function setTime(task,date,start,end){
+export function setTime(task,date,start,end,data){
+  if(task.blocks.some(b=>b.date===date&&b.start===start&&b.end===end))return;
   if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(start)||(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(end)&&end!=='24:00')||end<=start)throw new Error('종료 시간을 시작 시간보다 늦게 설정해 주세요.');
-  task.blocks=task.blocks.filter(b=>b.date!==date);task.blocks.push({id:uid(),date,start,end});
+  for(const b of task.blocks.filter(b=>b.date===date))if(!(task.history||[]).some(e=>e.kind==='time'&&e.date===date&&e.start===b.start&&e.end===b.end))recordTask(task,'time',{date,data,start:b.start,end:b.end,legacy:true});task.blocks=task.blocks.filter(b=>b.date!==date);task.blocks.push({id:uid(),date,start,end});recordTask(task,'time',{date,data,start,end});
 }
-export function removeTime(task,date){task.blocks=task.blocks.filter(b=>b.date!==date);}
+export function removeTime(task,date,data){if(!task.blocks.some(b=>b.date===date))return;for(const b of task.blocks.filter(b=>b.date===date))recordTask(task,'time',{date,data,start:b.start,end:b.end});task.blocks=task.blocks.filter(b=>b.date!==date);recordTask(task,'time-clear',{date,data});}
 export const duration=(start,end)=>{const parse=x=>Number(x.split(':')[0])*60+Number(x.split(':')[1]);return parse(end)-parse(start);};
-export function complete(task,date){task.status=task.status==='done'?'waiting':'done';task.completedAt=task.status==='done'?date+'T'+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date())+'+09:00':null;}
+export function complete(task,date){completeTask(task);}
 
 export function matches(state,task,query,project){const c=taskContext(state,task);return (!project||(project==='standalone'?!c.project:c.project?.id===project))&&(!query||[task.title,task.notes,...task.tags,c.work?.title,c.project?.title].join(' ').toLowerCase().includes(query.toLowerCase()));}
 

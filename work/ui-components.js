@@ -1,3 +1,4 @@
+import {taskActions} from './task-actions.js?v=20261104-work-history-1';
 // Shared visual primitives. Domain updates remain in their existing change handlers.
 export const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const paths={check:'m5 12 4 4L19 6',plus:'M12 5v14M5 12h14',chevron:'m9 5 7 7-7 7',left:'m15 5-7 7 7 7',close:'m6 6 12 12M6 18 18 6',clock:'M12 8v4l3 2',search:'m21 21-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',folder:'M3 7V5h6l2 2h10v13H3Z',briefcase:'M8 6V3h8v3M3 7h18v13H3ZM3 12h18M10 12v3h4v-3',home:'m3 10 9-7 9 7v11h-6v-7H9v7H3Z',settings:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2',list:'M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1',calendar:'M4 5h16v16H4ZM4 10h16M8 2v6M16 2v6',bell:'M18 8a6 6 0 0 0-12 0v6l-2 3h16l-2-3ZM10 21h4',arrow:'M4 12h16m-6-6 6 6-6 6',edit:'m15 4 5 5M4 20l5-1L21 7l-5-5L4 14Z',tag:'M3 3h8l10 10-8 8L3 11ZM7 7h.01',note:'M5 3h14v13l-5 5H5ZM14 21v-6h5M8 7h8M8 11h6',users:'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M2 21v-3a6 6 0 0 1 12 0v3M16 4a4 4 0 0 1 0 7M17 14a5 5 0 0 1 5 5v2',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',sun:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1 1M18 18l1 1M5 19l1-1M18 6l1-1',moon:'M20 14A9 9 0 0 1 10 3a9 9 0 1 0 10 11',leaf:'M20 3C8 1 2 8 5 15c5 8 16 1 15-12ZM5 20 16 8',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6',undo:'M8 4 3 9l5 5M3 9h11a6 6 0 0 1 0 12',info:'M12 11v6M12 7h.01'};
@@ -7,10 +8,7 @@ paths.week='M4 5h16v14H4ZM9 5v14M15 5v14';paths.more='M5 12h.01M12 12h.01M19 12h
 paths.filter='M3 6h7m4 0h7M3 18h11m4 0h3M10 3v6M14 15v6M3 12h3m4 0h11M6 9v6';paths.grip='M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01';
 export function icon(name,cls=''){return `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${['clock','info'].includes(name)?'<circle cx="12" cy="12" r="9"/>':''}<path d="${paths[name]||paths.note}"/></svg>`;}
 export const button=(label,action,attrs='',cls='button')=>`<button class="${cls}" data-action="${action}" ${attrs} ${!attrs.includes('title=')&&attrs.match(/aria-label="([^"]+)"/) ? 'title="'+attrs.match(/aria-label="([^"]+)"/)[1]+'"' : ''}>${label}</button>`;
-export function taskRowActions(task){
- const id=escapeHTML(task.id),name=escapeHTML(task.title);
- return `<div class="tt-row-actions">${button(icon('trash'),'delete-task',`data-id="${id}" aria-label="${name} 삭제" title="삭제"`,'icon-button row-delete')}${button(icon('more'),'detail',`data-type="task" data-id="${id}" aria-label="${name} 상세 보기" title="상세 보기"`,'icon-button row-detail')}</div>`;
-}
+export const taskRowActions=taskActions;
 
 export function choiceSelect(value,options,attribute,label,extra=''){
  const select=`<select ${attribute} aria-label="${escapeHTML(label)}">${options.map(([v,l])=>`<option value="${escapeHTML(v)}" ${value===v?'selected':''}>${escapeHTML(l)}</option>`).join('')}</select>`;

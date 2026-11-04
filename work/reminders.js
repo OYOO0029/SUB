@@ -1,4 +1,4 @@
-import {today,reminderTasks,taskContext,isPlanned} from './model.js?v=20261030-explicit-schedule-1';
+import {today,reminderTasks,taskContext,isPlanned} from './model.js?v=20261104-work-history-1';
 
 // The view date never controls notifications. A visit is recorded only once
 // account data is ready; waiting for sync must not consume today's first visit.

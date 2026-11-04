@@ -22,18 +22,18 @@ test('today table filters, unified detail entry, remaining separation and timer 
   const click=s=>{assert(document.querySelector(s),s);document.querySelector(s).click()},change=(s,v)=>{const el=document.querySelector(s);el.value=v;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))};
   a.todaySelected=true;b.todaySelected=true;
   render();assert.deepEqual([...document.querySelectorAll('table[aria-label="오늘 할 일"] th')].map(t=>(t.querySelector('.desktop-column-label')?.textContent||'').trim()),['','할 일','유형','프로젝트','작업일자','']);
-  assert.equal(view.addContext().date,null);assert.equal(view.addContext().todaySelected,true);assert(!document.querySelector('[data-today-status],[data-task-scope]'));
+  assert.equal(view.addContext().date,date);assert.equal(view.addContext().todaySelected,true);assert(!document.querySelector('[data-today-status],[data-task-scope]'));
   b.status='done';render();assert.deepEqual(view.items().map(t=>t.id),[a.id]);b.status='todo';render();
   assert.equal(document.querySelector('[data-list-status],[data-list-menu="status"]'),null);
   assert(document.querySelector('[data-action="detail"][data-id="'+a.id+'"]'));
-  const original=JSON.stringify(data);click('[data-tt="focus"][data-id="'+a.id+'"]');change('[data-tt-clock]','37');click('[data-tt="start"]');assert(timer.read().running);assert.equal(timer.read().minutes,37);click('[data-tt="focus"][data-id="'+b.id+'"]');click('[data-tt="start"]');assert.equal(timer.read().taskId,a.id);assert(document.querySelector('[data-tt-error]').textContent);assert.equal(JSON.stringify(data),original);
+  assert(!document.querySelector('[data-tt=focus]'));assert(!timer.read().running);
   view.reset();const past=createItem(data,'task','late',{projectId:p.id});past.due=addDays(date,-1);past.todaySelected=true;const undated=createItem(data,'task','undated'),future=createItem(data,'task','future');future.startDate=addDays(date,2);render();
-  const ids=label=>[...document.querySelectorAll('table[aria-label="'+label+'"] [data-tt-row]')].map(e=>e.dataset.ttRow);
-  assert.deepEqual(ids('기한 지난 일'),[past.id]);assert.deepEqual(ids('남은 할 일'),[undated.id,future.id]);assert.equal(new Set([...ids('오늘 할 일'),...ids('남은 할 일'),...ids('기한 지난 일')]).size,5);
+  const ids=label=>[...document.querySelectorAll(label==='남은 할 일'?'table[data-list-key=undated] [data-tt-row],table[data-list-key=scheduled] [data-tt-row]':'table[aria-label="'+label+'"] [data-tt-row]')].map(e=>e.dataset.ttRow);
+  assert.deepEqual(ids('기한 지난 일'),[past.id]);assert.deepEqual(ids('남은 할 일'),[future.id,undated.id]);assert.equal(new Set([...ids('오늘 할 일'),...ids('남은 할 일'),...ids('기한 지난 일')]).size,5);
   assert.equal(document.querySelectorAll('th button[data-list-menu]').length,0);
   past.status='done';render();const before=JSON.stringify(data);document.querySelector('[data-today-list-show-done]').value='all';document.querySelector('[data-today-list-show-done]').dispatchEvent(new window.Event('change',{bubbles:true}));assert.deepEqual(ids('완료한 일'),[past.id]);assert.deepEqual(ids('기한 지난 일'),[]);assert.equal(document.querySelectorAll('[data-today-list-show-done]').length,1);
   change('[data-today-list-sort]','recent');assert.deepEqual(ids('남은 할 일'),[future.id,undated.id]);assert.equal(document.querySelector('[data-today-drag]'),null);
-  change('[data-today-list-sort]','manual');assert.deepEqual(ids('남은 할 일'),[undated.id,future.id]);assert.equal(JSON.stringify(data),before);
+  change('[data-today-list-sort]','manual');assert.deepEqual(ids('남은 할 일'),[future.id,undated.id]);assert.equal(JSON.stringify(data),before);
   click('[data-task-project="'+p.id+'"]');assert.deepEqual(ids('완료한 일'),[past.id]);assert.deepEqual(ids('남은 할 일'),[]);assert.equal(JSON.stringify(data),before);
   owner='other';view.reset();render();assert(!document.querySelector('.tt-panel'));assert(!document.querySelector('.tt-mini'));validate(data);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}
@@ -61,7 +61,7 @@ test('project tabs filter work-linked tasks, inherit new tasks and isolate draft
  choose(a.id);assert.deepEqual(table.items().map(t=>t.id),[linked.id]);assert.equal(document.querySelectorAll('th[data-column=project]').length,0);assert.equal(table.addContext().projectId,a.id);assert.equal(JSON.stringify(data),original);
  composer.open();assert.equal(document.querySelectorAll('[data-batch-field],[data-batch-date],.batch-context,.batch-project').length,0);input('A draft');choose(b.id);assert(!document.querySelector('textarea'));composer.open();input('B first\nB second');submit();assert(data.tasks.slice(2).every(t=>t.projectId===b.id&&t.startDate===null&&t.due===null&&t.todaySelected));
  choose(a.id);assert.equal(document.querySelector('textarea').value,'A draft');submit();assert.equal(data.tasks.at(-1).projectId,a.id);assert(!data.tasks.at(-1).workId);
- const row=document.querySelector('[data-tt-row]');assert.equal(row.querySelector('.row-detail').closest('td'),row.lastElementChild);assert(row.querySelector('.row-delete').compareDocumentPosition(row.querySelector('.row-detail'))&window.Node.DOCUMENT_POSITION_FOLLOWING);
+ const row=document.querySelector('[data-tt-row]');assert.equal(row.querySelector('.row-detail').closest('td'),row.lastElementChild);assert(!row.querySelector('.row-delete'));assert(row.querySelector('[data-menu-panel] [data-action=delete-task]'));
  const pin=document.querySelector(`[data-project-pin="${a.id}"]`);pin.checked=false;pin.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(table.addContext().projectId,'');assert(document.querySelector('th[data-column=project]'));assert(!document.querySelector(`[data-task-project="${a.id}"]`));
  table.reset();composer.reset();render();assert(!document.querySelector(`[data-task-project="${a.id}"]`));owner='b';table.reset();render();assert(document.querySelector(`[data-task-project="${a.id}"]`));assert.equal(data.tasks.find(t=>t.id===other.id).projectId,b.id);validate(data);
  }finally{dom.window.close();for(const k of keys){const d=old.get(k);if(d)Object.defineProperty(globalThis,k,d);else delete globalThis[k];}}

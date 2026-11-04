@@ -1,3 +1,4 @@
+import {selectedOn,selectDay,koreaDay,deadline} from './task-history.js?v=20261104-work-history-1';
 // Read compatibility without rewriting historical records.
 export function taskPeriod(task){
  if(Object.hasOwn(task,'workPeriod'))return task.workPeriod||{start:null,end:null};
@@ -9,10 +10,10 @@ export function taskPeriod(task){
 export const activeTask=t=>!t.deletedAt&&!['done','cancelled'].includes(t.status);
 export function executionBuckets(data,date){
  const result={today:[],remaining:[],overdue:[]};
- for(const t of data.tasks){if(!activeTask(t))continue;const end=taskPeriod(t).end;result[end&&end<date?'overdue':t.todaySelected?'today':'remaining'].push(t);}
+ for(const t of data.tasks){if(!activeTask(t))continue;const end=deadline(t);result[end&&end<date?'overdue':selectedOn(t,date)?'today':'remaining'].push(t);}
  return result;
 }
-export function selectToday(task,selected=true){task.todaySelected=!!selected;}
+export function selectToday(task,selected=true){selectDay(task,koreaDay(),selected);}
 export function validatePeriod(period){
  if(period===null)return;
  const valid=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!Number.isNaN(Date.parse(d+'T12:00:00Z'))&&new Date(d+'T12:00:00Z').toISOString().slice(0,10)===d;
@@ -23,4 +24,4 @@ export function workPeriod(work){return Object.hasOwn(work,'workPeriod')?work.wo
 export function outsideWork(task,work){const t=taskPeriod(task),w=workPeriod(work);return !!(w?.start&&w?.end&&t.start&&t.end&&(t.start<w.start||t.end>w.end));}
 export function todayOrder(data,tasks){const rank=new Map((data.todayOrder||[]).map((id,i)=>[id,i]));return [...tasks].sort((a,b)=>(rank.get(a.id)??Infinity)-(rank.get(b.id)??Infinity));}
 export function reorderToday(data,date,id,before=null){const ids=todayOrder(data,executionBuckets(data,date).today).map(t=>t.id);if(!ids.includes(id)||id===before)return;const rest=ids.filter(x=>x!==id),at=before?rest.indexOf(before):-1;rest.splice(at<0?rest.length:at,0,id);data.todayOrder=rest;}
-export const lateDays=(task,date)=>Math.max(0,Math.round((Date.parse(date+'T12:00:00Z')-Date.parse(taskPeriod(task).end+'T12:00:00Z'))/86400000));
+export const lateDays=(task,date)=>Math.max(0,Math.round((Date.parse(date+'T12:00:00Z')-Date.parse(deadline(task)+'T12:00:00Z'))/86400000));

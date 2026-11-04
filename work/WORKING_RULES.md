@@ -20,8 +20,8 @@
 ## 데이터 불변 조건
 - 소속 읽기는 ownership.js의 taskContext, 소속 변경은 assignTaskOwner를 사용합니다. 활성 업무가 있으면 그 업무의 프로젝트가 기준이며, 업무가 없을 때만 직접 프로젝트를 사용합니다. 기존 이중 연결 기록은 읽을 때 변경하지 않고 명시적 소속 수정 때만 정리합니다.
 - 프로젝트 → 업무 → 할 일 관계와 하위 할 일(checks)을 구분합니다. 화면 정리로 레코드나 관계를 변환하지 않습니다.
-- 오늘 선택(todaySelected), 작업일자(workPeriod), 업무 기간, 시간 배치(blocks), 리마인드는 독립입니다. 날짜 편집 시에만 startDate/due 호환 필드를 반영합니다. 기존 plans는 보존합니다.
-- 오늘/남은/기한 지난 분류는 schedule-rules.js의 executionBuckets를 사용합니다. taskPeriod/workPeriod로 날짜를 읽고, 기존 캘린더 해석은 model.js에서 호환합니다. 오늘 선택이 날짜나 상태를 바꾸면 안 됩니다.
+- 날짜별 선택(dayPlans, 기존 todaySelected 호환), 작업일자(workPeriod), 업무 기간, 시간 배치(blocks), 리마인드는 독립입니다. 작업일자 편집은 startDate, 실제 마감 편집은 due 호환 필드를 반영합니다. 기존 plans는 보존합니다.
+- 오늘/남은/기한 지난 분류는 schedule-rules.js의 executionBuckets를 사용합니다. 작업일자는 taskPeriod/workPeriod, 실제 마감은 deadline/due로 읽고, 기존 캘린더 해석은 model.js에서 호환합니다. 오늘 선택이 날짜나 상태를 바꾸면 안 됩니다.
 - 기존 plans 기반 항목은 기존 해석을 유지합니다. 사용자가 시작일을 수정할 때만 선택적 startDate를 기록합니다. 일괄 마이그레이션하지 않습니다.
 - 프로젝트 변경은 기존 updateItem의 연결 규칙을 사용합니다. 다른 프로젝트로 이동하면 맞지 않는 업무 연결만 해제하고 메모·일정·하위 할 일은 보존합니다.
 - 업무 삭제 시 하위 할 일의 프로젝트를 보존합니다. 복원은 삭제 후 사용자가 명시적으로 바꾼 연결을 덮어쓰지 않습니다. 프로젝트·업무별 추가 초안은 서로 분리합니다.

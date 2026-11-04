@@ -1,26 +1,26 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-timeline-polish-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-work-history-1';
 import {activeProject} from './project-options.js';
-import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
-import {createTaskBatch} from './editing.js?v=20261104-timeline-polish-1';
-import {today} from './model.js?v=20261030-explicit-schedule-1';
+import {choiceSelect} from './ui-components.js?v=20261104-work-history-1';
+import {createTaskBatch} from './editing.js?v=20261104-work-history-1';
+import {today} from './model.js?v=20261104-work-history-1';
 export function createTaskComposer({getData,getScope,render,save,esc,icon,notify,getContext=()=>({})}){
  const projectPicker=createProjectPicker({getData,getScope,onPick:id=>{if(!draft)return false;draft.projectId=id||'';render();}});
  let includeInactive=false;let draft=null,resize=null,contextToken=null,composing=false,compositionEnded=0;const drafts=new Map();
  function view(){if(!draft)return '';const project=getData().projects.find(p=>p.id===draft.projectId);
  return `<form class="task-composer" data-task-composer>${!draft.hideProject?`<div class="batch-project"><button type="button" class="ux-status-filter" data-batch-picker aria-label="추가 대상 프로젝트"><span>${esc(project?.title||'프로젝트 선택')}</span>${icon('down')}</button></div>`:''}<div class="batch-title"><textarea name="titles" rows="1" ${draft.pending?'readonly':''} aria-label="추가할 할 일" placeholder="할 일 입력 후 Enter" required>${esc(draft.text)}</textarea></div><div class="batch-due"><span class="ux-empty">-</span></div><div class="batch-actions"><button type="submit" class="icon-button batch-submit" aria-label="할 일 저장" title="저장">${icon('check')}</button><button type="button" class="icon-button batch-close" data-batch-close aria-label="연속 추가 닫기" title="닫기">${icon('close')}</button></div><span class="batch-status" role="status">${esc(draft.message||'')}</span><p role="alert" class="form-error">${esc(draft.error||'')}</p></form>`;}
- const draftKey=d=>JSON.stringify([d.owner,d.target,d.projectId||'',d.workId||'']);
- const contextKey=()=>{const c=getContext(),w=getData().works.find(x=>x.id===c.workId);return draftKey({owner:getScope(),target:c.target||'main',projectId:w?.projectId||c.projectId||'',workId:w?.id||''});};
+ const draftKey=d=>JSON.stringify([d.owner,d.target,d.projectId||'',d.workId||'',d.planDate||'']);
+ const contextKey=()=>{const c=getContext(),w=getData().works.find(x=>x.id===c.workId);return draftKey({owner:getScope(),target:c.target||'main',projectId:w?.projectId||c.projectId||'',workId:w?.id||'',planDate:c.planDate||''});};
  function stash(){if(!draft)return;const key=draftKey(draft);if(draft.text.trim()||draft.pending)drafts.set(key,draft);else drafts.delete(key);}
  function open(opts={}){
   opts={...getContext(),...Object.fromEntries(Object.entries(opts).filter(([,v])=>v!==undefined))};
   const w=getData().works.find(x=>x.id===opts.workId&&!x.deletedAt);
   const date=null;
-  const next={owner:getScope(),projectId:w?.projectId||opts.projectId||'',workId:w?.id||'',target:opts.target||'main',todaySelected:opts.todaySelected??((opts.target||'main')==='main'),defaultDate:date,startDate:date,due:null,text:'',hideProject:!!opts.projectId||!!w};
+  const next={owner:getScope(),projectId:w?.projectId||opts.projectId||'',workId:w?.id||'',target:opts.target||'main',todaySelected:opts.todaySelected??((opts.target||'main')==='main'),planDate:opts.planDate||null,defaultDate:date,startDate:date,due:null,text:'',hideProject:!!opts.projectId||!!w};
   contextToken=contextKey();stash();draft=drafts.get(draftKey(next))||next;draft.hideProject=next.hideProject;render();focusInput();
  }
  function close(){if(draft)drafts.delete(draftKey(draft));draft=null;render();}
  document.addEventListener('click',e=>{if(draft&&e.target.closest('[data-batch-picker]'))projectPicker.open(e.target.closest('[data-batch-picker]'),draft.projectId);if(draft&&e.target.closest('[data-batch-close]'))close();});
- window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){stash();draft=null;}const saved=drafts.get(draftKey({owner:getScope(),target:'main',projectId:e.detail||'',workId:''}));if(saved){draft=saved;draft.hideProject=!!e.detail;} });
+ window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){stash();draft=null;}const saved=drafts.get(draftKey({owner:getScope(),target:'main',projectId:e.detail||'',workId:'',planDate:getContext().planDate||''}));if(saved){draft=saved;draft.hideProject=!!e.detail;} });
  document.addEventListener('change',e=>{if(e.target.matches('[data-batch-inactive]')){includeInactive=e.target.checked;render();queueMicrotask(()=>document.querySelector('.batch-project [data-menu-toggle]')?.click());return;}if(e.target.matches('[data-batch-project]')&&draft&&!draft.pending){draft.projectId=e.target.value;return;}if(e.target.matches('[data-task-scope]')&&draft?.target==='main'&&!draft.pending){draft.defaultDate=getContext().date||today();draft.startDate=draft.defaultDate;}});
  document.addEventListener('input',e=>{if(e.target.matches('[data-task-composer] textarea')&&draft)draft.text=e.target.value;});
  document.addEventListener('submit',e=>{if(!e.target.matches('[data-task-composer]'))return;e.preventDefault();if(!draft||!getScope()||draft.owner!==getScope()||composing||Date.now()-compositionEnded<80)return;try{if(!draft.text.trim()&&!draft.pending)return;if(draft.projectId&&!getData().projects.some(p=>p.id===draft.projectId&&!p.deletedAt)||draft.workId&&!getData().works.some(w=>w.id===draft.workId&&!w.deletedAt&&(w.projectId||'')===draft.projectId))throw Error('추가할 프로젝트 또는 업무가 변경되었습니다. 입력을 보관하고 다시 열어 주세요.');const count=draft.pending||createTaskBatch(getData(),draft.text,draft).length;draft.pending=count;if(save()===false)throw Error('저장하지 못했습니다. Enter 또는 저장 버튼으로 다시 시도하세요.');draft.pending=null;draft.text='';draft.error='';draft.message=`${count}개 추가됨`;draft.startDate=draft.defaultDate;draft.due=null;window.dispatchEvent(new window.CustomEvent('task-batch-saved',{detail:{target:draft.target}}));render();focusInput();notify('할 일을 추가했습니다.');}catch(err){draft.message='';draft.error=err.message;render();}});
@@ -34,7 +34,7 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   document.querySelectorAll('.task-entry-row,.table-add-edge,.task-entry-body').forEach(e=>e.remove());
   const targets=[...document.querySelectorAll('.tt-screen table[data-list-key="today"],.tt-remaining table,.project-task-table,table[data-compose-work]')];
   for(const table of targets.filter(t=>t.dataset.listKey!=='completed')){
-   const target=table.dataset.composeWork?'work':['remaining','overdue'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
+   const target=table.dataset.composeWork?'work':['remaining','overdue','scheduled','undated'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
    const active=draft&&draft.target===target&&(target!=='work'||draft.workId===table.dataset.composeWork);
    const empty=table.querySelector('td.tt-empty,td.pl-empty');
    if(empty)empty.parentElement.hidden=!!active;
@@ -50,6 +50,6 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   }
   if(draft&&!document.querySelector('[data-task-composer]')){const host=document.querySelector('.workspace-content');if(host){const row=document.createElement('div');row.className='task-entry-row';row.innerHTML=view();host.append(row);}}
  }
- document.addEventListener('click',e=>{const edge=e.target.closest('[data-batch-edge]');if(edge)open({target:edge.dataset.batchEdge,workId:edge.dataset.batchWork||undefined,todaySelected:edge.dataset.batchEdge==='main'});});
+ document.addEventListener('click',e=>{const edge=e.target.closest('[data-batch-edge]');if(edge)open({target:edge.dataset.batchEdge,workId:edge.dataset.batchWork||undefined,planDate:edge.dataset.batchEdge==='main'?getContext().planDate||null:null,todaySelected:edge.dataset.batchEdge==='main'&&getContext().date===today()});});
  return {view,open,mount,reset(){draft=null;contextToken=null;drafts.clear();resize?.disconnect();}};
 }

@@ -1,4 +1,5 @@
-import {addDays,isPlanned} from './model.js?v=20261030-explicit-schedule-1';
+import {deadline,historicalTask,doneOn,koreaDay} from './task-history.js?v=20261104-work-history-1';
+import {addDays,isPlanned} from './model.js?v=20261104-work-history-1';
 
 // Work calendars start Sunday; personal calendar defaults stay independent.
 export function workCalendarDays(date,monthly=false){
@@ -17,14 +18,14 @@ export function calendarWeeks(tasks,days,maxVisible=Infinity,{plans=true,due=tru
       for(let day=0;day<dates.length;day++){
         if(!plans||!isPlanned(task,dates[day]))continue;
         const start=day;
-        while(day+1<dates.length&&isPlanned(task,dates[day+1]))day++;
-        segments.push({task,start,end:day,kind:'plan',
+        while(day+1<dates.length&&isPlanned(task,dates[day+1])&&(dates[day]>=koreaDay()||doneOn(task,dates[start])===doneOn(task,dates[day+1])))day++;
+        segments.push({task:dates[start]<koreaDay()?historicalTask(task,dates[start]):task,start,end:day,kind:'plan',
           continuesBefore:isPlanned(task,addDays(dates[start],-1)),
           continuesAfter:isPlanned(task,addDays(dates[day],1)),
-          due:due&&task.due>=dates[start]&&task.due<=dates[day]?task.due:null});
+          due:due&&deadline(task)>=dates[start]&&deadline(task)<=dates[day]?deadline(task):null});
       }
-      const dueIndex=dates.indexOf(task.due);
-      if(due&&dueIndex>=0&&(!plans||!isPlanned(task,task.due)))segments.push({task,start:dueIndex,end:dueIndex,kind:'deadline',due:task.due});
+      const dueIndex=dates.indexOf(deadline(task));
+      if(due&&dueIndex>=0&&(!plans||!isPlanned(task,deadline(task))))segments.push({task,start:dueIndex,end:dueIndex,kind:'deadline',due:deadline(task)});
     }
     segments.sort((a,b)=>a.start-b.start||(b.end-b.start)-(a.end-a.start)||a.task.title.localeCompare(b.task.title,'ko')||a.task.id.localeCompare(b.task.id));
     const lanes=[],dayTasks=dates.map(()=>[]),hidden=dates.map(()=>[]);

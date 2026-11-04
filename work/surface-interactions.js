@@ -1,7 +1,14 @@
 // Small anchored menus and a horizontally draggable reminder strip.
 // These interactions do not change task data.
 export function installSurfaceInteractions(){
-  const panelFor=button=>document.getElementById(button.getAttribute('aria-controls'));
+const imeForms='[data-worklog],[data-slot-new],[data-create-form]';
+const imeEnds=new WeakMap(),imeActive=new WeakSet();
+document.addEventListener('compositionstart',e=>{if(e.target.closest(imeForms))imeActive.add(e.target);},true);
+document.addEventListener('compositionend',e=>{if(e.target.closest(imeForms)){imeActive.delete(e.target);imeEnds.set(e.target,Date.now());}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest(imeForms)&&(e.isComposing||e.keyCode===229||e.repeat||imeActive.has(e.target)||Date.now()-(imeEnds.get(e.target)||0)<80))e.preventDefault();},true);
+
+  let menuSequence=0;
+  const panelFor=button=>{let panel=document.getElementById(button.getAttribute('aria-controls'));if(!panel){panel=button.closest('[data-dropdown]')?.querySelector('[data-menu-panel]');if(panel){panel.id||='surface-auto-'+(++menuSequence);button.setAttribute('aria-controls',panel.id);}}return panel;};
   const triggerFor=panel=>document.querySelector(`[aria-controls="${panel.id}"]`);
   const entries=panel=>panel.classList.contains('task-project-menu')?[...panel.querySelectorAll('input')].filter(e=>!e.closest('[hidden]')):[...panel.children].flatMap(el=>el.matches('button')?[el]:[...el.children].filter(child=>child.matches('button'))).filter(el=>!el.disabled&&!el.hidden);
   function close(panel,focus=false){
@@ -56,6 +63,10 @@ export function installSurfaceInteractions(){
   window.addEventListener('resize',()=>closeAll());
   document.addEventListener('scroll',event=>{if(event.target.matches?.('.project-list-scroll'))closeAll();},true);
 
+  const tooltip=document.createElement('div');tooltip.id='control-tooltip';tooltip.role='tooltip';tooltip.hidden=true;document.body.append(tooltip);
+  const hideTip=()=>{tooltip.hidden=true;};window.addEventListener('my-week-render',hideTip);window.addEventListener('work-detail-render',hideTip);
+  const showTip=e=>{const b=e.target.closest('button.icon-button,button[aria-label][title]');if(!b)return;const text=b.getAttribute('title')||b.getAttribute('aria-label');if(!text)return;tooltip.textContent=text;tooltip.hidden=false;const r=b.getBoundingClientRect();tooltip.style.left=Math.max(8,Math.min(r.left,innerWidth-tooltip.offsetWidth-8))+'px';tooltip.style.top=Math.min(r.bottom+4,innerHeight-tooltip.offsetHeight-8)+'px';};
+  document.addEventListener('focusin',showTip);document.addEventListener('pointerover',showTip);document.addEventListener('focusout',hideTip);document.addEventListener('pointerout',hideTip);document.addEventListener('click',hideTip);document.addEventListener('scroll',hideTip,true);
   let drag=null,suppressUntil=0,suppressedStrip=null;
   const finish=()=>{
     if(!drag)return;const current=drag;drag=null;

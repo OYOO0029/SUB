@@ -1,3 +1,4 @@
+import {selectDay,koreaDay} from '../work/task-history.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {emptyWorkState} from '../work/work-account.mjs';
@@ -6,13 +7,13 @@ import {complete,setTime} from '../work/model.js';
 import {validate} from '../work/repository.js';
 import {taskContext} from '../work/ownership.js';
 import {taskPeriod,selectToday,executionBuckets,reorderToday,todayOrder,outsideWork} from '../work/schedule-rules.js';
-test('explicit today selection never changes dates, persists overnight and overdue wins once',()=>{
+test('explicit today selection never changes dates, does not carry overnight and overdue wins once',()=>{
  const d=emptyWorkState();const [a,b,c]=createTaskBatch(d,'selected\nremaining\nundated');
  updateItem(d,'task',a.id,{workPeriod:{start:'2026-10-25',end:'2026-10-31'}});
  updateItem(d,'task',b.id,{workPeriod:{start:'2026-10-25',end:'2026-10-31'}});
- const before=structuredClone(a);selectToday(a);for(const k of ['workPeriod','startDate','due','plans','blocks','status'])assert.deepEqual(a[k],before[k]);
- for(const day of ['2026-10-30','2026-10-31']){const s=executionBuckets(d,day);assert.deepEqual(s.today.map(t=>t.id),[a.id]);assert.deepEqual(s.remaining.map(t=>t.id),[b.id,c.id]);}
- const s=executionBuckets(d,'2026-11-01');assert.deepEqual(s.overdue.map(t=>t.id),[a.id,b.id]);assert.deepEqual(s.remaining.map(t=>t.id),[c.id]);assert.equal(new Set(Object.values(s).flat().map(t=>t.id)).size,3);
+ const before=structuredClone(a);selectDay(a,'2026-10-30');for(const k of ['workPeriod','startDate','due','plans','blocks','status'])assert.deepEqual(a[k],before[k]);
+ for(const day of ['2026-10-30']){const s=executionBuckets(d,day);assert.deepEqual(s.today.map(t=>t.id),[a.id]);assert.deepEqual(s.remaining.map(t=>t.id),[b.id,c.id]);}
+ assert.equal(executionBuckets(d,'2026-10-31').today.length,0);updateItem(d,'task',a.id,{deadline:'2026-10-31'});updateItem(d,'task',b.id,{deadline:'2026-10-31'});const s=executionBuckets(d,'2026-11-01');assert.deepEqual(s.overdue.map(t=>t.id),[a.id,b.id]);assert.deepEqual(s.remaining.map(t=>t.id),[c.id]);assert.equal(new Set(Object.values(s).flat().map(t=>t.id)).size,3);
  complete(a,'2026-11-01');assert(!Object.values(executionBuckets(d,'2026-11-01')).flat().includes(a));complete(a,'2026-11-01');assert.equal(a.status,'waiting');
 });
 test('date read preserves legacy data, explicit period validates atomically, timers never alter status or dates',()=>{
@@ -23,7 +24,7 @@ test('date read preserves legacy data, explicit period validates atomically, tim
 });
 test('today order persists independently from project and historical daily order',()=>{
  const d=emptyWorkState(),xs=createTaskBatch(d,'A\nB\nC',{todaySelected:true});d.dailyOrder={'2026-10-30':xs.map(t=>t.id)};const before=structuredClone(d.dailyOrder);
- reorderToday(d,'2026-10-30',xs[2].id,xs[0].id);const reload=validate(JSON.parse(JSON.stringify(d)));assert.deepEqual(todayOrder(reload,reload.tasks).map(t=>t.title),['C','A','B']);assert.deepEqual(reload.tasks.map(t=>t.title),['A','B','C']);assert.deepEqual(reload.dailyOrder,before);
+ reorderToday(d,koreaDay(),xs[2].id,xs[0].id);const reload=validate(JSON.parse(JSON.stringify(d)));assert.deepEqual(todayOrder(reload,reload.tasks).map(t=>t.title),['C','A','B']);assert.deepEqual(reload.tasks.map(t=>t.title),['A','B','C']);assert.deepEqual(reload.dailyOrder,before);
 });
 test('group, ungroup, delete and restore work preserve original task identity and dates',()=>{
  const d=emptyWorkState(),p=createItem(d,'project','P'),w=createItem(d,'work','W',{projectId:p.id}),xs=createTaskBatch(d,'A\nB',{projectId:p.id});const ids=xs.map(t=>t.id);

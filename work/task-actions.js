@@ -1,0 +1,4 @@
+import {escapeHTML as esc,icon} from './ui-components.js?v=20261104-work-history-1';
+import {selectedOn,koreaDay} from './task-history.js?v=20261104-work-history-1';
+let menuSequence=0;
+export function taskActions(t,{date=koreaDay()}={}){const menuId='task-actions-'+(++menuSequence),selected=selectedOn(t,date),label=date===koreaDay()?'오늘 목록':date+' 목록';return `<div class="tt-row-actions" data-dropdown><button class="icon-button row-detail" data-menu-toggle aria-controls="${menuId}" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(t.title)} 추가 작업" title="추가 작업">${icon('more')}</button><div id="${menuId}" class="surface-menu" data-menu-panel role="menu" hidden>${t.status!=='done'?`<button class="menu-option" data-action="select-day" data-id="${esc(t.id)}" data-date="${date}" data-selected="${!selected}">${label}${selected?'에서 제외':'에 추가'}</button>`:''}<button class="menu-option" data-action="delete-task" data-id="${esc(t.id)}">삭제</button></div></div>`;}
