@@ -53,7 +53,7 @@ html {scrollbar-gutter: stable;}
 .tt-panel .tt-clock {margin: 8px 0;}
 #app :is(.focus-add,.flow-add,[data-tt-add-check]) input:not([type=checkbox]),#app .tt-date input {min-height: var(--ux-control); padding: 4px 8px; font-size: 13px; border-radius: var(--ux-radius);}
 #app:has(.tt-mini) .main {padding-bottom: 80px;}
-#app :is(button,input,select,[contenteditable]):focus-visible {outline: 2px solid var(--muted); outline-offset: 2px;}
+:is(#app,#detail) :is(button,input,select,[contenteditable]):focus-visible {outline: 2px solid var(--muted); outline-offset: 2px;}
 #app .tt-table th {text-align: center; vertical-align: middle;}
 #app .tt-column {justify-content: center; margin-inline: auto;}
 #app .tt-table td {vertical-align: middle;}
@@ -153,7 +153,7 @@ tr:hover .tt-task-menu>[data-menu-toggle],.tt-task-menu:focus-within>[data-menu-
 .tt-edit-title:hover {border-color: #424a57 !important;}
 .tt-edit-title:focus {outline: 1px solid #8ecbd0;}
 .tt-panel header .tt-task-menu {margin-left: auto;}
-#app .list-title-edit,#detail .list-title-edit {width: 100%; min-width: 0; flex: 1; border: 0 !important; outline: 0 !important; box-shadow: none !important; border-radius: 0; background: transparent !important; color: inherit; font: inherit; font-weight: 500; padding: 0; margin: 0; text-align: left; cursor: text;}
+#app .list-title-edit,#detail .list-title-edit {width: 100%; min-width: 0; flex: 1; border: 0 !important; box-shadow: none !important; border-radius: 0; background: transparent !important; color: inherit; font: inherit; font-weight: 500; padding: 0; margin: 0; text-align: left; cursor: pointer;overflow:hidden;text-overflow:ellipsis;}
 #app .tt-edit-title:hover,#app .tt-edit-title:focus {border-color: transparent !important; outline: none !important; box-shadow: none !important;}
 .is-done .list-title-edit {color: var(--muted); text-decoration: line-through;}
 .row-delete {opacity: 0; flex: none;}
@@ -496,8 +496,10 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 #detail.detail-expanded{width:min(760px,calc(100vw - 24px));inset:12px;margin:auto;}
 #detail.detail-expanded :is(.detail-header,.detail-body,.detail-primary-actions){max-width:620px;margin-inline:auto;width:100%;box-sizing:border-box;}
 #detail .detail-nav>[data-action=detail-expand]{margin:0;}
-#detail .detail-nav>.inline-save-state{position:absolute;top:-10px;left:0;font-size:10px;}
-#detail .detail-nav>[data-action=close-detail]{margin-left:auto;}
+#detail .detail-nav>.inline-save-state{position:static;align-self:center;margin-right:auto;font-size:11px;color:var(--ux-secondary);}
+#detail .detail-retry{font-size:12px;white-space:nowrap;}
+.group-mode-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--ux-secondary);font-size:12px;}
+#detail .detail-nav>[data-action=close-detail]{margin-left:0;}
 #detail .detail-settings{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);}
 #detail .detail-action{display:inline-flex;align-items:center;gap:var(--ux-gap);min-height:var(--ux-control);padding:4px 8px;background:transparent;color:var(--ux-secondary);font:inherit;font-size:13px;}
 #detail .detail-action .icon{width:16px;height:16px;}

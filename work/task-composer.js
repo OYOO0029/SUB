@@ -23,7 +23,7 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
  window.addEventListener('task-project-context',e=>{if(draft?.target==='main'){stash();draft=null;}const saved=drafts.get(draftKey({owner:getScope(),target:'main',projectId:e.detail||'',workId:''}));if(saved){draft=saved;draft.hideProject=!!e.detail;} });
  document.addEventListener('change',e=>{if(e.target.matches('[data-batch-inactive]')){includeInactive=e.target.checked;render();queueMicrotask(()=>document.querySelector('.batch-project [data-menu-toggle]')?.click());return;}if(e.target.matches('[data-batch-project]')&&draft&&!draft.pending){draft.projectId=e.target.value;return;}if(e.target.matches('[data-task-scope]')&&draft?.target==='main'&&!draft.pending){draft.defaultDate=getContext().date||today();draft.startDate=draft.defaultDate;}});
  document.addEventListener('input',e=>{if(e.target.matches('[data-task-composer] textarea')&&draft)draft.text=e.target.value;});
- document.addEventListener('submit',e=>{if(!e.target.matches('[data-task-composer]'))return;e.preventDefault();if(!draft||!getScope()||draft.owner!==getScope()||composing||Date.now()-compositionEnded<80)return;try{if(!draft.text.trim()&&!draft.pending)return;if(draft.projectId&&!getData().projects.some(p=>p.id===draft.projectId&&!p.deletedAt)||draft.workId&&!getData().works.some(w=>w.id===draft.workId&&!w.deletedAt&&(w.projectId||'')===draft.projectId))throw Error('추가할 프로젝트 또는 업무가 변경되었습니다. 입력을 보관하고 다시 열어 주세요.');const count=draft.pending||createTaskBatch(getData(),draft.text,draft).length;draft.pending=count;if(save()===false)throw Error('저장하지 못했습니다. 추가 버튼으로 다시 저장하세요.');draft.pending=null;draft.text='';draft.error='';draft.message=`${count}개 추가됨`;draft.startDate=draft.defaultDate;draft.due=null;window.dispatchEvent(new window.CustomEvent('task-batch-saved',{detail:{target:draft.target}}));render();focusInput();notify('할 일을 추가했습니다.');}catch(err){draft.message='';draft.error=err.message;render();}});
+ document.addEventListener('submit',e=>{if(!e.target.matches('[data-task-composer]'))return;e.preventDefault();if(!draft||!getScope()||draft.owner!==getScope()||composing||Date.now()-compositionEnded<80)return;try{if(!draft.text.trim()&&!draft.pending)return;if(draft.projectId&&!getData().projects.some(p=>p.id===draft.projectId&&!p.deletedAt)||draft.workId&&!getData().works.some(w=>w.id===draft.workId&&!w.deletedAt&&(w.projectId||'')===draft.projectId))throw Error('추가할 프로젝트 또는 업무가 변경되었습니다. 입력을 보관하고 다시 열어 주세요.');const count=draft.pending||createTaskBatch(getData(),draft.text,draft).length;draft.pending=count;if(save()===false)throw Error('저장하지 못했습니다. Enter 또는 저장 버튼으로 다시 시도하세요.');draft.pending=null;draft.text='';draft.error='';draft.message=`${count}개 추가됨`;draft.startDate=draft.defaultDate;draft.due=null;window.dispatchEvent(new window.CustomEvent('task-batch-saved',{detail:{target:draft.target}}));render();focusInput();notify('할 일을 추가했습니다.');}catch(err){draft.message='';draft.error=err.message;render();}});
  document.addEventListener('keydown',e=>{if(!e.target.closest('[data-task-composer]'))return;if(e.key==='Enter'&&!e.shiftKey&&e.target.tagName==='TEXTAREA'){e.preventDefault();if(!e.repeat&&!composing&&!e.isComposing&&e.keyCode!==229&&Date.now()-compositionEnded>80)e.target.form.requestSubmit();}else if(e.key==='Escape'&&!draft?.text.trim()){e.preventDefault();close();}});
  document.addEventListener('compositionstart',e=>{if(e.target.closest('[data-task-composer]'))composing=true;});
  document.addEventListener('compositionend',e=>{if(e.target.closest('[data-task-composer]')){composing=false;compositionEnded=Date.now();}});
@@ -32,13 +32,13 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
   const currentContext=contextKey();if(contextToken!==null&&contextToken!==currentContext){stash();draft=drafts.get(currentContext)||null;}contextToken=currentContext;
   resize?.disconnect();
   document.querySelectorAll('.task-entry-row,.table-add-edge,.task-entry-body').forEach(e=>e.remove());
-  const targets=[...document.querySelectorAll('.tt-screen table[data-list-key="today"],.tt-remaining table,.project-task-table')];
+  const targets=[...document.querySelectorAll('.tt-screen table[data-list-key="today"],.tt-remaining table,.project-task-table,table[data-compose-work]')];
   for(const table of targets.filter(t=>t.dataset.listKey!=='completed')){
-   const target=['remaining','overdue'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
-   const active=draft&&draft.target===target;
+   const target=table.dataset.composeWork?'work':['remaining','overdue'].includes(table.dataset.listKey)?table.dataset.listKey:table.matches('.wd-table')?'work':table.matches('.project-task-table')?'project':'main';
+   const active=draft&&draft.target===target&&(target!=='work'||draft.workId===table.dataset.composeWork);
    const empty=table.querySelector('td.tt-empty,td.pl-empty');
    if(empty)empty.parentElement.hidden=!!active;
-   if(!active&&empty&&!empty.querySelector('button:not([data-batch-edge])')){empty.innerHTML=`<button type="button" class="table-empty-add" data-batch-edge="${target}" aria-label="할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;continue;}
+   if(!active&&empty&&!empty.querySelector('button:not([data-batch-edge])')){empty.innerHTML=`<button type="button" class="table-empty-add" data-batch-edge="${target}" ${table.dataset.composeWork?`data-batch-work="${table.dataset.composeWork}"`:""} aria-label="할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;continue;}
    if(active){let body=[...table.tBodies].find(b=>draft.workId&&b.dataset.workGroup===draft.workId)||table.tBodies[table.tBodies.length-1]||table.createTBody();
     if(target==='project'&&!draft.workId){body=table.createTBody();body.className='task-entry-body';}
     const row=body.insertRow();row.className='task-entry-row';const cell=row.insertCell();cell.colSpan=table.tHead?.rows[0]?.cells.length||5;cell.innerHTML=view();const form=cell.querySelector('form');form.dataset.entryTarget=target;
@@ -46,10 +46,10 @@ export function createTaskComposer({getData,getScope,render,save,esc,icon,notify
 
    }
    if(active)continue;
-   const edge=document.createElement('div');edge.className='table-add-edge';edge.innerHTML=`<button type="button" data-batch-edge="${target}" aria-label="목록 끝에 할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;table.parentElement.after(edge);
+   const edge=document.createElement('div');edge.className='table-add-edge';edge.innerHTML=`<button type="button" data-batch-edge="${target}" ${table.dataset.composeWork?`data-batch-work="${table.dataset.composeWork}"`:""} aria-label="목록 끝에 할 일 추가">${icon('plus')}<span>할 일 추가</span></button>`;table.parentElement.after(edge);
   }
   if(draft&&!document.querySelector('[data-task-composer]')){const host=document.querySelector('.workspace-content');if(host){const row=document.createElement('div');row.className='task-entry-row';row.innerHTML=view();host.append(row);}}
  }
- document.addEventListener('click',e=>{const edge=e.target.closest('[data-batch-edge]');if(edge)open({target:edge.dataset.batchEdge,todaySelected:edge.dataset.batchEdge==='main'});});
+ document.addEventListener('click',e=>{const edge=e.target.closest('[data-batch-edge]');if(edge)open({target:edge.dataset.batchEdge,workId:edge.dataset.batchWork||undefined,todaySelected:edge.dataset.batchEdge==='main'});});
  return {view,open,mount,reset(){draft=null;contextToken=null;drafts.clear();resize?.disconnect();}};
 }

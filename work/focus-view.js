@@ -1,5 +1,5 @@
 import {executionBuckets} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {createTodayTable} from './today-table.js?v=20261104-timeline-polish-1';
+import {createTodayTable} from './today-table.js?v=20261104-task-flow-1';
 import {today,taskContext,setTime,removeTime,isDuePast} from './model.js?v=20261030-explicit-schedule-1';
 import {executionSections,unfinished} from './workflow.js?v=20261030-explicit-schedule-1';
 import {orderedTasks,deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
