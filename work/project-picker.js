@@ -1,6 +1,6 @@
 import {activeProject} from './project-options.js';
 import {projectState} from './project-view.js';
-import {escapeHTML as esc,icon} from './ui-components.js';
+import {escapeHTML as esc,icon} from './ui-components.js?v=20261104-workspace-1';
 const key=owner=>'work-recent-projects-v1:'+owner;
 export function recentProjects(owner){try{const xs=JSON.parse(window.localStorage.getItem(key(owner))||'[]');return Array.isArray(xs)?xs.filter(x=>typeof x==='string').slice(0,20):[];}catch{return [];}}
 export function rememberProject(owner,id){if(!owner||!id)return;try{window.localStorage.setItem(key(owner),JSON.stringify([id,...recentProjects(owner).filter(x=>x!==id)].slice(0,20)));}catch{}}

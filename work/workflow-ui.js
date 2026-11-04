@@ -1,5 +1,5 @@
-import {taskRowActions} from './ui-components.js?v=20261103-compact-mobile-1';
-import {statusFilter} from './status-filter.js?v=20261103-compact-mobile-1';
+import {taskRowActions} from './ui-components.js?v=20261104-workspace-1';
+import {statusFilter} from './status-filter.js?v=20261104-workspace-1';
 import {today,taskStart,isPlanned,taskContext,isDuePast} from './model.js?v=20261030-explicit-schedule-1';
 import {projectState,PROJECT_STATES} from './project-view.js';
 import {projectTasks,projectSummary,executionSections,unfinished} from './workflow.js?v=20261030-explicit-schedule-1';

@@ -1,13 +1,13 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-input-fix-1';
-import {listControls,sortTasks} from './list-controls.js?v=20261104-input-fix-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-workspace-1';
+import {listControls,sortTasks} from './list-controls.js?v=20261104-workspace-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {executionBuckets,taskPeriod,todayOrder,reorderToday,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {taskList} from './task-list.js?v=20261104-input-fix-1';
+import {taskList} from './task-list.js?v=20261104-workspace-1';
 import {statusOptions} from './detail-fields.js?v=20261030-explicit-schedule-1';
-import {taskRowActions} from './ui-components.js?v=20261103-compact-mobile-1';
-import {createProjectTabs} from './project-tabs.js?v=20261104-input-fix-1';
-import {choiceSelect} from './ui-components.js?v=20261103-compact-mobile-1';
-import {statusFilter} from './status-filter.js?v=20261103-compact-mobile-1';
+import {taskRowActions} from './ui-components.js?v=20261104-workspace-1';
+import {createProjectTabs} from './project-tabs.js?v=20261104-workspace-1';
+import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
+import {statusFilter} from './status-filter.js?v=20261104-workspace-1';
 import {createDatePicker,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 import {workImages,hydrateWorkImages} from './image-store.mjs';
 import {validImageRef} from './image-schema.mjs';
@@ -57,10 +57,10 @@ export function createTodayTable({getData,getScope,ui,esc,icon,timer,render,save
  function renderList(key){const f=filters[key],project=projectTabs.current(),xs=filtered(key==='completed'?getData().tasks.filter(t=>!t.deletedAt&&t.status==='done'):executionBuckets(getData(),today())[key],key);return taskList(getData(),xs,{key,project,date:today(),filter:f.status,sort:f.sort,query:f.query,projectFilter:f.project,drag:key==='today'&&!project&&!f.project&&!f.status&&!f.query&&listSort==='manual'});}
  function section(key){const label={today:'오늘 할 일',remaining:'남은 할 일',overdue:'기한 지난 일',completed:'완료한 일'}[key];return '<details open class="execution-section '+(key==='today'?'execution-today':'tt-remaining')+'" data-fold="execution-'+key+'"><summary>'+label+'</summary>'+renderList(key)+(menuScope===key?menuView():'')+'</details>';}
  function remainingView(){return ['remaining','overdue',...(showDone?['completed']:[])].map(section).join('');}
- function toolbar(){if(listOwner!==getScope()){listOwner=getScope();showDone=false;listSort='manual';}return '<div class="tt-toolbar">'+projectTabs.view()+'</div>'+listControls(showDone,listSort,'today-list');}
+ function toolbar(){if(listOwner!==getScope()){listOwner=getScope();showDone=false;listSort='manual';}return '<div class="tt-toolbar">'+projectTabs.view()+listControls(showDone,listSort,'today-list')+'</div>';}
  function screen(){return '<section class="focus-screen tt-screen">'+toolbar()+section('today')+remainingView()+panelView()+miniView()+'</section>';}
  document.addEventListener('click',e=>{const b=e.target.closest('[data-list-menu]');if(b&&['today','remaining','overdue'].includes(b.dataset.listKey)){menu=menu===b.dataset.listMenu&&menuScope===b.dataset.listKey?null:b.dataset.listMenu;menuScope=b.dataset.listKey;repaint();}const un=e.target.closest('[data-list-unselect]');if(un){selectToday(task(un.dataset.listUnselect),false);save();repaint();}});
- document.addEventListener('change',e=>{if(e.target.matches('[data-today-list-show-done]')){showDone=e.target.checked;repaint();return;}if(e.target.matches('[data-today-list-sort]')){listSort=e.target.value;repaint();return;}if(e.target.matches('[data-list-status]')){try{updateItem(getData(),'task',e.target.dataset.listStatus,{status:e.target.value});save();repaint();window.dispatchEvent(new Event('work-cell-updated'));}catch(err){notify(err.message);}}});
+ document.addEventListener('change',e=>{if(e.target.matches('[data-today-list-show-done]')){showDone=e.target.value==='all';repaint();return;}if(e.target.matches('[data-today-list-sort]')){listSort=e.target.value;repaint();return;}if(e.target.matches('[data-list-status]')){try{updateItem(getData(),'task',e.target.dataset.listStatus,{status:e.target.value});save();repaint();window.dispatchEvent(new Event('work-cell-updated'));}catch(err){notify(err.message);}}});
  let moveId=null;
  document.addEventListener('click',e=>{const handle=e.target.closest('[data-today-drag]');if(handle){moveId=handle.dataset.todayDrag;menu='move';menuScope='today';repaint();const box=document.querySelector('.tt-menu'),anchor=document.querySelector('[data-today-drag="'+moveId+'"]');if(box&&anchor){const r=anchor.getBoundingClientRect();box.style.left=Math.max(8,Math.min(r.left,innerWidth-248))+'px';box.style.top=Math.max(8,Math.min(r.bottom,innerHeight-120))+'px';}}const m=e.target.closest('[data-move-today]');if(m){const xs=items(),i=xs.findIndex(t=>t.id===moveId);if(i<0||m.dataset.moveToday==='up'&&i===0||m.dataset.moveToday==='down'&&i===xs.length-1)return;reorderToday(getData(),today(),moveId,xs[m.dataset.moveToday==='up'?i-1:i+2]?.id);menu=null;save();repaint();}});
  let dragged=null;

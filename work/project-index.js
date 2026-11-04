@@ -1,0 +1,13 @@
+import {choiceSelect,escapeHTML as esc,icon,button} from './ui-components.js?v=20261104-workspace-1';
+import {PROJECT_STATES,projectState} from './project-view.js';
+import {taskContext} from './ownership.js';
+import {periodLabel} from './task-list.js?v=20261104-workspace-1';
+export const runningWork=w=>['진행','진행 중','진행중','실행','개발중','개발 중'].includes(w.stage);
+export function projectIndex(data,ui){
+ const state=ui.projectIndexFilter||'active',sort=ui.projectIndexSort||'added';
+ const ps=data.projects.filter(p=>!p.deletedAt&&(state==='all'||projectState(p)===state));
+ if(sort==='name')ps.sort((a,b)=>a.title.localeCompare(b.title,'ko'));if(sort==='end')ps.sort((a,b)=>(a.end||'9999').localeCompare(b.end||'9999'));
+ const rows=ps.map(p=>{const works=data.works.filter(w=>!w.deletedAt&&w.projectId===p.id&&runningWork(w)),remaining=data.tasks.filter(t=>!t.deletedAt&&!['done','cancelled'].includes(t.status)&&taskContext(data,t).project?.id===p.id).length;
+ return `<tr><td class="pl-status-cell">${choiceSelect(projectState(p),PROJECT_STATES,`data-project-status="${esc(p.id)}"`,`${p.title} 현황`)}</td><td class="pl-text">${button(esc(p.title),'detail',`data-type="project" data-id="${esc(p.id)}" title="${esc(p.title)}"`,'project-index-name')}</td><td class="pl-text">${works.length?`<button class="cell-edit project-index-work" data-project-work-jump="${esc(p.id)}" title="${esc(works.map(w=>w.title).join(', '))}">${esc(works[0].title)}${works.length>1?' 외 '+(works.length-1)+'개':''}</button>`:'<span class="ux-empty">-</span>'}</td><td data-project-context="${esc(p.id)}">${button(esc(p.end?periodLabel({start:p.end,end:p.end}):'-'),'field-date','data-field="period" aria-label="사업 기간 편집"','cell-edit')}</td><td>${remaining}</td></tr>`;}).join('');
+ return `<section class="project-overview"><div class="project-index-toolbar">${choiceSelect(state,[['active','진행 프로젝트'],['all','전체 프로젝트'],...PROJECT_STATES.filter(([v])=>v!=='active')],'data-project-index-filter','프로젝트 표시')}<div class="project-index-tools"><button class="quiet-link" data-project-all-tasks>전체 할 일</button>${choiceSelect(sort,[['added','등록순'],['name','이름순'],['end','종료일순']],'data-project-index-sort','프로젝트 정렬')}${button(icon('plus')+'프로젝트','add-project','','small-button')}</div></div><div class="project-list-scroll"><table class="pl-table project-index-table" aria-label="프로젝트 목록"><colgroup><col style="width:100px"><col><col style="width:26%"><col style="width:125px"><col style="width:85px"></colgroup><thead><tr><th>현황</th><th class="text-column">프로젝트명</th><th class="text-column">진행 중인 업무</th><th>사업 종료일</th><th>남은 할 일</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="pl-empty">프로젝트가 없습니다.</td></tr>'}</tbody></table></div></section>`;
+}

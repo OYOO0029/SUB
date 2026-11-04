@@ -2,7 +2,7 @@
 <style>body{margin:0;background:#101318;color:white;font:12px sans-serif}nav{display:flex;gap:6px;padding:6px;flex-wrap:wrap}button{padding:6px 10px}iframe{display:block;border:0;height:720px;margin:auto}pre{margin:4px 8px;max-height:70px;overflow:auto;white-space:pre-wrap}</style>
 <nav aria-label="화면 너비"><button data-width="1280">1280px</button><button data-width="768">768px</button><button data-width="390">390px</button><button data-width="320">320px</button></nav>
 <nav aria-label="검수 화면"><button data-page="tasks">오늘 목록</button><button data-page="timeline">타임라인</button><button data-page="projects">프로젝트 목록</button><button data-page="project-detail">프로젝트 상세</button><button data-page="work">업무 상세</button><button data-page="task">할 일 상세</button><button data-page="calendar">캘린더</button><button data-page="add">행 추가</button><button data-page="project-scope">프로젝트 탭</button><button data-page="project-menu">탭 편집</button><button data-page="menu">선택 메뉴</button></nav>
-<pre id="metrics"></pre><iframe title="검수용 업무 화면" style="width:1280px"></iframe>
+<nav><button id="fail-save">저장 실패 켜기</button><button id="restore-save">저장 정상화</button><button id="ime-search">한글 조합 검수</button><span id="qa-result"></span></nav><pre id="metrics"></pre><iframe title="검수용 업무 화면" style="width:1280px"></iframe>
 <script>
 if(!['localhost','127.0.0.1'].includes(location.hostname)){document.querySelector('iframe').remove();throw Error('Local fixture only');}
 const frame=document.querySelector('iframe');frame.src='/work/index.html?embedded=1&v=ux-contract';
@@ -12,17 +12,18 @@ document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>{frame.style.
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=async()=>{const p=b.dataset.page,d=frame.contentDocument;
  if(p==='project-scope'){click('[data-task-project]:not([data-task-project=""])');return;}
  if(p==='project-menu'){click('[aria-label="프로젝트 탭 편집"]');return;}
- if(p==='menu'){click('[data-list-menu="due"][data-list-key="today"]');return;}
+ if(p==='menu'){click('.task-list-controls [data-menu-toggle]');return;}
  if(p==='add'){click('[data-batch-edge]');return;}
  click('#detail[open] [data-action=close-detail]');
  const tab=['task','timeline'].includes(p)?'tasks':['project-detail','work'].includes(p)?'projects':p;
  click(`[data-action=navigate][data-value="${tab}"]`);await tick();
  if(p==='timeline')click('[data-focus=view][data-value=timeline], [data-action=view][data-value=timeline]');
  if(p==='tasks'||p==='task')click('[data-focus=view][data-value=list], [data-action=view][data-value=list]');
- if(p==='project-detail')click('[data-task-project]:not([data-task-project=""])');
- if(p==='work'){click('[data-action=project-page-tab][data-value=wbs]');await tick();click('[data-action=detail][data-type=work]');}
+ if(p==='project-detail')click('.project-index-name');
+ if(p==='work'){click('.project-index-name');await tick();click('[data-action=project-page-tab][data-value=wbs]');await tick();click('[data-action=detail][data-type=work]');}
  if(p==='task')click('.tt-table .row-detail');
 });
+let originalWrite;document.querySelector('#fail-save').onclick=()=>{const w=frame.contentWindow;originalWrite ||= w.Storage.prototype.setItem;w.Storage.prototype.setItem=function(k,v){if(k.includes('work')||k.includes('Work'))throw new DOMException('검수용 저장 실패','QuotaExceededError');return originalWrite.call(this,k,v)};document.querySelector('#qa-result').textContent='저장 실패 재현 중';};document.querySelector('#restore-save').onclick=()=>{if(originalWrite)frame.contentWindow.Storage.prototype.setItem=originalWrite;document.querySelector('#qa-result').textContent='저장 정상화';};document.querySelector('#ime-search').onclick=()=>{const d=frame.contentDocument,w=frame.contentWindow,input=d.querySelector('.cell-project-search');if(!input)return;input.focus();input.dispatchEvent(new w.CompositionEvent('compositionstart',{bubbles:true}));let stable=true;for(const value of ['ㅎ','혀','현','현ㅈ','현자','현장']){input.value=value;input.dispatchEvent(new w.InputEvent('input',{bubbles:true,isComposing:true,inputType:'insertCompositionText',data:value}));stable &&= d.querySelector('.cell-project-search')===input&&d.activeElement===input;}input.dispatchEvent(new w.CompositionEvent('compositionend',{bubbles:true,data:'현장'}));document.querySelector('#qa-result').textContent=stable?'한글 조합·포커스 유지 통과':'한글 조합 실패';};
 function measure(){const d=frame.contentDocument,w=frame.contentWindow;if(!d?.querySelector('#app'))return;
  const style=e=>w.getComputedStyle(e),rect=e=>{const r=e.getBoundingClientRect();return {w:Math.round(r.width),h:Math.round(r.height)}};
  const visible=e=>e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0;

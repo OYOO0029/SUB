@@ -1,6 +1,6 @@
 import {taskPeriod,lateDays} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {taskContext} from './ownership.js';
-import {escapeHTML as esc,icon} from './ui-components.js?v=20261103-compact-mobile-1';
+import {escapeHTML as esc,icon} from './ui-components.js?v=20261104-workspace-1';
 import {deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
 export function periodLabel(p){return p?.start?deadlineLabel(p.start)+(p.end&&p.end!==p.start?' – '+deadlineLabel(p.end):''):'-';}
 export function taskList(data,items,{key='today',project='',date,drag=false,filter='',sort='manual',query='',projectFilter='',selection=false,selected=new Set()}={}){

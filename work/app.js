@@ -1,18 +1,18 @@
-import {createProjectWorkspace} from './project-workspace.js?v=20261104-input-fix-1';
+import {createProjectWorkspace} from './project-workspace.js?v=20261104-workspace-1';
 import {selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {icon,button,installSelectControls} from './ui-components.js?v=20261103-compact-mobile-1';
-import {createTaskComposer} from './task-composer.js?v=20261104-input-fix-1';
+import {icon,button,installSelectControls} from './ui-components.js?v=20261104-workspace-1';
+import {createTaskComposer} from './task-composer.js?v=20261104-workspace-1';
 import {createDatePicker} from './date-picker.js?v=20261030-explicit-schedule-1';
 import {installTableResize} from './table-resize.js?v=20261027-click-add-1';
 import {workImages} from './image-store.mjs';
-import {createFocusView} from './focus-view.js?v=20261104-input-fix-1';
+import {createFocusView} from './focus-view.js?v=20261104-workspace-1';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
-import {createWorkflowUI} from './workflow-ui.js?v=20261103-compact-mobile-1';
+import {createWorkflowUI} from './workflow-ui.js?v=20261104-workspace-1';
 import {projectSummary,projectTasks,unfinished,removeFromDay,moveTaskDate} from './workflow.js?v=20261030-explicit-schedule-1';
 import {createItem,changeCheck,updateItem,trashItem,restoreItem} from './editing.js?v=20261103-compact-mobile-1';
 import {PROJECT_STATES,projectState,projectList,projectActiveWorks,projectWorkDue} from './project-view.js?v=20261026-controls-1';
 import {createReminderCenter} from './reminders.js?v=20261030-explicit-schedule-1';
-import {createDetailUI} from './detail-ui.js?v=20261104-input-fix-1';
+import {createDetailUI} from './detail-ui.js?v=20261104-workspace-1';
 import {activeChecks} from './editing.js?v=20261103-compact-mobile-1';
 import {today,addDays,addMonths,weekDays,monthDays,uid,isVisible,isPlanned,isDuePast,isCarried,planToday,planFor,setTime,removeTime,complete,taskContext,matches,duration} from './model.js?v=20261030-explicit-schedule-1';
 import {startWorkCloud} from './integration.js?v=20261103-compact-mobile-1';
@@ -177,7 +177,7 @@ function render({keepMenus=false}={}){
   if(menus.length)surfaces.restore(menus);reminders.refresh();window.dispatchEvent(new Event('my-week-render'));
 }
 function property(label,i,value){return `<div class="property-row"><dt>${icon(i)}${label}</dt><dd>${value||'<span class="muted">미정</span>'}</dd></div>`;}
-function openDetail(type,id){if(type==='project'){if($('#detail').open)$('#detail').close();ui.detail=null;ui.tab='projects';focus.selectProject(id);ui.projectPage=id;ui.projectPageTab='tasks';ui.projectTaskFilter='all';ui.projectDetailQuery='';ui.projectDetailDue='';ui.projectAdd=null;ui.search='';render();return;}detailUI.open(type,id);}
+function openDetail(type,id){if(type==='project'&&$('#detail').open){document.activeElement?.blur();if(ui.saveWarning||$('#detail [data-invalid]')){toast('저장하지 못한 내용을 먼저 다시 저장해 주세요.');return;}}if(type==='project'){if($('#detail').open)$('#detail').close();ui.detail=null;ui.tab='projects';ui.projectPage=id;ui.projectAllTasks=false;ui.projectPageTab='tasks';ui.projectTaskFilter='all';ui.projectDetailQuery='';ui.projectDetailDue='';ui.projectAdd=null;ui.search='';render();return;}detailUI.open(type,id);}
 function renderDetail(){detailUI.render();}
 function inputField(label,name,value='',type='text',attrs=''){return `<label class="form-field"><span>${label}</span><input name="${name}" type="${type}" value="${esc(value)}" ${attrs}></label>`;}
 function selectField(label,name,options){return `<label class="form-field"><span>${label}</span><select name="${name}">${options}</select></label>`;}
@@ -185,13 +185,13 @@ function showEditor(html){$('#editor').innerHTML=html;if(!$('#editor').open)$('#
 function editorFrame(title,body,footer=''){return `<header class="editor-header"><h2 id="editor-title">${title}</h2>${button(icon('close'),'close-editor','type="button" aria-label="닫기"','icon-button')}</header>${body}${footer}`;}
 function editEntity(type='task',id=null,opts={}){if(!workAccount.owner){window.dispatchEvent(new Event('my-week-login-request'));return;}if(id)openDetail(type,id);else if(type==='task'){if($('#detail').open&&ui.detail?.type!=='work')$('#detail').close();composer.open(opts);}else detailUI.create(type,opts);}
 function timeEditor(id){detailUI.timeEditor(id);}
-function settings(){showEditor(editorFrame('설정',`<div class="editor-body"><section><label><input type="checkbox" data-countdown-visible ${countdownVisible()?'checked':''}> 퇴근까지 남은 시간 표시</label></section><section><h3>계정과 동기화</h3><p class="form-help">개인 일정과 같은 계정으로 업무를 저장합니다.</p><button class="small-button" data-action="cloud-open"><span data-cloud-label>계정 · 동기화</span></button><p class="work-cloud-status" data-cloud-status></p></section><section class="detail-section"><h3>업무 데이터</h3><div class="settings-actions">${button(icon('download')+'JSON 내보내기','export','','small-button')}<button class="small-button" data-open-work-import>업무 백업 가져오기</button><button class="small-button" data-migrate-work-images>기존 이미지 별도 저장</button>${button(icon('trash')+'휴지통','trash','','small-button')}</div></section><section class="detail-section"><a class="property-link" href="../schedule.html?v=20261104-input-fix-1">개인 일정 열기 ${icon('arrow')}</a></section></div>`,`<footer class="editor-footer">${button('닫기','close-editor','','small-button')}</footer>`));window.dispatchEvent(new Event('my-week-render'));}
+function settings(){showEditor(editorFrame('설정',`<div class="editor-body"><section><label><input type="checkbox" data-countdown-visible ${countdownVisible()?'checked':''}> 퇴근까지 남은 시간 표시</label></section><section><h3>계정과 동기화</h3><p class="form-help">개인 일정과 같은 계정으로 업무를 저장합니다.</p><button class="small-button" data-action="cloud-open"><span data-cloud-label>계정 · 동기화</span></button><p class="work-cloud-status" data-cloud-status></p></section><section class="detail-section"><h3>업무 데이터</h3><div class="settings-actions">${button(icon('download')+'JSON 내보내기','export','','small-button')}<button class="small-button" data-open-work-import>업무 백업 가져오기</button><button class="small-button" data-migrate-work-images>기존 이미지 별도 저장</button>${button(icon('trash')+'휴지통','trash','','small-button')}</div></section><section class="detail-section"><a class="property-link" href="../schedule.html?v=20261104-workspace-1">개인 일정 열기 ${icon('arrow')}</a></section></div>`,`<footer class="editor-footer">${button('닫기','close-editor','','small-button')}</footer>`));window.dispatchEvent(new Event('my-week-render'));}
 function trash(){detailUI.trash();}
 function tracker(){const days=monthDays(ui.date).filter(d=>d.slice(0,7)===ui.date.slice(0,7));showEditor(editorFrame(`${fmt(ui.date,{month:'long'})} 트래커`,`<div class="editor-body"><p class="form-help">날짜별 버튼을 눌러 기록하고 취소할 수 있어요.</p>${['물 마시기','운동','독서'].map((name,i)=>`<section class="tracker-section"><h3>${name} <span class="count">${days.filter(d=>data.tracker[d+'-'+i]).length}일</span></h3><div class="tracker-month">${days.map(d=>`<button class="tracker-date ${data.tracker[d+'-'+i]?'checked':''}" data-action="track-month" data-date="${d}" data-index="${i}" aria-label="${d} ${name}" aria-pressed="${!!data.tracker[d+'-'+i]}">${Number(d.slice(8))}</button>`).join('')}</div></section>`).join('')}</div>`));}
 async function download(){try{const portable=await workImages.portable(data);const blob=new Blob([JSON.stringify(portable,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`what-to-do-work-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('업무 데이터를 내보냈어요.');}catch(error){toast(error.message||'백업하지 못했습니다.');}}
 
 const projectWorkspace=createProjectWorkspace({getData:()=>data,ui,render,save:commitWork,notify:toast,tabs:()=>focus.projectTabs(),selectedProject:()=>focus.selectedProject(),projectInfo:p=>detailUI.projectInfo(p)});
-const composer=createTaskComposer({getContext:()=>$('#detail').open&&ui.detail?.type==='work'?{target:'work',workId:ui.detail.id,date:today()}:ui.tab==='projects'?{target:'project',projectId:ui.projectPage||focus.selectedProject(),todaySelected:false}:{target:'main',...focus.addContext()},getData:()=>data,getScope:()=>workAccount.owner,render,save:()=>{const ok=commitWork();return ok;},esc,icon,notify:toast});
+const composer=createTaskComposer({getContext:()=>$('#detail').open&&ui.detail?.type==='work'?{target:'work',workId:ui.detail.id,date:today()}:ui.tab==='projects'?{target:'project',projectId:ui.projectPage||null,todaySelected:false}:{target:'main',...focus.addContext()},getData:()=>data,getScope:()=>workAccount.owner,render,save:()=>{const ok=commitWork();return ok;},esc,icon,notify:toast});
 window.addEventListener('work-detail-render',()=>composer.mount());
 window.addEventListener('work-add-tasks',e=>editEntity('task',null,e.detail||{}));
 window.addEventListener('work-task-detail',e=>openDetail('task',e.detail));
@@ -205,15 +205,15 @@ document.addEventListener('click',event=>{
   const el=event.target.closest('[data-action]');if(!el)return;const a=el.dataset.action,id=el.dataset.id;
   if(a==='submit-check')return;
   event.preventDefault();
-  if(a==='mode'){if(el.dataset.value==='personal'){location.href='../schedule.html?v=20261104-input-fix-1';return;}ui.mode=el.dataset.value;ui.view=ui.mode==='personal'?'week':'list';ui.search='';render();}
+  if(a==='mode'){if(el.dataset.value==='personal'){location.href='../schedule.html?v=20261104-workspace-1';return;}ui.mode=el.dataset.value;ui.view=ui.mode==='personal'?'week':'list';ui.search='';render();}
   else if(a==='project-filter'){const v=el.dataset.value;ui.projectStates=v==='all'?(ui.projectStates.length===4?[]:PROJECT_STATES.map(([k])=>k)):ui.projectStates.includes(v)?ui.projectStates.filter(k=>k!==v):[...ui.projectStates,v];render({keepMenus:true});document.querySelector(`[data-action="project-filter"][data-value="${v}"]`)?.focus();}
   else if(a==='project-sort'||a==='project-direction'){ui[a==='project-sort'?'projectSort':'projectDirection']=el.dataset.value;render({keepMenus:true});document.querySelector(`[data-action="${a}"][data-value="${el.dataset.value}"]`)?.focus();}
   else if(a==='retry-save'){persist('다시 저장했습니다.');}
-  else if(a==='navigate'){if($('#detail').open)$('#detail').close();ui.tab=el.dataset.value;ui.projectPage=null;ui.completed=false;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';ui.view=ui.tab==='calendar'?'week':'list';if(ui.tab==='tasks')ui.date=today();render();}
+  else if(a==='navigate'){if($('#detail').open){document.activeElement?.blur();if(ui.saveWarning||$('#detail [data-invalid]')){toast('저장하지 못한 내용을 먼저 다시 저장해 주세요.');return;}}if($('#detail').open)$('#detail').close();ui.tab=el.dataset.value;ui.projectPage=null;ui.projectAllTasks=false;ui.completed=false;ui.search='';ui.project='';ui.work='';ui.status='active';ui.group='none';ui.view=ui.tab==='calendar'?'week':'list';if(ui.tab==='tasks')ui.date=today();render();}
   else if(a==='open-project')openDetail('project',id);
   else if(a==='add-project')detailUI.create('project');
   else if(a==='project-settings')openDetail('project',id);
-  else if(a==='project-back'){ui.projectPage=null;render();}
+  else if(a==='project-back'){ui.projectPage=null;ui.projectAllTasks=false;ui.detail=null;render();}
   else if(a==='project-page-tab'){ui.projectPageTab=el.dataset.value;render();}
   else if(a==='project-due-filter'){ui.projectDue=el.dataset.value;render({keepMenus:true});}
   else if(a==='project-add-toggle')editEntity('task',null,{projectId:ui.projectPage,workId:el.dataset.workId});
