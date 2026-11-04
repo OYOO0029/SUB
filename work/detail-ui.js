@@ -1,4 +1,4 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-drawer-layout-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-quiet-list-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {taskList,periodLabel} from './task-list.js?v=20261104-workspace-1';
@@ -83,7 +83,7 @@ export function createDetailUI({getData,getScope=()=>null,ui,esc,icon,button,pro
     if(type==='work'){
       $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}</dl>${body}</div>`;window.dispatchEvent(new window.Event('work-detail-render'));return;
     }
-    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<details class="detail-extra"><summary>추가 설정</summary><dl class="properties">${extra}${shared}</dl></details>`:''}${type==='task'?'':body}</div><footer class="detail-footer"><span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&unfinished(e)?button(icon('calendar'),e.todaySelected?'detail-unselect-today':'do-today',`data-id="${id}" aria-label="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}" title="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}"`,'icon-button')+`<button class="icon-button" data-tt="focus" data-work-focus data-id="${id}" aria-label="집중" title="집중">${icon('play')}</button>`:''}</footer>`;
+    $('#detail').innerHTML=header(e,type)+`<div class="detail-body"><dl class="properties">${props}${type==='task'?'':shared+property('메모','note',textField('notes',e.notes,'메모',true))}</dl>${type==='task'?body:''}${type==='task'?`<section class="detail-settings" aria-label="일정 설정"><dl class="properties">${extra}${peopleValues(e.people).length||e.tags?.length?shared:''}</dl></section>`:''}${type==='task'?'':body}</div><footer class="detail-footer"><span class="detail-footer-spacer" aria-hidden="true"></span>${type==='task'&&unfinished(e)?button(icon('calendar')+(e.todaySelected?'오늘에서 빼기':'오늘 하기'),e.todaySelected?'detail-unselect-today':'do-today',`data-id="${id}" aria-label="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}" title="${e.todaySelected?'오늘에서 빼기':'오늘 하기'}"`,'detail-action')+`<button class="detail-action" data-tt="focus" data-work-focus data-id="${id}" aria-label="집중" title="집중">${icon('play')}집중</button>`:''}</footer>`;
 
   }
   document.addEventListener('click',e=>{if(e.target.closest('[data-action=detail-expand]')){const d=$('#detail');d.classList.toggle('detail-expanded');e.target.closest('button').setAttribute('aria-label',d.classList.contains('detail-expanded')?'작게 보기':'넓게 보기');}});

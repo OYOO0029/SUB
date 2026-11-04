@@ -76,7 +76,7 @@ html {scrollbar-gutter: stable;}
 .ux-empty {font-size: 11px; line-height: 16px; font-weight: 400; color: var(--muted);}
 .tt-table-wrap,.pl-table-wrap {max-width:100%; min-width:0; max-height: min(60dvh,560px); overflow: auto; scrollbar-width: thin; overscroll-behavior-inline: contain;}
 .tt-table {border-collapse: separate; border-spacing: 0;}
-:is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th {position: sticky; top: 0; z-index: 3; background: var(--panel); box-shadow: 0 1px 0 var(--line);}
+:is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th {position: sticky; top: 0; z-index: 3; background: var(--surface,#21252b); box-shadow: 0 1px 0 #ffffff0c;}
 :is(#app,#detail,#editor,#property-editor) :is(.tt-table,.pl-table) th:not(:last-child),
 #app .tt-table td:not(:last-child):not([colspan]),
 #app .pl-table:not(.pl-project-table) td:not(:last-child):not([colspan]) {border-right: 0;}
@@ -214,7 +214,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #detail:is(.minimal-task,.minimal-work) .detail-nav {display:flex;justify-content:flex-end;position:relative;margin:0 0 20px;gap:4px;}
 #detail .inline-save-state:empty {display:none;}
 #detail:is(.minimal-task,.minimal-work) h2 {padding:0;margin:0;}
-#detail:is(.minimal-task,.minimal-work) .detail-title-input {font-size: 24px;box-sizing:border-box;margin:0; field-sizing: content; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 28px; height: auto; max-height: none; line-height: 1.5; border: 0; outline: 0; background: transparent; padding: 0;}
+#detail:is(.minimal-task,.minimal-work) .detail-title-input {font-size: 18px;box-sizing:border-box;margin:0; field-sizing: content; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 28px; height: auto; max-height: none; line-height: 1.5; border: 0; outline: 0; background: transparent; padding: 0;}
 #detail.minimal-task .detail-complete {margin-top: 5px;}
 #detail.minimal-task .properties {margin: 0;}
 #detail.minimal-task .inline-value {min-height: 32px; height: auto; background: transparent; border-color: transparent; text-align: left; padding: 4px 0;}
@@ -222,7 +222,7 @@ tr:hover .row-delete,tr:focus-within .row-delete,.row-delete:focus-visible {opac
 #detail.minimal-task h3 {font-size: 13px; font-weight: 500; margin: 0;}
 #detail.minimal-task .detail-check-heading {display: flex; align-items: center; gap: 8px; min-height: 32px;}
 #detail.minimal-task .detail-check-heading .check-add-trigger {margin-left: auto;}
-#detail.minimal-task .inline-memo {min-height:96px;height:auto;field-sizing:content;margin-top:8px;width:100%;padding:8px 0;border:0;border-radius:0;box-sizing:border-box;resize:vertical;}
+#detail.minimal-task .inline-memo {min-height:56px;height:auto;field-sizing:content;margin-top:8px;width:100%;padding:8px 0;border:0;border-radius:0;box-sizing:border-box;resize:none;}
 #detail.minimal-task .detail-extra {margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;}
 #detail.minimal-task .detail-extra summary {font-size: 12px; color: var(--muted); padding: 8px 0;}
 .task-entry-row .batch-actions {grid-column:var(--entry-end); grid-row:1; display:flex; align-items:center; justify-content:flex-end; padding:0 8px;}
@@ -307,7 +307,8 @@ div.task-entry-row .batch-due {grid-column:3/5; grid-row:2;}
 
 /* Shared flat task and WBS surfaces. */
 :is(#app,#detail) .schedule-table :is(th,td){border-inline:0; border-bottom:1px solid #ffffff0c; padding-inline:8px; height:42px;}
-:is(#app,#detail) .schedule-table th{font-size:12px;font-weight:500;}
+:is(#app,#detail) :is(.tt-table,.pl-table) th{height:34px;font-size:12px;font-weight:500;color:#9aa3af;background:var(--surface,#21252b);}
+:is(#app,#detail) :is(.tt-table,.pl-table) th button{color:inherit;}
 :is(#app,#detail) .schedule-table .text-column{text-align:left;}
 :is(#app,#detail) .schedule-table .text-column .tt-column{margin-inline:0;justify-content:flex-start;}
 :is(#app,#detail) .schedule-table td{font-size:13px;font-weight:400;color:var(--muted);}
@@ -478,9 +479,14 @@ tr:hover .row-hover,tr:focus-within .row-hover,.row-hover:focus-visible{opacity:
 #detail:is(.minimal-task,.minimal-work) .detail-body{padding:12px 24px 24px;}
 #detail:is(.minimal-task,.minimal-work) .property-row{grid-template-columns:100px minmax(0,1fr);gap:12px;min-height:36px;margin-bottom:4px;align-items:center;}
 #detail.detail-expanded{width:min(900px,calc(100vw - 24px));inset:12px;margin:auto;}
-#detail .detail-nav>[data-action=detail-expand]{margin-left:auto;}
+#detail .detail-nav>[data-action=detail-expand]{margin:0;}
+#detail .detail-nav>.inline-save-state{margin:0 auto 0 0;}
+#detail .detail-nav>[data-action=close-detail]{margin-left:auto;}
+#detail .detail-settings{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);}
+#detail .detail-action{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 8px;background:transparent;color:var(--muted);font:inherit;font-size:12px;}
+#detail .detail-action .icon{width:16px;height:16px;}
 #detail .detail-nav [data-dropdown]{position:relative;}
 #detail .detail-nav .surface-menu{position:absolute;right:0;min-width:160px;z-index:2;}
 #detail .detail-footer{border:0;padding-top:0;}
 @media(max-width:760px){.tt-toolbar{flex-wrap:wrap;gap:8px;}.tt-toolbar>.task-project-nav{flex-basis:100%;}.tt-toolbar>.task-list-controls{margin-left:auto;}.project-index-tools{gap:6px;}.project-content-toolbar .task-list-controls{margin-left:auto;}}
-@media(max-width:580px){#detail:is(.minimal-task,.minimal-work,.detail-expanded){width:100%;max-width:100%;height:100dvh;max-height:100dvh;inset:0;border-radius:0;}#detail:is(.minimal-task,.minimal-work) :is(.detail-header,.detail-body){padding-inline:16px;}#detail:is(.minimal-task,.minimal-work) .detail-title-input{font-size:20px;}.project-index-tools{width:100%;justify-content:flex-end;}}
+@media(max-width:580px){#detail:is(.minimal-task,.minimal-work,.detail-expanded){width:100%;max-width:100%;height:100dvh;max-height:100dvh;inset:0;border-radius:0;}#detail:is(.minimal-task,.minimal-work) :is(.detail-header,.detail-body){padding-inline:16px;}#detail:is(.minimal-task,.minimal-work) .detail-title-input{font-size:18px;}.project-index-tools{width:100%;justify-content:flex-end;}}

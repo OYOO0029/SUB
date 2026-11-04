@@ -1,4 +1,4 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-drawer-layout-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-quiet-list-1';
 import {activeProject} from './project-options.js';
 import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
 import {createTaskBatch} from './editing.js?v=20261103-compact-mobile-1';

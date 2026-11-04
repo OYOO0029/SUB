@@ -1,4 +1,4 @@
-import {rememberProject} from './project-picker.js?v=20261104-drawer-layout-1';
+import {rememberProject} from './project-picker.js?v=20261104-quiet-list-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 // Browser preferences only: never modifies project or task records.
 export function createProjectTabs({getData,getScope,esc,icon,render,onSelect}){
