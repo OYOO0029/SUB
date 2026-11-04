@@ -1,4 +1,4 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-workspace-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-drawer-layout-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {taskList,periodLabel} from './task-list.js?v=20261104-workspace-1';
