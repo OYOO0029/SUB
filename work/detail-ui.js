@@ -1,14 +1,15 @@
-import {createProjectPicker} from './project-picker.js?v=20261104-quiet-list-1';
+import {taskTypeName} from './task-types.js?v=20261104-task-types-1';
+import {createProjectPicker} from './project-picker.js?v=20261104-task-types-1';
 import {activeProject,projectStateToggle,filterProjectOptions} from './project-options.js';
 import {taskPeriod,workPeriod,outsideWork,selectToday} from './schedule-rules.js?v=20261103-compact-mobile-1';
-import {taskList,periodLabel} from './task-list.js?v=20261104-workspace-1';
+import {taskList,periodLabel} from './task-list.js?v=20261104-task-types-1';
 import {choiceSelect} from './ui-components.js?v=20261104-workspace-1';
 import {taskRowActions} from './ui-components.js?v=20261104-workspace-1';
 import {statusFilter} from './status-filter.js?v=20261104-workspace-1';
 import {projectTasks,unfinished,removeFromDay} from './workflow.js?v=20261030-explicit-schedule-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {uid,today,taskStart,planFor,isPlanned,setTime,removeTime,taskContext} from './model.js?v=20261030-explicit-schedule-1';
-import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261103-compact-mobile-1';
+import {getItem,createItem,updateItem,updateMemo,changeCheck,selectDetailOption,updatePlan,trashItem,restoreItem,activeChecks,slotRange,timeGridState,minutes,conflicts} from './editing.js?v=20261104-task-types-1';
 import {statusOptions,stageOptions,peopleValues} from './detail-fields.js?v=20261030-explicit-schedule-1';
 import {deadlineConflict} from './work-view.js?v=20261030-explicit-schedule-1';
 import {createDatePicker,dateLabel,deadlineLabel} from './date-picker.js?v=20261030-explicit-schedule-1';
@@ -66,7 +67,7 @@ export function createDetailUI({getData,getScope=()=>null,ui,esc,icon,button,pro
       const {work,project}=taskContext(data,e),p=planFor(e,ui.date)||e.plans.find(p=>p.state==='active');
       const planned=p?`${p.start}${p.end!==p.start?' – '+p.end:''}`:'';
       const reminder=property('리마인드','calendar',`<div class="task-reminder"><input type="checkbox" data-task-reminder aria-label="리마인드 사용" ${e.remindFrom?'checked':''}>${e.remindFrom?valueButton(showDate(e.remindFrom)+' – '+(e.remindUntil?showDate(e.remindUntil):'종료일 없음'),'field-date','data-field="remindFrom" aria-label="리마인드 기간 변경"'):'<span class="empty-value">사용 안 함</span>'}</div>`);
-      props=property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+dateProperty('작업일자','workPeriod',periodLabel(taskPeriod(e)))+property('완료','check',`<input type="checkbox" data-complete="${esc(e.id)}" aria-label="${esc(e.title)} 완료" ${e.status==='done'?'checked':''}>`);
+      props=property('유형','tag',`<button class="inline-value" data-task-type="${esc(e.id)}" aria-label="유형 변경">${esc(taskTypeName(data,e))}</button>`)+property('프로젝트','folder',relation('projectId',project&&!project.deletedAt?project.id:null,'project'))+dateProperty('작업일자','workPeriod',periodLabel(taskPeriod(e)))+property('완료','check',`<input type="checkbox" data-complete="${esc(e.id)}" aria-label="${esc(e.title)} 완료" ${e.status==='done'?'checked':''}>`);
       body='<section class="task-memo-section"><h3>메모</h3>'+textField('notes',e.notes,'메모',true)+'</section>'+(activeChecks(e).length?'<details class="detail-extra"><summary>체크리스트</summary>'+checks(e)+'</details>':'');
       extra=reminder+property('시간 배치','clock',valueButton(e.blocks.filter(b=>b.date===ui.date).map(b=>b.start+' – '+b.end).join(' / '),'time','data-id="'+id+'"'));
 

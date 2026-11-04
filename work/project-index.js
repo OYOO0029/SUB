@@ -1,7 +1,7 @@
 import {choiceSelect,escapeHTML as esc,icon,button} from './ui-components.js?v=20261104-workspace-1';
 import {PROJECT_STATES,projectState} from './project-view.js';
 import {taskContext} from './ownership.js';
-import {periodLabel} from './task-list.js?v=20261104-workspace-1';
+import {periodLabel} from './task-list.js?v=20261104-task-types-1';
 export const runningWork=w=>['진행','진행 중','진행중','실행','개발중','개발 중'].includes(w.stage);
 export function projectIndex(data,ui){
  const state=ui.projectIndexFilter||'active',sort=ui.projectIndexSort||'added';

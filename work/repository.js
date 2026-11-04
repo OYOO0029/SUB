@@ -1,8 +1,9 @@
+import {taskTypes} from './task-types.js?v=20261104-task-types-1';
 import {validatePeriod} from './schedule-rules.js?v=20261103-compact-mobile-1';
 import {commitSnapshot} from '../schedule-save.mjs?v=20261028-domain-rules-1';
 import {validMemoPart} from './image-schema.mjs';
 import {appStorage} from '../schedule-storage.mjs?v=20261028-data-safety-1';
-import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261030-explicit-schedule-1';
+import {createWorkAccount,emptyWorkState} from './work-account.mjs?v=20261104-task-types-1';
 import {BASE_STATUSES,LEGACY_STATUS} from './detail-fields.js?v=20261030-explicit-schedule-1';
 export const workAccount=createWorkAccount({storage:appStorage,validate});
 export function loadState(){return {state:emptyWorkState(),warning:''};}
@@ -15,6 +16,8 @@ export function validate(data){
   const time=v=>typeof v==='string'&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(v);
   const strings=v=>Array.isArray(v)&&v.every(x=>typeof x==='string');
   const unique=(xs)=>xs.every(x=>x&&id(x.id)&&typeof x.title==='string')&&new Set(xs.map(x=>x.id)).size===xs.length;
+  if(data.taskTypes!==undefined&&(!Array.isArray(data.taskTypes)||data.taskTypes.some(t=>!t||!id(t.id)||typeof t.name!=='string'||!t.name.trim()||t.name.length>24)||new Set(data.taskTypes.map(t=>t.id)).size!==data.taskTypes.length||new Set(data.taskTypes.map(t=>t.name.trim().toLocaleLowerCase())).size!==data.taskTypes.length))throw Error('유형 목록을 확인해 주세요.');
+  for(const t of data.tasks)if(t.typeId!=null&&(!id(t.typeId)||!taskTypes(data).some(x=>x.id===t.typeId)))throw Error('할 일 유형 연결을 확인해 주세요.');
   const builtins=[...BASE_STATUSES,LEGACY_STATUS],custom=data.taskStatuses||[];
   if(data.taskStatuses!==undefined&&(!Array.isArray(data.taskStatuses)||custom.some(s=>!s||!id(s.id)||typeof s.label!=='string'||!s.label.trim()||s.label.length>40||builtins.some(([id,label])=>id===s.id||label===s.label))||new Set(custom.map(s=>s.id)).size!==custom.length||new Set(custom.map(s=>s.label)).size!==custom.length))throw new Error('상태 목록이 올바르지 않습니다.');
   if(data.workStages!==undefined&&(!strings(data.workStages)||data.workStages.some(s=>!s.trim()||s.length>40)))throw new Error('진행 단계 목록이 올바르지 않습니다.');
